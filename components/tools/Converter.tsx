@@ -1,12 +1,27 @@
 "use client";
 
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, X, Download, CheckCircle, AlertCircle, Loader2, Settings2, FileDown, ZapIcon } from "lucide-react";
-import { formatBytes, getSavingsPct, type ToolSlug, TOOL_CONFIG } from "@/lib/utils";
+import {
+  Upload,
+  X,
+  Download,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  Settings2,
+  FileDown,
+  ZapIcon,
+  ChevronDown,
+} from "lucide-react";
+import {
+  formatBytes,
+  getSavingsPct,
+  type ToolSlug,
+  TOOL_CONFIG,
+} from "@/lib/utils";
 import { toast } from "sonner";
-
 
 interface FileItem {
   id: string;
@@ -20,66 +35,136 @@ interface FileItem {
 
 interface ConverterProps {
   tool: ToolSlug;
+  onToolChange?: (tool: ToolSlug) => void;
 }
 
-export function Converter({ tool }: ConverterProps) {
-  const config = TOOL_CONFIG[tool];
+// Smart format map — file type se valid output tools
+const FORMAT_MAP: Record<string, ToolSlug[]> = {
+  "image/jpeg": ["image-to-webp", "image-to-pdf"],
+  "image/jpg": ["image-to-webp", "image-to-pdf"],
+  "image/png": ["image-to-webp", "image-to-pdf"],
+  "image/gif": ["image-to-webp"],
+  "image/bmp": ["image-to-webp"],
+  "image/tiff": ["image-to-webp"],
+  "image/avif": ["image-to-webp"],
+  "image/webp": ["webp-to-jpg", "webp-to-png"],
+  "image/heic": ["heic-to-jpg"],
+  "image/heif": ["heic-to-jpg"],
+  "application/pdf": ["pdf-merge", "pdf-compress"],
+};
+
+const ALL_ACCEPT = {
+  "image/jpeg": [".jpg", ".jpeg"],
+  "image/png": [".png"],
+  "image/gif": [".gif"],
+  "image/bmp": [".bmp"],
+  "image/tiff": [".tiff", ".tif"],
+  "image/avif": [".avif"],
+  "image/webp": [".webp"],
+  "image/heic": [".heic", ".heif"],
+  "application/pdf": [".pdf"],
+};
+
+export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
+  const [selectedTool, setSelectedTool] = useState<ToolSlug>(initialTool);
+  const [availableTools, setAvailableTools] = useState<ToolSlug[]>([
+    initialTool,
+  ]);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [quality, setQuality] = useState(85);
   const [showSettings, setShowSettings] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [fileDetected, setFileDetected] = useState(false);
 
-  const isImage = !tool.startsWith("pdf");
-  const showQuality = ["image-to-webp", "webp-to-jpg", "webp-to-png", "heic-to-jpg"].includes(tool);
+  const config = TOOL_CONFIG[selectedTool];
+  const showQuality = [
+    "image-to-webp",
+    "webp-to-jpg",
+    "webp-to-png",
+    "heic-to-jpg",
+  ].includes(selectedTool);
 
-  const onDrop = useCallback((accepted: File[]) => {
-    const newItems: FileItem[] = accepted.slice(0, 20).map(file => ({
-      id: Math.random().toString(36).slice(2),
-      file,
-      status: "idle",
-      preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
-    }));
-    setFiles(prev => [...prev, ...newItems]);
-  }, []);
+  const onDrop = useCallback(
+    (accepted: File[]) => {
+      if (accepted.length === 0) return;
+
+      // Detect file type and set available tools
+      const firstFile = accepted[0];
+      const mime = firstFile.type;
+      const validTools = FORMAT_MAP[mime] || [initialTool];
+
+      setAvailableTools(validTools);
+      setSelectedTool(validTools[0]);
+      onToolChange?.(validTools[0]);
+      setFileDetected(true);
+
+      const newItems: FileItem[] = accepted.slice(0, 20).map((file) => ({
+        id: Math.random().toString(36).slice(2),
+        file,
+        status: "idle",
+        preview: file.type.startsWith("image/")
+          ? URL.createObjectURL(file)
+          : undefined,
+      }));
+      setFiles((prev) => [...prev, ...newItems]);
+    },
+    [initialTool],
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: config.accept as unknown as Record<string, string[]>,
+    accept: ALL_ACCEPT,
     maxSize: 50 * 1024 * 1024,
     maxFiles: 20,
-    onDropRejected: () => toast.error("File rejected — check format or size (max 50MB)"),
+    onDropRejected: () =>
+      toast.error("File rejected — check format or size (max 50MB)"),
   });
 
   const convertFile = async (item: FileItem) => {
-    setFiles(prev => prev.map(f => f.id === item.id ? { ...f, status: "converting" } : f));
+    setFiles((prev) =>
+      prev.map((f) => (f.id === item.id ? { ...f, status: "converting" } : f)),
+    );
     try {
       const fd = new FormData();
       fd.append("file", item.file);
-      fd.append("tool", tool);
+      fd.append("tool", selectedTool);
       fd.append("quality", quality.toString());
 
-      const endpoint = (tool.startsWith("pdf") || tool === "image-to-pdf") ? "/api/pdf" : "/api/convert";
+      const endpoint =
+        selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
+          ? "/api/pdf"
+          : "/api/convert";
       const res = await fetch(endpoint, { method: "POST", body: fd });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "Conversion failed" }));
+        const err = await res
+          .json()
+          .catch(() => ({ error: "Conversion failed" }));
         throw new Error(err.error || "Conversion failed");
       }
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      setFiles(prev => prev.map(f =>
-        f.id === item.id ? { ...f, status: "done", outputUrl: url, outputSize: blob.size } : f
-      ));
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === item.id
+            ? { ...f, status: "done", outputUrl: url, outputSize: blob.size }
+            : f,
+        ),
+      );
       toast.success(`Converted: ${item.file.name}`);
     } catch (err: any) {
-      setFiles(prev => prev.map(f => f.id === item.id ? { ...f, status: "error", error: err.message } : f));
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === item.id ? { ...f, status: "error", error: err.message } : f,
+        ),
+      );
       toast.error(err.message || "Conversion failed");
     }
   };
 
-  const convertAll = () => {
-    files.filter(f => f.status === "idle").forEach(convertFile);
-  };
+  const convertAll = () =>
+    files.filter((f) => f.status === "idle").forEach(convertFile);
 
   const downloadFile = (item: FileItem) => {
     if (!item.outputUrl) return;
@@ -90,12 +175,13 @@ export function Converter({ tool }: ConverterProps) {
   };
 
   const downloadAll = async () => {
-    const done = files.filter(f => f.status === "done" && f.outputUrl);
+    const done = files.filter((f) => f.status === "done" && f.outputUrl);
     if (done.length === 0) return;
-    if (done.length === 1) { downloadFile(done[0]); return; }
-
+    if (done.length === 1) {
+      downloadFile(done[0]);
+      return;
+    }
     try {
-
       const JSZip = (await import("jszip")).default;
       const zip = new JSZip();
       for (const item of done) {
@@ -106,43 +192,201 @@ export function Converter({ tool }: ConverterProps) {
       const content = await zip.generateAsync({ type: "blob" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(content);
-      a.download = `Convoox-${tool}.zip`;
+      a.download = `convoox-${selectedTool}.zip`;
       a.click();
-    } catch { toast.error("Could not create ZIP"); }
+    } catch {
+      toast.error("Could not create ZIP");
+    }
   };
 
-  const removeFile = (id: string) => setFiles(prev => prev.filter(f => f.id !== id));
-  const clearAll = () => setFiles([]);
+  const removeFile = (id: string) => {
+    const remaining = files.filter((f) => f.id !== id);
+    setFiles(remaining);
+    if (remaining.length === 0) {
+      setFileDetected(false);
+      setAvailableTools([initialTool]);
+      setSelectedTool(initialTool);
+    }
+  };
 
-  const doneCount = files.filter(f => f.status === "done").length;
-  const idleCount = files.filter(f => f.status === "idle").length;
-  const convertingCount = files.filter(f => f.status === "converting").length;
+  const clearAll = () => {
+    setFiles([]);
+    setFileDetected(false);
+    setAvailableTools([initialTool]);
+    setSelectedTool(initialTool);
+  };
+
+  const doneCount = files.filter((f) => f.status === "done").length;
+  const idleCount = files.filter((f) => f.status === "idle").length;
 
   return (
     <div style={{ width: "100%", maxWidth: 800, margin: "0 auto" }}>
+      {/* Format selector — sirf tab dikhao jab file detect ho aur multiple options hon */}
+      <AnimatePresence>
+        {fileDetected && availableTools.length > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            style={{ marginBottom: 16 }}
+          >
+            {/* <div className="card" style={{ padding: "16px 20px" }}>
+              <p style={{ fontSize: 13, color: "var(--color-text-3)", marginBottom: 10 }}>
+                Convert to:
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {availableTools.map(t => {
+                  const tc = TOOL_CONFIG[t];
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => setSelectedTool(t)}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 8,
+                        padding: "8px 16px", borderRadius: 10, cursor: "pointer",
+                        border: selectedTool === t ? "1px solid var(--color-brand)" : "1px solid var(--color-border)",
+                        background: selectedTool === t ? "rgba(0,208,132,0.1)" : "var(--color-bg-3)",
+                        color: selectedTool === t ? "var(--color-brand)" : "var(--color-text-2)",
+                        fontSize: 13, fontWeight: 600, transition: "all 0.15s",
+                      }}
+                    >
+                      <span>{tc.icon}</span>
+                      {tc.title}
+                    </button>
+                  );
+                })}
+              </div>
+            </div> */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                background: "var(--color-bg-3)",
+                border: "1px solid var(--color-border)",
+                borderRadius: 10,
+                padding: "10px 16px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 13,
+                  color: "var(--color-text-3)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Convert to:
+              </span>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {availableTools.map((t) => {
+                  const tc = TOOL_CONFIG[t];
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => {
+                        setSelectedTool(t);
+                        onToolChange?.(t);
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        padding: "5px 12px",
+                        borderRadius: 7,
+                        cursor: "pointer",
+                        border:
+                          selectedTool === t
+                            ? "1px solid var(--color-brand)"
+                            : "1px solid transparent",
+                        background:
+                          selectedTool === t
+                            ? "rgba(0,208,132,0.12)"
+                            : "transparent",
+                        color:
+                          selectedTool === t
+                            ? "var(--color-brand)"
+                            : "var(--color-text-2)",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      <span>{tc.icon}</span>
+                      {tc.title}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Action bar */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, minHeight: 36 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 12,
+          minHeight: 36,
+        }}
+      >
         <button
           onClick={() => setShowSettings(!showSettings)}
-          style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", cursor: "pointer", color: "var(--color-text-3)", fontSize: 13, padding: 0 }}>
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--color-text-3)",
+            fontSize: 13,
+            padding: 0,
+          }}
+        >
           <Settings2 size={14} />
-          Settings {showSettings ? "▲" : "▼"}
+          Settings
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {doneCount > 1 && (
-            <button onClick={downloadAll} className="btn-ghost" style={{ fontSize: 13, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}>
+            <button
+              onClick={downloadAll}
+              className="btn-ghost"
+              style={{
+                fontSize: 13,
+                padding: "6px 14px",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
               <FileDown size={14} /> Download all ({doneCount})
             </button>
           )}
           {idleCount > 0 && (
-            <button onClick={convertAll} className="btn-primary" style={{ fontSize: 13, padding: "6px 14px" }}>
-              <ZapIcon size={14} /> Convert {idleCount > 1 ? `all (${idleCount})` : ""}
+            <button
+              onClick={convertAll}
+              className="btn-primary"
+              style={{ fontSize: 13, padding: "6px 14px" }}
+            >
+              <ZapIcon size={14} /> Convert{" "}
+              {idleCount > 1 ? `all (${idleCount})` : ""}
             </button>
           )}
           {files.length > 0 && (
-            <button onClick={clearAll} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 13, color: "var(--color-text-3)" }}>
+            <button
+              onClick={clearAll}
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 13,
+                color: "var(--color-text-3)",
+              }}
+            >
               Clear all
             </button>
           )}
@@ -156,16 +400,45 @@ export function Converter({ tool }: ConverterProps) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ overflow: "hidden", marginBottom: 12 }}>
+            style={{ overflow: "hidden", marginBottom: 12 }}
+          >
             <div className="card" style={{ padding: "16px 20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                <span style={{ fontSize: 13, color: "var(--color-text-2)", whiteSpace: "nowrap" }}>Quality</span>
-                <input type="range" min={1} max={100} value={quality}
-                  onChange={e => setQuality(Number(e.target.value))}
-                  style={{ flex: 1, accentColor: "var(--color-brand)" }} />
-                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--color-brand)", minWidth: 36 }}>{quality}%</span>
+                <span
+                  style={{
+                    fontSize: 13,
+                    color: "var(--color-text-2)",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Quality
+                </span>
+                <input
+                  type="range"
+                  min={1}
+                  max={100}
+                  value={quality}
+                  onChange={(e) => setQuality(Number(e.target.value))}
+                  style={{ flex: 1, accentColor: "var(--color-brand)" }}
+                />
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "var(--color-brand)",
+                    minWidth: 36,
+                  }}
+                >
+                  {quality}%
+                </span>
               </div>
-              <p style={{ fontSize: 12, color: "var(--color-text-3)", marginTop: 8 }}>
+              <p
+                style={{
+                  fontSize: 12,
+                  color: "var(--color-text-3)",
+                  marginTop: 8,
+                }}
+              >
                 85% recommended — great balance of quality and file size.
               </p>
             </div>
@@ -174,29 +447,65 @@ export function Converter({ tool }: ConverterProps) {
       </AnimatePresence>
 
       {/* Drop zone */}
-      <div {...getRootProps()} className={`dropzone${isDragActive ? " active" : ""}`}
-        style={{ padding: "56px 32px", textAlign: "center", marginBottom: 16 }}>
+      <div
+        {...getRootProps()}
+        className={`dropzone${isDragActive ? " active" : ""}`}
+        style={{ padding: "56px 32px", textAlign: "center", marginBottom: 16 }}
+      >
         <input {...getInputProps()} />
-        <motion.div animate={isDragActive ? { scale: 1.04 } : { scale: 1 }} transition={{ type: "spring", stiffness: 300 }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 16, margin: "0 auto 16px",
-            background: isDragActive ? "rgba(0,208,132,0.15)" : "rgba(0,208,132,0.08)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "background 0.2s"
-          }}>
-            <Upload size={24} color={isDragActive ? "var(--color-brand)" : "var(--color-text-3)"} />
+        <motion.div
+          animate={isDragActive ? { scale: 1.04 } : { scale: 1 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 16,
+              margin: "0 auto 16px",
+              background: isDragActive
+                ? "rgba(0,208,132,0.15)"
+                : "rgba(0,208,132,0.08)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "background 0.2s",
+            }}
+          >
+            <Upload
+              size={24}
+              color={
+                isDragActive ? "var(--color-brand)" : "var(--color-text-3)"
+              }
+            />
           </div>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--color-text-1)", marginBottom: 6 }}>
+          <p
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+              fontSize: 17,
+              color: "var(--color-text-1)",
+              marginBottom: 6,
+            }}
+          >
             {isDragActive ? "Drop files here" : "Drag & drop files here"}
           </p>
           <p style={{ fontSize: 13, color: "var(--color-text-3)" }}>
-            or <span style={{ color: "var(--color-brand)", cursor: "pointer" }}>browse files</span> — up to 20 files, 50MB each
+            or{" "}
+            <span style={{ color: "var(--color-brand)", cursor: "pointer" }}>
+              browse files
+            </span>{" "}
+            — up to 20 files, 50MB each
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6, marginTop: 16 }}>
-            {Object.values(config.accept).flat().map(ext => (
-              <span key={ext} className="tag">{ext.replace(".", "")}</span>
-            ))}
-          </div>
+          <p
+            style={{
+              fontSize: 12,
+              color: "var(--color-text-3)",
+              marginTop: 10,
+            }}
+          >
+            Supports JPG, PNG, WebP, HEIC, GIF, BMP, TIFF, AVIF, PDF
+          </p>
         </motion.div>
       </div>
 
@@ -205,7 +514,9 @@ export function Converter({ tool }: ConverterProps) {
         {files.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {files.map((item, i) => {
-              const savings = item.outputSize ? getSavingsPct(item.file.size, item.outputSize) : null;
+              const savings = item.outputSize
+                ? getSavingsPct(item.file.size, item.outputSize)
+                : null;
               return (
                 <motion.div
                   key={item.id}
@@ -214,56 +525,154 @@ export function Converter({ tool }: ConverterProps) {
                   exit={{ opacity: 0, x: 16 }}
                   transition={{ delay: i * 0.02 }}
                   className="card"
-                  style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
-
-                  {/* Thumb */}
+                  style={{
+                    padding: "14px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                  }}
+                >
                   {item.preview ? (
-                    <img src={item.preview} alt="" style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
+                    <img
+                      src={item.preview}
+                      alt=""
+                      style={{
+                        width: 44,
+                        height: 44,
+                        objectFit: "cover",
+                        borderRadius: 8,
+                        flexShrink: 0,
+                      }}
+                    />
                   ) : (
-                    <div style={{ width: 44, height: 44, borderRadius: 8, background: "var(--color-bg-4)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 20 }}>
+                    <div
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 8,
+                        background: "var(--color-bg-4)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        fontSize: 20,
+                      }}
+                    >
                       {config.icon}
                     </div>
                   )}
 
-                  {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 14, fontWeight: 500, color: "var(--color-text-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 500,
+                        color: "var(--color-text-1)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {item.file.name}
                     </p>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 3 }}>
-                      <span style={{ fontSize: 12, color: "var(--color-text-3)" }}>{formatBytes(item.file.size)}</span>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        marginTop: 3,
+                      }}
+                    >
+                      <span
+                        style={{ fontSize: 12, color: "var(--color-text-3)" }}
+                      >
+                        {formatBytes(item.file.size)}
+                      </span>
                       {item.outputSize && (
                         <>
-                          <span style={{ fontSize: 12, color: "var(--color-text-3)" }}>→</span>
-                          <span style={{ fontSize: 12, color: "#34D399" }}>{formatBytes(item.outputSize)}</span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: "var(--color-text-3)",
+                            }}
+                          >
+                            →
+                          </span>
+                          <span style={{ fontSize: 12, color: "#34D399" }}>
+                            {formatBytes(item.outputSize)}
+                          </span>
                           {savings && Number(savings) > 0 && (
-                            <span style={{ fontSize: 11, fontWeight: 700, color: "#34D399", background: "rgba(52,211,153,0.12)", padding: "2px 7px", borderRadius: 99 }}>
+                            <span
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 700,
+                                color: "#34D399",
+                                background: "rgba(52,211,153,0.12)",
+                                padding: "2px 7px",
+                                borderRadius: 99,
+                              }}
+                            >
                               -{savings}%
                             </span>
                           )}
                         </>
                       )}
-                      {item.error && <span style={{ fontSize: 12, color: "#F87171" }}>{item.error}</span>}
+                      {item.error && (
+                        <span style={{ fontSize: 12, color: "#F87171" }}>
+                          {item.error}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      flexShrink: 0,
+                    }}
+                  >
                     {item.status === "idle" && (
-                      <button onClick={() => convertFile(item)} className="btn-primary" style={{ fontSize: 12, padding: "6px 14px" }}>
+                      <button
+                        onClick={() => convertFile(item)}
+                        className="btn-primary"
+                        style={{ fontSize: 12, padding: "6px 14px" }}
+                      >
                         Convert
                       </button>
                     )}
                     {item.status === "converting" && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--color-text-3)" }}>
-                        <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          fontSize: 12,
+                          color: "var(--color-text-3)",
+                        }}
+                      >
+                        <Loader2
+                          size={14}
+                          style={{ animation: "spin 1s linear infinite" }}
+                        />
                         Converting…
                       </div>
                     )}
                     {item.status === "done" && (
                       <>
                         <CheckCircle size={16} color="#34D399" />
-                        <button onClick={() => downloadFile(item)} className="btn-ghost" style={{ fontSize: 12, padding: "6px 12px", display: "flex", alignItems: "center", gap: 5 }}>
+                        <button
+                          onClick={() => downloadFile(item)}
+                          className="btn-ghost"
+                          style={{
+                            fontSize: 12,
+                            padding: "6px 12px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 5,
+                          }}
+                        >
                           <Download size={13} /> Download
                         </button>
                       </>
@@ -271,13 +680,31 @@ export function Converter({ tool }: ConverterProps) {
                     {item.status === "error" && (
                       <>
                         <AlertCircle size={16} color="#F87171" />
-                        <button onClick={() => convertFile(item)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 12, color: "#F87171" }}>
+                        <button
+                          onClick={() => convertFile(item)}
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: 12,
+                            color: "#F87171",
+                          }}
+                        >
                           Retry
                         </button>
                       </>
                     )}
-                    <button onClick={() => removeFile(item.id)}
-                      style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--color-text-3)", padding: 4, display: "flex" }}>
+                    <button
+                      onClick={() => removeFile(item.id)}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--color-text-3)",
+                        padding: 4,
+                        display: "flex",
+                      }}
+                    >
                       <X size={15} />
                     </button>
                   </div>
@@ -288,7 +715,6 @@ export function Converter({ tool }: ConverterProps) {
         )}
       </AnimatePresence>
 
-      {/* Spinner style */}
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );

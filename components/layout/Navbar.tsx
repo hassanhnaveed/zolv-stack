@@ -12,48 +12,138 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50" style={{ background: "rgba(17,19,24,0.85)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+    <header
+      className="fixed top-0 left-0 right-0 z-50"
+      style={{
+        background: "rgba(17,19,24,0.85)",
+        backdropFilter: "blur(20px)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
-
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: 60,
+          }}
+        >
           {/* Logo */}
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-            <div style={{ width: 32, height: 32, borderRadius: 9, background: "var(--color-brand)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Link
+            href="/"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              textDecoration: "none",
+            }}
+          >
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 9,
+                background: "var(--color-brand)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <Zap size={16} color="#0A0F0D" strokeWidth={2.5} />
             </div>
-            <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 17, color: "#fff", letterSpacing: "-0.5px" }}>
+            <span
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 800,
+                fontSize: 17,
+                color: "#fff",
+                letterSpacing: "-0.5px",
+              }}
+            >
               Con<span style={{ color: "var(--color-brand)" }}>voox</span>
             </span>
           </Link>
 
           {/* Desktop nav */}
-          <nav style={{ display: "flex", alignItems: "center", gap: 32 }} className="hidden md:flex">
-            <Link href="/#tools" style={{ fontSize: 14, color: "var(--color-text-2)", textDecoration: "none", transition: "color 0.2s" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "var(--color-text-1)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "var(--color-text-2)")}>
+          <nav
+            style={{ alignItems: "center", gap: 32 }}
+            className="hidden md:flex"
+          >
+            <Link
+              href="/#tools"
+              style={{
+                fontSize: 14,
+                color: "var(--color-text-2)",
+                textDecoration: "none",
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--color-text-1)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--color-text-2)")
+              }
+            >
               Tools
             </Link>
-            <Link href="/#how-it-works" style={{ fontSize: 14, color: "var(--color-text-2)", textDecoration: "none", transition: "color 0.2s" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "var(--color-text-1)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "var(--color-text-2)")}>
+            <Link
+              href="/#how-it-works"
+              style={{
+                fontSize: 14,
+                color: "var(--color-text-2)",
+                textDecoration: "none",
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--color-text-1)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--color-text-2)")
+              }
+            >
               How it works
             </Link>
-            <Link href="/#faq" style={{ fontSize: 14, color: "var(--color-text-2)", textDecoration: "none", transition: "color 0.2s" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "var(--color-text-1)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "var(--color-text-2)")}>
+            <Link
+              href="/#faq"
+              style={{
+                fontSize: 14,
+                color: "var(--color-text-2)",
+                textDecoration: "none",
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--color-text-1)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--color-text-2)")
+              }
+            >
               FAQ
             </Link>
           </nav>
 
           {/* CTA */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <Link href="/image-to-webp" className="btn-primary hidden md:inline-flex" style={{ fontSize: 13, padding: "8px 16px" }}>
+            <Link
+              href="/image-to-webp"
+              className="btn-primary hidden md:inline-flex"
+              style={{ fontSize: 13, padding: "8px 16px" }}
+            >
               Start Converting
             </Link>
             <button
               className="md:hidden"
               onClick={() => setOpen(!open)}
-              style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: 8, cursor: "pointer", color: "var(--color-text-1)" }}>
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 8,
+                padding: 8,
+                cursor: "pointer",
+                color: "var(--color-text-1)",
+              }}
+            >
               {open ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
@@ -67,8 +157,13 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(17,19,24,0.98)", overflow: "hidden" }}>
-            <div style={{ padding: "16px 24px", display: "flex", flexDirection: "column", gap: 4 }}>
+            style={{
+              borderTop: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(17,19,24,0.98)",
+              overflow: "hidden",
+            }}
+          >
+            {/* <div style={{ padding: "16px 24px", display: "flex", flexDirection: "column", gap: 4 }}>
               {tools.map(t => (
                 <Link key={t.slug} href={`/${t.slug}`} onClick={() => setOpen(false)}
                   style={{ fontSize: 14, color: "var(--color-text-2)", padding: "10px 0", textDecoration: "none", borderBottom: "1px solid rgba(255,255,255,0.04)", display: "flex", alignItems: "center", gap: 10 }}>
@@ -76,6 +171,91 @@ export function Navbar() {
                   {t.title}
                 </Link>
               ))}
+            </div> */}
+            <div
+              style={{
+                padding: "16px 24px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "var(--color-text-3)",
+                  letterSpacing: "0.8px",
+                  textTransform: "uppercase",
+                  marginBottom: 8,
+                }}
+              >
+                Image Tools
+              </p>
+              {tools
+                .filter((t) => !t.slug.startsWith("pdf"))
+                .map((t) => (
+                  <Link
+                    key={t.slug}
+                    href={`/${t.slug}`}
+                    onClick={() => setOpen(false)}
+                    style={{
+                      fontSize: 14,
+                      color: "var(--color-text-2)",
+                      padding: "8px 0",
+                      textDecoration: "none",
+                      borderBottom: "1px solid rgba(255,255,255,0.04)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                    }}
+                  >
+                    <span>{t.icon}</span>
+                    {t.title}
+                  </Link>
+                ))}
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "var(--color-text-3)",
+                  letterSpacing: "0.8px",
+                  textTransform: "uppercase",
+                  margin: "12px 0 8px",
+                }}
+              >
+                PDF Tools
+              </p>
+              {tools
+                .filter((t) => t.slug.startsWith("pdf"))
+                .map((t) => (
+                  <Link
+                    key={t.slug}
+                    href={`/${t.slug}`}
+                    onClick={() => setOpen(false)}
+                    style={{
+                      fontSize: 14,
+                      color: "var(--color-text-2)",
+                      padding: "8px 0",
+                      textDecoration: "none",
+                      borderBottom: "1px solid rgba(255,255,255,0.04)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                    }}
+                  >
+                    <span>{t.icon}</span>
+                    {t.title}
+                  </Link>
+                ))}
+              <Link
+                href="/image-to-webp"
+                onClick={() => setOpen(false)}
+                className="btn-primary"
+                style={{ marginTop: 12, textAlign: "center", fontSize: 14 }}
+              >
+                Start Converting
+              </Link>
             </div>
           </motion.div>
         )}
