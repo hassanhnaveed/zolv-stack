@@ -11,6 +11,7 @@ Built with Next.js 16, Sharp, Tailwind CSS v4, pdf-lib.
 - Image → PDF
 - PDF Merge
 - PDF Compress
+- PDF To JGP
 
 ## Stack
 | Tool | Version |
@@ -29,7 +30,7 @@ Built with Next.js 16, Sharp, Tailwind CSS v4, pdf-lib.
 npm install
 
 # 2. Create .env.local
-cp .env.example .env.local
+.env.local
 # Edit NEXT_PUBLIC_APP_URL to your domain
 
 # 3. Run dev server
