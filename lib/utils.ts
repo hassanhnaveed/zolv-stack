@@ -317,6 +317,28 @@ export const TOOL_CONFIG = {
     icon: "✨",
     color: "#8B5CF6",
   },
+  "remove-bg": {
+    slug: "remove-bg",
+    title: "Background Remover",
+    description: "Remove image background instantly with AI",
+    longDesc:
+      "Remove the background from any image automatically using AI. Perfect for product photos, portraits, and graphics. Free, unlimited, no signup required.",
+    keywords: [
+      "remove background online free",
+      "background remover ai",
+      "transparent background image",
+      "remove bg free unlimited",
+    ],
+    accept: {
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/webp": [".webp"],
+    },
+    outputExt: ".png",
+    outputMime: "image/png",
+    icon: "🪄",
+    color: "#06B6D4",
+  },
 } as const;
 
 export type ToolSlug = keyof typeof TOOL_CONFIG;
