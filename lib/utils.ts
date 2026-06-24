@@ -313,6 +313,25 @@ export const TOOL_CONFIG = {
     icon: "✂️",
     color: "#F59E0B",
   },
+  "pdf-to-word": {
+    slug: "pdf-to-word",
+    title: "PDF to Word",
+    description: "Convert PDF to editable Word document",
+    longDesc:
+      "Convert any PDF to an editable Word (.docx) document. Preserves formatting, tables, and text. Free, unlimited, no signup required.",
+    keywords: [
+      "pdf to word",
+      "pdf to docx",
+      "convert pdf to word online free",
+      "pdf to word converter",
+    ],
+    accept: { "application/pdf": [".pdf"] },
+    outputExt: ".docx",
+    outputMime:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    icon: "📝",
+    color: "#2563EB",
+  },
   "image-enhance": {
     slug: "image-enhance",
     title: "Image Enhancer",
@@ -385,5 +404,5 @@ export const FORMAT_OUTPUT_MAP: Record<string, ToolSlug[]> = {
   "image/webp": ALL_IMAGE_OUTPUTS.filter((t) => t !== "image-to-webp"),
   "image/heic": ALL_IMAGE_OUTPUTS,
   "image/heif": ALL_IMAGE_OUTPUTS,
-  "application/pdf": ["pdf-merge", "pdf-compress", "pdf-to-jpg"],
+  "application/pdf": ["pdf-merge", "pdf-compress", "pdf-to-jpg", "pdf-to-word"],
 };

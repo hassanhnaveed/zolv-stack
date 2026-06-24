@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { PdfSplitter } from "./pdfSplitter";
+import { PdfToWord } from "./pdfToWord";
 
 export function ToolPage({ slug }: { slug: ToolSlug }) {
   const [activeTool, setActiveTool] = useState<ToolSlug>(slug);
@@ -143,9 +144,11 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
             </div>
           </div>
 
-          {/* <Converter tool={slug} onToolChange={setActiveTool} /> */}
+          
           {slug === "pdf-split" ? (
             <PdfSplitter />
+          ) : slug === "pdf-to-word" ? (
+            <PdfToWord />
           ) : (
             <Converter
               tool={activeTool}
