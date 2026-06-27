@@ -1,3 +1,4 @@
+// new code
 "use client";
 
 import { useCallback, useState } from "react";
@@ -30,7 +31,7 @@ interface FileItem {
   preview?: string;
   outputUrl?: string;
   outputSize?: number;
-  outputExt?: string; // for pdf-to-jpg to determine zip vs jpg
+  outputExt?: string;
   error?: string;
 }
 
@@ -59,7 +60,6 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [quality, setQuality] = useState(85);
   const [showSettings, setShowSettings] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [fileDetected, setFileDetected] = useState(false);
 
   const config = TOOL_CONFIG[selectedTool];
@@ -73,17 +73,13 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
   const onDrop = useCallback(
     (accepted: File[]) => {
       if (accepted.length === 0) return;
-
-      // Detect file type and set available tools
       const firstFile = accepted[0];
       const mime = firstFile.type;
       const validTools = FORMAT_OUTPUT_MAP[mime] || [initialTool];
-
       setAvailableTools(validTools);
       setSelectedTool(validTools[0]);
       onToolChange?.(validTools[0]);
       setFileDetected(true);
-
       const newItems: FileItem[] = accepted.slice(0, 20).map((file) => ({
         id: Math.random().toString(36).slice(2),
         file,
@@ -100,10 +96,10 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: ALL_ACCEPT,
-    maxSize: 50 * 1024 * 1024,
+    maxSize: 200 * 1024 * 1024, // ✅ 200MB
     maxFiles: 20,
     onDropRejected: () =>
-      toast.error("File rejected — check format or size (max 50MB)"),
+      toast.error("File rejected — check format or size (max 200MB)"),
   });
 
   const convertFile = async (item: FileItem) => {
@@ -159,57 +155,90 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
     }
   };
 
-  const convertAll = () =>
-    files.filter((f) => f.status === "idle").forEach(convertFile);
+  // ✅ Image to PDF — sab images ek PDF mein
+  const convertImagesToPdf = async () => {
+    const idleFiles = files.filter((f) => f.status === "idle");
+    if (idleFiles.length === 0) return;
 
-  // const downloadFile = (item: FileItem) => {
-  //   if (!item.outputUrl) return;
-  //   const a = document.createElement("a");
-  //   a.href = item.outputUrl;
+    setFiles((prev) =>
+      prev.map((f) =>
+        f.status === "idle" ? { ...f, status: "converting" } : f,
+      ),
+    );
 
-  //   if (selectedTool === "pdf-to-jpg") {
-  //     // Single page → JPG, Multiple pages → ZIP
-  //     // Server already handles this — check content type
-  //     fetch(item.outputUrl, { method: "HEAD" }).then((res) => {
-  //       const contentType = res.headers.get("content-type") || "";
-  //       if (contentType.includes("zip")) {
-  //         a.download = item.file.name.replace(".pdf", "-pages.zip");
-  //       } else {
-  //         a.download = item.file.name.replace(".pdf", ".jpg");
-  //       }
-  //       document.body.appendChild(a);
-  //       a.click();
-  //       document.body.removeChild(a);
-  //     });
-  //     return;
-  //   }
+    try {
+      const fd = new FormData();
+      for (const item of idleFiles) {
+        fd.append("file", item.file);
+      }
+      fd.append("tool", "image-to-pdf");
 
-  //   a.download = item.file.name.replace(/\.[^.]+$/, config.outputExt);
-  //   document.body.appendChild(a);
-  //   a.click();
-  //   document.body.removeChild(a);
-  // };
-  // ✅ NAYA - YE LAGAO
+      const res = await fetch("/api/pdf", { method: "POST", body: fd });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Failed" }));
+        throw new Error(err.error || "Conversion failed");
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      // Pehli idle file pe URL rakho, baaki done mark karo
+      let first = true;
+      setFiles((prev) =>
+        prev.map((f) => {
+          const isIdle = idleFiles.find((idle) => idle.id === f.id);
+          if (!isIdle) return f;
+          if (first) {
+            first = false;
+            return {
+              ...f,
+              status: "done",
+              outputUrl: url,
+              outputSize: blob.size,
+            };
+          }
+          return { ...f, status: "done" };
+        }),
+      );
+
+      toast.success("All images combined into one PDF!");
+    } catch (err: any) {
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.status === "converting"
+            ? { ...f, status: "error", error: err.message }
+            : f,
+        ),
+      );
+      toast.error(err.message || "Conversion failed");
+    }
+  };
+
+  // ✅ Convert All — image-to-pdf ke liye special handling
+  const convertAll = () => {
+    if (selectedTool === "image-to-pdf") {
+      convertImagesToPdf();
+    } else {
+      files.filter((f) => f.status === "idle").forEach(convertFile);
+    }
+  };
+
   const downloadFile = (item: FileItem) => {
     if (!item.outputUrl) return;
-
     const a = document.createElement("a");
     a.href = item.outputUrl;
-
-    // Blob ka content type directly item se track karo — no fetch needed
     if (selectedTool === "pdf-to-jpg") {
-      // outputSize se zip ya jpg ka pata nahi chalta
-      // isliye hum blob ko check karte hain jo already store hai
-      const ext = item.outputExt ?? ".jpg"; // fallback jpg
+      const ext = item.outputExt ?? ".jpg";
       a.download = item.file.name.replace(".pdf", ext);
     } else {
       a.download = item.file.name.replace(/\.[^.]+$/, config.outputExt);
     }
-
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   };
+
   const downloadAll = async () => {
     const done = files.filter((f) => f.status === "done" && f.outputUrl);
     if (done.length === 0) return;
@@ -257,7 +286,7 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
 
   return (
     <div style={{ width: "100%", maxWidth: 800, margin: "0 auto" }}>
-      {/* Format selector — sirf tab dikhao jab file detect ho aur multiple options hon */}
+      {/* Format selector */}
       <AnimatePresence>
         {fileDetected && availableTools.length > 1 && (
           <motion.div
@@ -355,10 +384,8 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
             padding: 0,
           }}
         >
-          <Settings2 size={14} />
-          Settings
+          <Settings2 size={14} /> Settings
         </button>
-
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {doneCount > 1 && (
             <button
@@ -503,15 +530,25 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
             or{" "}
             <span style={{ color: "var(--color-brand)", cursor: "pointer" }}>
               browse files
-            </span>{" "}
-            — up to 20 files, 50MB each
+            </span>
+            {selectedTool === "image-to-pdf"
+              ? " — up to 20 images, 200MB each"
+              : " — up to 20 files, 200MB each"}
           </p>
+          {selectedTool === "image-to-pdf" && (
+            <p
+              style={{
+                fontSize: 12,
+                color: "var(--color-brand)",
+                marginTop: 8,
+                fontWeight: 600,
+              }}
+            >
+              All images will be combined into one PDF
+            </p>
+          )}
           <p
-            style={{
-              fontSize: 12,
-              color: "var(--color-text-3)",
-              marginTop: 10,
-            }}
+            style={{ fontSize: 12, color: "var(--color-text-3)", marginTop: 8 }}
           >
             Supports JPG, PNG, WebP, HEIC, GIF, BMP, TIFF, AVIF, PDF
           </p>
@@ -644,11 +681,17 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
                   >
                     {item.status === "idle" && (
                       <button
-                        onClick={() => convertFile(item)}
+                        onClick={() =>
+                          selectedTool === "image-to-pdf"
+                            ? convertImagesToPdf()
+                            : convertFile(item)
+                        }
                         className="btn-primary"
                         style={{ fontSize: 12, padding: "6px 14px" }}
                       >
-                        Convert
+                        {selectedTool === "image-to-pdf"
+                          ? "Combine to PDF"
+                          : "Convert"}
                       </button>
                     )}
                     {item.status === "converting" && (
@@ -671,19 +714,21 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
                     {item.status === "done" && (
                       <>
                         <CheckCircle size={16} color="#34D399" />
-                        <button
-                          onClick={() => downloadFile(item)}
-                          className="btn-ghost"
-                          style={{
-                            fontSize: 12,
-                            padding: "6px 12px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 5,
-                          }}
-                        >
-                          <Download size={13} /> Download
-                        </button>
+                        {item.outputUrl && (
+                          <button
+                            onClick={() => downloadFile(item)}
+                            className="btn-ghost"
+                            style={{
+                              fontSize: 12,
+                              padding: "6px 12px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 5,
+                            }}
+                          >
+                            <Download size={13} /> Download
+                          </button>
+                        )}
                       </>
                     )}
                     {item.status === "error" && (
