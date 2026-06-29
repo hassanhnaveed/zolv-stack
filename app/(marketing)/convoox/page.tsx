@@ -645,6 +645,7 @@ import Link from "next/link";
 import { ArrowRight, ShieldCheck, Zap, Globe, Lock } from "lucide-react";
 import { TOOL_CONFIG, type ToolSlug } from "@/lib/utils";
 import { useState } from "react";
+import { SmartUploadWidget } from "@/components/tools/SmartUploadWidget";
 
 const tools = Object.values(TOOL_CONFIG);
 
@@ -814,21 +815,8 @@ export default function HomePage() {
               watermarks, zero registration.
             </p>
 
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                gap: 12,
-              }}
-            >
-              <Link href="/image-to-webp" className="btn-primary">
-                Start Converting <ArrowRight size={16} />
-              </Link>
-              <Link href="#tools" className="btn-ghost">
-                See all tools
-              </Link>
-            </div>
+            {/* CloudConvert-style upload widget */}
+            <SmartUploadWidget />
 
             <div
               style={{
@@ -861,6 +849,22 @@ export default function HomePage() {
                   {t}
                 </span>
               ))}
+            </div>
+
+            <div style={{ marginTop: 20, textAlign: "center" }}>
+              <Link
+                href="#tools"
+                style={{
+                  fontSize: 13,
+                  color: "var(--color-text-3)",
+                  textDecoration: "none",
+                  borderBottom: "1px solid var(--color-border)",
+                  paddingBottom: 2,
+                  transition: "color 0.15s",
+                }}
+              >
+                Browse all tools ↓
+              </Link>
             </div>
           </div>
         </div>
@@ -1338,11 +1342,11 @@ export default function HomePage() {
             free, fast, private.
           </p>
           <Link
-            href="/image-to-webp"
+            href="#"
             className="btn-primary"
             style={{ fontSize: 16, padding: "14px 32px" }}
           >
-            Start Converting Free <ArrowRight size={18} />
+            Select a File <ArrowRight size={18} />
           </Link>
         </div>
       </section>
