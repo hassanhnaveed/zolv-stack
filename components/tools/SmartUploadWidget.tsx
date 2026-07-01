@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  FolderOpen,
+  Upload,
   X,
   Download,
   CheckCircle,
@@ -71,12 +71,11 @@ export function SmartUploadWidget() {
     setErrorMsg("");
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: ALL_ACCEPT,
     maxSize: 200 * 1024 * 1024,
     maxFiles: 1,
-    noClick: true,
     onDropRejected: () =>
       toast.error("File rejected — check format or size (max 200MB)"),
   });
@@ -157,9 +156,9 @@ export function SmartUploadWidget() {
     >
       <input {...getInputProps()} />
 
-      {/* Drag-over overlay */}
+      {/* Drag-over overlay (shown once a file is already selected, to allow drag-replace) */}
       <AnimatePresence>
-        {isDragActive && (
+        {isDragActive && phase !== "idle" && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -193,72 +192,71 @@ export function SmartUploadWidget() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {/* ── IDLE: Select File button ── */}
+        {/* ── IDLE: CloudConvert-style drag & drop zone ── */}
         {phase === "idle" && (
           <motion.div
             key="idle"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            style={{ textAlign: "center" }}
+            className={`dropzone${isDragActive ? " active" : ""}`}
+            style={{ padding: "48px 32px", textAlign: "center" }}
           >
-            <button
-              onClick={open}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
-                background: "var(--color-brand)",
-                color: "#052210",
-                fontWeight: 800,
-                fontSize: 16,
-                padding: "15px 40px",
-                borderRadius: 14,
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "var(--font-display)",
-                letterSpacing: "-0.3px",
-                transition: "all 0.2s ease",
-                boxShadow: "0 4px 28px rgba(0,208,132,0.28)",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.transform =
-                  "translateY(-2px)";
-                (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0 14px 40px rgba(0,208,132,0.38)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.transform =
-                  "translateY(0)";
-                (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0 4px 28px rgba(0,208,132,0.28)";
-              }}
+            <motion.div
+              animate={isDragActive ? { scale: 1.04 } : { scale: 1 }}
+              transition={{ type: "spring", stiffness: 300 }}
             >
-              <FolderOpen size={20} />
-              Select File
-            </button>
-
-            <p
-              style={{
-                fontSize: 13,
-                color: "var(--color-text-3)",
-                marginTop: 14,
-              }}
-            >
-              or drag &amp; drop any image or PDF here
-            </p>
-            <p
-              style={{
-                fontSize: 11,
-                color: "var(--color-text-3)",
-                marginTop: 6,
-                opacity: 0.6,
-                letterSpacing: "0.3px",
-              }}
-            >
-              JPG · PNG · WebP · HEIC · GIF · BMP · TIFF · AVIF · PDF — up to
-              200 MB
-            </p>
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 16,
+                  margin: "0 auto 16px",
+                  background: isDragActive
+                    ? "rgba(0,208,132,0.15)"
+                    : "rgba(0,208,132,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "background 0.2s",
+                }}
+              >
+                <Upload
+                  size={24}
+                  color={
+                    isDragActive ? "var(--color-brand)" : "var(--color-text-3)"
+                  }
+                />
+              </div>
+              <p
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 700,
+                  fontSize: 17,
+                  color: "var(--color-text-1)",
+                  marginBottom: 6,
+                }}
+              >
+                {isDragActive ? "Drop to detect format" : "Drag & drop files here"}
+              </p>
+              <p style={{ fontSize: 13, color: "var(--color-text-3)" }}>
+                or{" "}
+                <span style={{ color: "var(--color-brand)", cursor: "pointer" }}>
+                  browse files
+                </span>
+              </p>
+              <p
+                style={{
+                  fontSize: 12,
+                  color: "var(--color-text-3)",
+                  marginTop: 8,
+                  opacity: 0.7,
+                }}
+              >
+                JPG · PNG · WebP · HEIC · GIF · BMP · TIFF · AVIF · PDF — up to
+                200 MB
+              </p>
+            </motion.div>
           </motion.div>
         )}
 
