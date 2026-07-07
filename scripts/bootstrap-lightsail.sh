@@ -37,7 +37,11 @@ if ! command -v pm2 >/dev/null 2>&1; then
 fi
 
 echo "Node: $(command -v node) ($(node -v))"
-echo "npm:  $(command -v npm) ($(npm -v))"
+
+if [ "$(swapon --show | wc -l)" -eq 0 ]; then
+  echo "No swap detected. Small instances may run out of memory at runtime."
+  echo "Optional: sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile"
+fi
 
 echo "Bootstrap complete."
 echo "Set GitHub secret LIGHTSAIL_APP_DIR=${APP_DIR}"

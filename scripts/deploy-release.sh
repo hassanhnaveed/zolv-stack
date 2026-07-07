@@ -55,7 +55,10 @@ restart_app() {
     if pm2 describe zolv-stack >/dev/null 2>&1; then
       pm2 delete zolv-stack
     fi
-    pm2 start npm --name zolv-stack --cwd "${CURRENT_LINK}" -- run start
+    pm2 start node_modules/next/dist/bin/next \
+      --name zolv-stack \
+      --cwd "${CURRENT_LINK}" \
+      -- start -p 3000
     pm2 save
     return 0
   fi
@@ -123,7 +126,6 @@ if [ -z "${ARCHIVE_PATH}" ] || [ ! -f "${ARCHIVE_PATH}" ]; then
 fi
 
 require_command tar
-require_command npm
 require_command node
 require_command curl
 
@@ -139,10 +141,12 @@ mkdir -p "${RELEASE_DIR}"
 tar -xzf "${ARCHIVE_PATH}" -C "${RELEASE_DIR}"
 
 cd "${RELEASE_DIR}"
-log "Installing dependencies"
-npm ci
-log "Building application"
-npm run build
+if [ ! -d ".next" ] || [ ! -d "node_modules" ]; then
+  log "ERROR: Prebuilt artifact is missing .next or node_modules"
+  log "The app must be built in CI before deployment."
+  exit 1
+fi
+log "Using prebuilt artifact from CI (skipping npm ci/build on server)"
 
 ln -sfn "${RELEASE_DIR}" "${CURRENT_LINK}"
 log "Restarting application"
