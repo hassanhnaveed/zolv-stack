@@ -49,6 +49,8 @@ ensure_app_dir() {
 }
 
 restart_app() {
+  setup_node_path
+
   if command -v pm2 >/dev/null 2>&1; then
     if pm2 describe zolv-stack >/dev/null 2>&1; then
       pm2 delete zolv-stack
@@ -70,9 +72,44 @@ restart_app() {
 require_command() {
   if ! command -v "$1" >/dev/null 2>&1; then
     log "ERROR: Required command not found: $1"
+    log "PATH=${PATH}"
     exit 1
   fi
 }
+
+setup_node_path() {
+  export PATH="/usr/local/bin:/usr/bin:/bin:${DEPLOY_HOME}/.local/bin:${PATH}"
+
+  export NVM_DIR="${NVM_DIR:-${DEPLOY_HOME}/.nvm}"
+  if [ -s "${NVM_DIR}/nvm.sh" ]; then
+    # shellcheck disable=SC1090
+    . "${NVM_DIR}/nvm.sh"
+    nvm use --silent default 2>/dev/null || nvm use --silent --lts 2>/dev/null || true
+  fi
+
+  for profile in "${DEPLOY_HOME}/.profile" "${DEPLOY_HOME}/.bashrc"; do
+    if ! command -v node >/dev/null 2>&1 && [ -f "${profile}" ]; then
+      # shellcheck disable=SC1090
+      . "${profile}"
+    fi
+  done
+
+  if ! command -v node >/dev/null 2>&1; then
+    for candidate in \
+      "${DEPLOY_HOME}/.nvm/versions/node/"*/bin \
+      /usr/local/bin \
+      /usr/bin; do
+      if [ -d "${candidate}" ] && [ -x "${candidate}/node" ]; then
+        export PATH="${candidate}:${PATH}"
+        break
+      fi
+    done
+  fi
+
+  log "node=$(command -v node || echo missing) npm=$(command -v npm || echo missing) pm2=$(command -v pm2 || echo missing)"
+}
+
+setup_node_path
 
 ARCHIVE_PATH="$(find_archive || true)"
 log "user=$(whoami) home=${DEPLOY_HOME} app_dir=${APP_DIR}"
