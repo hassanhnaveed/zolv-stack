@@ -51,15 +51,45 @@ ensure_app_dir() {
 restart_app() {
   setup_node_path
 
+  local node_bin app_root
+  node_bin="$(command -v node)"
+  app_root="$(readlink -f "${CURRENT_LINK}")"
+
+  if [ ! -d "${app_root}/.next" ] || [ ! -d "${app_root}/node_modules" ]; then
+    log "ERROR: Release is missing .next or node_modules in ${app_root}"
+    exit 1
+  fi
+
   if command -v pm2 >/dev/null 2>&1; then
-    if pm2 describe zolv-stack >/dev/null 2>&1; then
-      pm2 delete zolv-stack
+    pm2 delete zolv-stack 2>/dev/null || true
+    sleep 2
+
+    if [ -x "${app_root}/node_modules/next/dist/bin/next" ]; then
+      log "Starting app with pm2 + next binary"
+      NODE_ENV=production pm2 start "${app_root}/node_modules/next/dist/bin/next" \
+        --name zolv-stack \
+        --interpreter "${node_bin}" \
+        --cwd "${app_root}" \
+        -- start -p 3000 -H 0.0.0.0 || true
     fi
-    pm2 start node_modules/next/dist/bin/next \
-      --name zolv-stack \
-      --cwd "${CURRENT_LINK}" \
-      -- start -p 3000
+
+    if ! pm2 describe zolv-stack 2>/dev/null | grep -q "online"; then
+      log "Next binary start did not stay online, trying pm2 + npm run start"
+      pm2 delete zolv-stack 2>/dev/null || true
+      NODE_ENV=production pm2 start npm \
+        --name zolv-stack \
+        --cwd "${app_root}" \
+        -- run start || true
+    fi
+
+    if ! pm2 describe zolv-stack 2>/dev/null | grep -q "online"; then
+      log "ERROR: pm2 process zolv-stack is not online"
+      log_diagnostics
+      exit 1
+    fi
+
     pm2 save
+    pm2 status zolv-stack || true
     return 0
   fi
 
@@ -70,6 +100,43 @@ restart_app() {
 
   log "ERROR: Neither pm2 nor systemctl is available to restart the app"
   exit 1
+}
+
+health_urls() {
+  printf '%s\n' \
+    "${HEALTHCHECK_URL}" \
+    "http://127.0.0.1:3000/api/health" \
+    "http://localhost:3000/api/health" \
+    "http://127.0.0.1:3000" \
+    "http://localhost:3000"
+}
+
+wait_for_health() {
+  local attempts="${1:-30}"
+  local delay="${2:-2}"
+  local attempt url
+
+  for ((attempt = 1; attempt <= attempts; attempt++)); do
+    while IFS= read -r url; do
+      [ -n "${url}" ] || continue
+      if curl -fsS "${url}" >/dev/null 2>&1; then
+        log "Health check passed: ${url} (attempt ${attempt})"
+        return 0
+      fi
+    done < <(health_urls | awk '!seen[$0]++')
+
+    log "Health check attempt ${attempt}/${attempts} failed, retrying in ${delay}s..."
+    sleep "${delay}"
+  done
+
+  log "ERROR: Health check failed for all URLs"
+  while IFS= read -r url; do
+    [ -n "${url}" ] || continue
+    log "Trying verbose curl: ${url}"
+    curl -v "${url}" 2>&1 | tail -n 20 || true
+  done < <(health_urls | awk '!seen[$0]++')
+
+  return 1
 }
 
 require_command() {
@@ -112,6 +179,16 @@ setup_node_path() {
   log "node=$(command -v node || echo missing) npm=$(command -v npm || echo missing) pm2=$(command -v pm2 || echo missing)"
 }
 
+log_diagnostics() {
+  log "HEALTHCHECK_URL=${HEALTHCHECK_URL}"
+  log "=== pm2 status ==="
+  pm2 status 2>/dev/null || true
+  log "=== pm2 logs (last 40 lines) ==="
+  pm2 logs zolv-stack --lines 40 --nostream 2>/dev/null || true
+  log "=== port 3000 listeners ==="
+  ss -tlnp 2>/dev/null | grep ':3000' || netstat -tlnp 2>/dev/null | grep ':3000' || true
+}
+
 setup_node_path
 
 ARCHIVE_PATH="$(find_archive || true)"
@@ -152,15 +229,17 @@ ln -sfn "${RELEASE_DIR}" "${CURRENT_LINK}"
 log "Restarting application"
 restart_app
 
-log "Running health check: ${HEALTHCHECK_URL}"
-if ! curl -fsS --retry 5 --retry-delay 2 "${HEALTHCHECK_URL}" >/dev/null; then
+log "Running health check"
+if ! wait_for_health 30 2; then
   log "Healthcheck failed for ${SHA}"
+  log_diagnostics
   if [ -n "${PREVIOUS_TARGET}" ] && [ -d "${PREVIOUS_TARGET}" ]; then
     log "Rolling back to ${PREVIOUS_TARGET}"
     ln -sfn "${PREVIOUS_TARGET}" "${CURRENT_LINK}"
     restart_app
-    curl -fsS --retry 5 --retry-delay 2 "${HEALTHCHECK_URL}" >/dev/null
+    wait_for_health 15 2
   fi
+  log_diagnostics
   exit 1
 fi
 
