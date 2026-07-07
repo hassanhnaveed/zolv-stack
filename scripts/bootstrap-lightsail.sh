@@ -23,7 +23,7 @@ fi
 
 if ! command -v pm2 >/dev/null 2>&1; then
   echo "Installing pm2..."
-  sudo npm install -g pm2
+  npm install -g pm2
 fi
 
 echo "Bootstrap complete."
