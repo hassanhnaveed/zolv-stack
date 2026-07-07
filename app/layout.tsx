@@ -5,8 +5,8 @@ import { Toaster } from "sonner";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://fileora.netlify.app"),
   title: {
-    default: "Fileora — Free Online File Converter | Image to WebP, PDF, HEIC & More",
-    template: "%s | fileora — Free File Converter",
+    default: "Fileora  Free Online File Converter | Image to WebP, PDF, HEIC & More",
+    template: "%s | fileora  Free File Converter",
   },
   description:
     "fileora is a free online file converter. Convert images to WebP, JPG to PDF, HEIC to JPG, merge & compress PDFs. No signup, no watermarks, no limits. Fast & private.",

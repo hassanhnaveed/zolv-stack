@@ -16,7 +16,7 @@ export function Footer() {
                 <Zap size={14} color="#0A0F0D" strokeWidth={2.5} />
               </div>
               <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 15, color: "#fff" }}>
-                Con<span style={{ color: "var(--color-brand)" }}>voox</span>
+                File<span style={{ color: "var(--color-brand)" }}>ora</span>
               </span>
             </Link>
             <p style={{ fontSize: 13, color: "var(--color-text-3)", lineHeight: 1.7, maxWidth: 220 }}>

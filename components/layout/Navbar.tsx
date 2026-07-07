@@ -61,7 +61,7 @@ export function Navbar() {
                 letterSpacing: "-0.5px",
               }}
             >
-              Con<span style={{ color: "var(--color-brand)" }}>voox</span>
+              File<span style={{ color: "var(--color-brand)" }}>ora</span>
             </span>
           </Link>
 
