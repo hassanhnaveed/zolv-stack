@@ -1,0 +1,133 @@
+name: Deploy zolv-stack to Lightsail (main)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-zolv-stack-main
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Lint and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Package deployment artifact
+        run: tar --exclude='.git' --exclude='node_modules' -czf zolv-stack-${{ github.sha }}.tgz .
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zolv-stack-${{ github.sha }}
+          path: zolv-stack-${{ github.sha }}.tgz
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to Lightsail
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - name: Download deployment artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: zolv-stack-${{ github.sha }}
+
+      - name: Copy artifact to Lightsail
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          source: zolv-stack-${{ github.sha }}.tgz
+          target: /tmp
+
+      - name: Deploy artifact over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          SHA: ${{ github.sha }}
+          APP_DIR: ${{ secrets.LIGHTSAIL_APP_DIR }}
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script_stop: true
+          envs: SHA,APP_DIR,HEALTHCHECK_URL
+          script: |
+            set -euo pipefail
+
+            APP_DIR="${APP_DIR:-/var/www/zolv-stack}"
+            HEALTHCHECK_URL="${HEALTHCHECK_URL:-http://127.0.0.1:3000}"
+            ARCHIVE_PATH="/tmp/zolv-stack-${SHA}.tgz"
+            RELEASE_DIR="${APP_DIR}/releases/${SHA}"
+            CURRENT_LINK="${APP_DIR}/current"
+            PREVIOUS_TARGET=""
+
+            if [ -L "${CURRENT_LINK}" ]; then
+              PREVIOUS_TARGET="$(readlink -f "${CURRENT_LINK}")"
+            fi
+
+            restart_app() {
+              if command -v pm2 >/dev/null 2>&1; then
+                if pm2 describe zolv-stack >/dev/null 2>&1; then
+                  pm2 delete zolv-stack
+                fi
+                pm2 start npm --name zolv-stack --cwd "${CURRENT_LINK}" -- run start
+                pm2 save
+              else
+                sudo systemctl restart zolv-stack
+              fi
+            }
+
+            echo "Deploying commit: ${SHA}"
+            mkdir -p "${APP_DIR}/releases"
+            rm -rf "${RELEASE_DIR}"
+            mkdir -p "${RELEASE_DIR}"
+            tar -xzf "${ARCHIVE_PATH}" -C "${RELEASE_DIR}"
+
+            cd "${RELEASE_DIR}"
+
+            npm ci
+            npm run build
+
+            ln -sfn "${RELEASE_DIR}" "${CURRENT_LINK}"
+            restart_app
+
+            if ! curl -fsS --retry 5 --retry-delay 2 "${HEALTHCHECK_URL}" >/dev/null; then
+              echo "Healthcheck failed for ${SHA}"
+              if [ -n "${PREVIOUS_TARGET}" ] && [ -d "${PREVIOUS_TARGET}" ]; then
+                echo "Rolling back to ${PREVIOUS_TARGET}"
+                ln -sfn "${PREVIOUS_TARGET}" "${CURRENT_LINK}"
+                restart_app
+                curl -fsS --retry 5 --retry-delay 2 "${HEALTHCHECK_URL}" >/dev/null
+              fi
+              exit 1
+            fi
+
+            rm -f "${ARCHIVE_PATH}"
+            echo "Deployment successful"
