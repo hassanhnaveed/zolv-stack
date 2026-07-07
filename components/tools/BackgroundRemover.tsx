@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Download, Loader2, Wand2 } from "lucide-react";
-import { formatBytes } from "@/lib/utils";
+import { formatBytes, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function BackgroundRemover() {
@@ -52,8 +52,8 @@ export function BackgroundRemover() {
       setResultBlob(blob);
       setResult(URL.createObjectURL(blob));
       toast.success("Background removed!");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to remove background");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to remove background"));
     } finally {
       setLoading(false);
     }

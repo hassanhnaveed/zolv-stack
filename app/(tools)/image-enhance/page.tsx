@@ -123,7 +123,7 @@ export default function Page() {
                 }}
               >
                 Convoox Image Enhancer uses advanced AI to bring new life to
-                your photos. Whether it's a blurry old photo, a low-quality
+                your photos. Whether it&apos;s a blurry old photo, a low-quality
                 screenshot, or a pixelated image simply upload and get a
                 sharper, clearer, high-quality result in seconds. Use the
                 before/after slider to see the difference instantly. No account

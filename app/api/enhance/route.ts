@@ -84,6 +84,7 @@
 
 // new image enhacned with pyhton
 import { NextRequest, NextResponse } from "next/server";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -128,7 +129,7 @@ export async function POST(req: NextRequest) {
         timeout: 50000,
         maxBuffer: 1024 * 1024 * 10,
       });
-    } catch (execErr: any) {
+    } catch (execErr: unknown) {
       // Process crash ho sakta hai exit pe (ncnn/Vulkan cleanup issue)
       // Lekin agar output file ban gayi hai toh ignore karo
       if (!fs.existsSync(tmpOutput)) {
@@ -153,10 +154,10 @@ export async function POST(req: NextRequest) {
         "Cache-Control": "no-store",
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Enhance error:", err);
     return NextResponse.json(
-      { error: "Enhancement failed: " + err.message },
+      { error: "Enhancement failed: " + getErrorMessage(err) },
       { status: 500 },
     );
   }
