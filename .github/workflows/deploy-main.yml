@@ -89,12 +89,35 @@ jobs:
           script: |
             set -euo pipefail
 
-            APP_DIR="${APP_DIR:-/var/www/zolv-stack}"
+            APP_DIR="${APP_DIR:-$HOME/zolv-stack}"
             HEALTHCHECK_URL="${HEALTHCHECK_URL:-http://127.0.0.1:3000}"
             ARCHIVE_PATH="/tmp/zolv-stack-${SHA}.tgz"
             RELEASE_DIR="${APP_DIR}/releases/${SHA}"
             CURRENT_LINK="${APP_DIR}/current"
             PREVIOUS_TARGET=""
+
+            if [ ! -f "${ARCHIVE_PATH}" ] && [ -f "/tmp/zolv-stack-${SHA}/zolv-stack-${SHA}.tgz" ]; then
+              ARCHIVE_PATH="/tmp/zolv-stack-${SHA}/zolv-stack-${SHA}.tgz"
+            fi
+
+            if [ ! -f "${ARCHIVE_PATH}" ]; then
+              echo "ERROR: Deployment artifact not found at ${ARCHIVE_PATH}"
+              exit 1
+            fi
+
+            if [ ! -d "${APP_DIR}" ]; then
+              if ! mkdir -p "${APP_DIR}/releases" 2>/dev/null; then
+                echo "ERROR: Cannot create APP_DIR=${APP_DIR}"
+                echo "Your SSH user does not have permission to create this path."
+                echo "Run once on the server:"
+                echo "  sudo mkdir -p ${APP_DIR}/releases"
+                echo "  sudo chown -R $(whoami):$(whoami) ${APP_DIR}"
+                echo "Or set LIGHTSAIL_APP_DIR to a writable path, e.g. ${HOME}/zolv-stack"
+                exit 1
+              fi
+            else
+              mkdir -p "${APP_DIR}/releases"
+            fi
 
             if [ -L "${CURRENT_LINK}" ]; then
               PREVIOUS_TARGET="$(readlink -f "${CURRENT_LINK}")"
@@ -113,7 +136,6 @@ jobs:
             }
 
             echo "Deploying commit: ${SHA}"
-            mkdir -p "${APP_DIR}/releases"
             rm -rf "${RELEASE_DIR}"
             mkdir -p "${RELEASE_DIR}"
             tar -xzf "${ARCHIVE_PATH}" -C "${RELEASE_DIR}"
