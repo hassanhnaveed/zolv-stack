@@ -33,13 +33,14 @@ jobs:
 
       - name: Package deployment artifact
         run: |
+          ARTIFACT="/tmp/zolv-stack-${{ github.sha }}.tgz"
           tar \
             --exclude='./.git' \
             --exclude='./node_modules' \
             --exclude='./.next' \
             --exclude='./.eslintcache' \
-            --exclude='./zolv-stack-*.tgz' \
-            -czf "zolv-stack-${{ github.sha }}.tgz" .
+            -czf "${ARTIFACT}" .
+          mv "${ARTIFACT}" "zolv-stack-${{ github.sha }}.tgz"
 
       - name: Build
         run: npm run build
