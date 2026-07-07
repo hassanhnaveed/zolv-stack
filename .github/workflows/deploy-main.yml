@@ -60,18 +60,21 @@ jobs:
     environment: production
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download deployment artifact
         uses: actions/download-artifact@v4
         with:
           name: zolv-stack-${{ github.sha }}
 
-      - name: Copy artifact to Lightsail
+      - name: Copy files to Lightsail
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ${{ secrets.LIGHTSAIL_USER }}
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          source: zolv-stack-${{ github.sha }}.tgz
+          source: "zolv-stack-${{ github.sha }}.tgz,scripts/deploy-release.sh"
           target: /tmp
 
       - name: Deploy artifact over SSH
@@ -84,80 +87,13 @@ jobs:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ${{ secrets.LIGHTSAIL_USER }}
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          command_timeout: 30m
           script_stop: true
           envs: SHA,APP_DIR,HEALTHCHECK_URL
           script: |
-            set -euo pipefail
-
-            APP_DIR="${APP_DIR:-$HOME/zolv-stack}"
-            HEALTHCHECK_URL="${HEALTHCHECK_URL:-http://127.0.0.1:3000}"
-            ARCHIVE_PATH="/tmp/zolv-stack-${SHA}.tgz"
-            RELEASE_DIR="${APP_DIR}/releases/${SHA}"
-            CURRENT_LINK="${APP_DIR}/current"
-            PREVIOUS_TARGET=""
-
-            if [ ! -f "${ARCHIVE_PATH}" ] && [ -f "/tmp/zolv-stack-${SHA}/zolv-stack-${SHA}.tgz" ]; then
-              ARCHIVE_PATH="/tmp/zolv-stack-${SHA}/zolv-stack-${SHA}.tgz"
-            fi
-
-            if [ ! -f "${ARCHIVE_PATH}" ]; then
-              echo "ERROR: Deployment artifact not found at ${ARCHIVE_PATH}"
-              exit 1
-            fi
-
-            if [ ! -d "${APP_DIR}" ]; then
-              if ! mkdir -p "${APP_DIR}/releases" 2>/dev/null; then
-                echo "ERROR: Cannot create APP_DIR=${APP_DIR}"
-                echo "Your SSH user does not have permission to create this path."
-                echo "Run once on the server:"
-                echo "  sudo mkdir -p ${APP_DIR}/releases"
-                echo "  sudo chown -R $(whoami):$(whoami) ${APP_DIR}"
-                echo "Or set LIGHTSAIL_APP_DIR to a writable path, e.g. ${HOME}/zolv-stack"
-                exit 1
-              fi
+            chmod +x /tmp/deploy-release.sh /tmp/scripts/deploy-release.sh 2>/dev/null || true
+            if [ -f /tmp/deploy-release.sh ]; then
+              bash /tmp/deploy-release.sh
             else
-              mkdir -p "${APP_DIR}/releases"
+              bash /tmp/scripts/deploy-release.sh
             fi
-
-            if [ -L "${CURRENT_LINK}" ]; then
-              PREVIOUS_TARGET="$(readlink -f "${CURRENT_LINK}")"
-            fi
-
-            restart_app() {
-              if command -v pm2 >/dev/null 2>&1; then
-                if pm2 describe zolv-stack >/dev/null 2>&1; then
-                  pm2 delete zolv-stack
-                fi
-                pm2 start npm --name zolv-stack --cwd "${CURRENT_LINK}" -- run start
-                pm2 save
-              else
-                sudo systemctl restart zolv-stack
-              fi
-            }
-
-            echo "Deploying commit: ${SHA}"
-            rm -rf "${RELEASE_DIR}"
-            mkdir -p "${RELEASE_DIR}"
-            tar -xzf "${ARCHIVE_PATH}" -C "${RELEASE_DIR}"
-
-            cd "${RELEASE_DIR}"
-
-            npm ci
-            npm run build
-
-            ln -sfn "${RELEASE_DIR}" "${CURRENT_LINK}"
-            restart_app
-
-            if ! curl -fsS --retry 5 --retry-delay 2 "${HEALTHCHECK_URL}" >/dev/null; then
-              echo "Healthcheck failed for ${SHA}"
-              if [ -n "${PREVIOUS_TARGET}" ] && [ -d "${PREVIOUS_TARGET}" ]; then
-                echo "Rolling back to ${PREVIOUS_TARGET}"
-                ln -sfn "${PREVIOUS_TARGET}" "${CURRENT_LINK}"
-                restart_app
-                curl -fsS --retry 5 --retry-delay 2 "${HEALTHCHECK_URL}" >/dev/null
-              fi
-              exit 1
-            fi
-
-            rm -f "${ARCHIVE_PATH}"
-            echo "Deployment successful"
