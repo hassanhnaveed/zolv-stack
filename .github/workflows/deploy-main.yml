@@ -31,11 +31,18 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Package deployment artifact
+        run: |
+          tar \
+            --exclude='./.git' \
+            --exclude='./node_modules' \
+            --exclude='./.next' \
+            --exclude='./.eslintcache' \
+            --exclude='./zolv-stack-*.tgz' \
+            -czf "zolv-stack-${{ github.sha }}.tgz" .
+
       - name: Build
         run: npm run build
-
-      - name: Package deployment artifact
-        run: tar --exclude='.git' --exclude='node_modules' -czf zolv-stack-${{ github.sha }}.tgz .
 
       - name: Upload deployment artifact
         uses: actions/upload-artifact@v4
