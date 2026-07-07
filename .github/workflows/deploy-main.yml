@@ -68,13 +68,29 @@ jobs:
         with:
           name: zolv-stack-${{ github.sha }}
 
-      - name: Copy files to Lightsail
+      - name: Prepare deploy files
+        run: |
+          cp scripts/deploy-release.sh deploy-release.sh
+          sed -i 's/\r$//' deploy-release.sh
+          chmod +x deploy-release.sh
+          ls -la "zolv-stack-${{ github.sha }}.tgz" deploy-release.sh
+
+      - name: Copy artifact to Lightsail
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ${{ secrets.LIGHTSAIL_USER }}
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          source: "zolv-stack-${{ github.sha }}.tgz,scripts/deploy-release.sh"
+          source: zolv-stack-${{ github.sha }}.tgz
+          target: /tmp
+
+      - name: Copy deploy script to Lightsail
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          source: deploy-release.sh
           target: /tmp
 
       - name: Deploy artifact over SSH
@@ -88,12 +104,19 @@ jobs:
           username: ${{ secrets.LIGHTSAIL_USER }}
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           command_timeout: 30m
+          debug: true
           script_stop: true
           envs: SHA,APP_DIR,HEALTHCHECK_URL
           script: |
-            chmod +x /tmp/deploy-release.sh /tmp/scripts/deploy-release.sh 2>/dev/null || true
-            if [ -f /tmp/deploy-release.sh ]; then
-              bash /tmp/deploy-release.sh
-            else
-              bash /tmp/scripts/deploy-release.sh
+            set -xe
+            echo "=== Remote /tmp ==="
+            ls -la /tmp
+            echo "SHA=${SHA:-unset}"
+            echo "APP_DIR=${APP_DIR:-unset}"
+            if [ ! -f /tmp/deploy-release.sh ]; then
+              echo "ERROR: /tmp/deploy-release.sh is missing"
+              find /tmp -maxdepth 3 -type f | sort
+              exit 1
             fi
+            export SHA APP_DIR HEALTHCHECK_URL
+            bash /tmp/deploy-release.sh

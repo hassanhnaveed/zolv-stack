@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+log() {
+  echo "[deploy] $*"
+}
+
+log "starting deploy-release.sh"
+
 SHA="${SHA:?SHA is required}"
 DEPLOY_USER="${USER:-ubuntu}"
 DEPLOY_HOME="${HOME:-/home/${DEPLOY_USER}}"
@@ -9,10 +15,6 @@ HEALTHCHECK_URL="${HEALTHCHECK_URL:-http://127.0.0.1:3000}"
 RELEASE_DIR="${APP_DIR}/releases/${SHA}"
 CURRENT_LINK="${APP_DIR}/current"
 PREVIOUS_TARGET=""
-
-log() {
-  echo "[deploy] $*"
-}
 
 find_archive() {
   local candidate
