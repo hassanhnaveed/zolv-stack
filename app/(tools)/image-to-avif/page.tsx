@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Convert any image to AVIF format free online. Better compression than WebP. JPG, PNG, WebP, GIF to AVIF. No signup, no watermarks.",
   keywords:
     "image to avif, jpg to avif, png to avif, convert to avif free online",
-  alternates: { canonical: "https://convoox.netlify.app/image-to-avif" },
+  alternates: { canonical: "https://fileora.netlify.app/image-to-avif" },
 };
 
 export default function Page() {

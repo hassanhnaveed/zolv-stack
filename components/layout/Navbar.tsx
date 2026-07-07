@@ -71,7 +71,7 @@ export function Navbar() {
             className="hidden md:flex"
           >
             <Link
-              href="/convoox#tools"
+              href="/fileora#tools"
               style={{
                 fontSize: 14,
                 color: "var(--color-text-2)",
@@ -88,7 +88,7 @@ export function Navbar() {
               Tools
             </Link>
             <Link
-              href="/convoox#how-it-works"
+              href="/fileora#how-it-works"
               style={{
                 fontSize: 14,
                 color: "var(--color-text-2)",
@@ -105,7 +105,7 @@ export function Navbar() {
               How it works
             </Link>
             <Link
-              href="/convoox#faq"
+              href="/fileora#faq"
               style={{
                 fontSize: 14,
                 color: "var(--color-text-2)",

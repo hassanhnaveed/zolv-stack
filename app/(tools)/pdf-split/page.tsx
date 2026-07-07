@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Split any PDF into separate pages or custom page ranges. Free, unlimited, no signup required. Download individual pages or as ZIP.",
   keywords:
     "split pdf online free, pdf splitter, extract pdf pages, separate pdf pages",
-  alternates: { canonical: "https://convoox.netlify.app/pdf-split" },
+  alternates: { canonical: "https://fileora.netlify.app/pdf-split" },
 };
 
 export default function Page() {

@@ -4,12 +4,12 @@ import { Footer } from "@/components/layout/Footer";
 import { ImageEnhancer } from "../../../components/tools/ImageEnhancer";
 
 export const metadata: Metadata = {
-  title: "Enhance Image — Free Online | Improve Image Quality | Convoox",
+  title: "Enhance Image — Free Online | Improve Image Quality | Fileora",
   description:
     "Enhance image quality with AI. Sharpen blurry images, upscale resolution 2x, boost clarity. Free online tool with before/after comparison. No signup required.",
   keywords:
     "ai image enhancer, sharpen image online free, upscale image, improve image quality, hd image enhancer online",
-  alternates: { canonical: "https://convoox.netlify.app/image-enhance" },
+  alternates: { canonical: "https://fileora.netlify.app/image-enhance" },
 };
 
 export default function Page() {
@@ -112,7 +112,7 @@ export default function Page() {
                   marginBottom: 16,
                 }}
               >
-                About Convoox Image Enhancer
+                About Fileora Image Enhancer
               </h2>
               <p
                 style={{
@@ -122,7 +122,7 @@ export default function Page() {
                   marginBottom: 16,
                 }}
               >
-                Convoox Image Enhancer uses advanced AI to bring new life to
+                Fileora Image Enhancer uses advanced AI to bring new life to
                 your photos. Whether it's a blurry old photo, a low-quality
                 screenshot, or a pixelated image simply upload and get a
                 sharper, clearer, high-quality result in seconds. Use the

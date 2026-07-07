@@ -5,11 +5,11 @@ import { useState } from "react";
 
 const products = [
   {
-    name: "Convoox",
+    name: "Fileora",
     tagline: "Free File Converter",
     description:
       "Convert any image format, remove backgrounds, enhance photos with AI, merge & compress PDFs. Unlimited, no signup, no watermarks.",
-    href: "/convoox",
+    href: "/fileora",
     icon: "⚡",
     color: "#00D084",
     tags: ["Image Converter", "PDF Tools", "AI Enhancer", "Background Remover"],
@@ -228,7 +228,7 @@ export default function ZolvStackHome() {
             Our products
           </h2>
         </div>
-        {/* convoox box */}
+        {/* fileora box */}
         <div
           style={{
             display: "grid",

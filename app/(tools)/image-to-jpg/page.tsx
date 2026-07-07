@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description:
     "Convert any image to JPG format free online. PNG, WebP, AVIF, BMP, TIFF, GIF, HEIC to JPG. No signup, no watermarks, instant download.",
   keywords: "image to jpg, png to jpg, webp to jpg, convert to jpg free online",
-  alternates: { canonical: "https://convoox.netlify.app/image-to-jpg" },
+  alternates: { canonical: "https://fileora.netlify.app/image-to-jpg" },
 };
 
 export default function Page() {

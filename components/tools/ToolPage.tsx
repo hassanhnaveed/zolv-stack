@@ -25,13 +25,13 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://convoox.com",
+        item: "https://fileora.com",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: config.title,
-        item: `https://convoox.com/${slug}`,
+        item: `https://fileora.com/${slug}`,
       },
     ],
   };
@@ -39,12 +39,12 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: `convoox ${config.title}`,
+    name: `fileora ${config.title}`,
     applicationCategory: "UtilitiesApplication",
     operatingSystem: "Web",
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description: config.longDesc,
-    url: `https://convoox.com/${slug}`,
+    url: `https://fileora.com/${slug}`,
   };
 
   return (
@@ -85,7 +85,7 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
               if (typeof window !== "undefined" && window.history.length > 1) {
                 router.back();
               } else {
-                router.push("/convoox");
+                router.push("/fileora");
               }
             }}
             style={{
@@ -177,7 +177,7 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
             About {config.title}
           </h2>
           <p style={{ fontSize: 15, color: "var(--color-text-2)", lineHeight: 1.8 }}>
-            {config.longDesc} convoox makes {config.title.toLowerCase()} completely free — no registration, no watermarks, no file limits. All processing happens securely on our servers using Sharp, the industry-standard image processing library.
+            {config.longDesc} fileora makes {config.title.toLowerCase()} completely free — no registration, no watermarks, no file limits. All processing happens securely on our servers using Sharp, the industry-standard image processing library.
           </p>
         </div>
       </section> */}

@@ -5,15 +5,15 @@
 // // import { Converter } from "@/components/tools/Converter";
 
 // export const metadata: Metadata = {
-//   title: "Convoox | Free File Converter Online",
+//   title: "Fileora | Free File Converter Online",
 //   description:
-//     "convoox is a free online file converter. Convert images to WebP, JPG to PDF, HEIC to JPG, merge and compress PDFs. No signup, no watermarks, unlimited files. Fast and 100% private.",
-//   alternates: { canonical: "https://convoox.netlify.app" },
+//     "fileora is a free online file converter. Convert images to WebP, JPG to PDF, HEIC to JPG, merge and compress PDFs. No signup, no watermarks, unlimited files. Fast and 100% private.",
+//   alternates: { canonical: "https://fileora.netlify.app" },
 //   openGraph: {
-//     title: "convoox — Free Online File Converter | No Limits",
+//     title: "fileora — Free Online File Converter | No Limits",
 //     description:
 //       "Convert images to WebP, merge PDFs and more. Free, no limits, no watermarks.",
-//     url: "https://convoox.netlify.app",
+//     url: "https://fileora.netlify.app",
 //   },
 // };
 
@@ -44,8 +44,8 @@
 
 // const faqs = [
 //   {
-//     q: "Is convoox really free to use?",
-//     a: "Yes — all tools on convoox are completely free. No hidden fees, no credit card, no account required. Convert unlimited files.",
+//     q: "Is fileora really free to use?",
+//     a: "Yes — all tools on fileora are completely free. No hidden fees, no credit card, no account required. Convert unlimited files.",
 //   },
 //   {
 //     q: "Are my files stored on your servers?",
@@ -65,7 +65,7 @@
 //   },
 //   {
 //     q: "What image formats can I convert?",
-//     a: "convoox supports JPG, JPEG, PNG, GIF, BMP, TIFF, AVIF, HEIC, HEIF, and WebP as input formats depending on the tool.",
+//     a: "fileora supports JPG, JPEG, PNG, GIF, BMP, TIFF, AVIF, HEIC, HEIF, and WebP as input formats depending on the tool.",
 //   },
 //   {
 //     q: "Can I convert multiple files at once?",
@@ -364,7 +364,7 @@
 //         </div>
 //       </section>
 
-//       {/* Why convoox */}
+//       {/* Why fileora */}
 //       <section
 //         style={{
 //           padding: "80px 24px",
@@ -385,7 +385,7 @@
 //                 marginBottom: 12,
 //               }}
 //             >
-//               Why convoox?
+//               Why fileora?
 //             </h2>
 //             <p
 //               style={{
@@ -621,7 +621,7 @@
 //               marginBottom: 28,
 //             }}
 //           >
-//             Join thousands of users who convert files with convoox every day —
+//             Join thousands of users who convert files with fileora every day —
 //             free, fast, private.
 //           </p>
 //           <Link
@@ -691,8 +691,8 @@ const whyItems = [
 
 const faqs = [
   {
-    q: "Is Convoox really free to use?",
-    a: "Yes — all tools on Convoox are completely free. No hidden fees, no credit card, no account required. Convert unlimited files.",
+    q: "Is Fileora really free to use?",
+    a: "Yes — all tools on Fileora are completely free. No hidden fees, no credit card, no account required. Convert unlimited files.",
   },
   {
     q: "Are my files stored on your servers?",
@@ -712,7 +712,7 @@ const faqs = [
   },
   {
     q: "What image formats can I convert?",
-    a: "Convoox supports JPG, JPEG, PNG, GIF, BMP, TIFF, AVIF, HEIC, HEIF, and WebP as input formats depending on the tool.",
+    a: "Fileora supports JPG, JPEG, PNG, GIF, BMP, TIFF, AVIF, HEIC, HEIF, and WebP as input formats depending on the tool.",
   },
   {
     q: "Can I convert multiple files at once?",
@@ -1083,7 +1083,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Convoox */}
+      {/* Why Fileora */}
       <section
         style={{
           padding: "80px 24px",
@@ -1104,7 +1104,7 @@ export default function HomePage() {
                 marginBottom: 12,
               }}
             >
-              Why Convoox?
+              Why Fileora?
             </h2>
             <p
               style={{

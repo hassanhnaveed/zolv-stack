@@ -14,9 +14,9 @@ export default function TermsPage() {
           <p style={{ fontSize: 13, color: "var(--color-text-3)", marginBottom: 40 }}>Last updated: {new Date().getFullYear()}</p>
 
           {[
-            { title: "Use of Service", body: "Convoox is provided for lawful personal and commercial use. You may not use this service to convert copyrighted material you do not own or have rights to." },
-            { title: "No Warranty", body: "Convoox is provided 'as is' without warranty of any kind. We do not guarantee 100% uptime or conversion accuracy for all file types." },
-            { title: "Limitation of Liability", body: "Convoox is not liable for any data loss or damages arising from use of this service. Always keep backups of your original files." },
+            { title: "Use of Service", body: "Fileora is provided for lawful personal and commercial use. You may not use this service to convert copyrighted material you do not own or have rights to." },
+            { title: "No Warranty", body: "Fileora is provided 'as is' without warranty of any kind. We do not guarantee 100% uptime or conversion accuracy for all file types." },
+            { title: "Limitation of Liability", body: "Fileora is not liable for any data loss or damages arising from use of this service. Always keep backups of your original files." },
             { title: "Acceptable Use", body: "Do not upload malicious files, illegal content, or attempt to abuse or overload our servers. We reserve the right to block abusive users." },
             { title: "Changes", body: "We may modify these terms at any time. Continued use constitutes acceptance of the updated terms." },
           ].map(({ title, body }) => (

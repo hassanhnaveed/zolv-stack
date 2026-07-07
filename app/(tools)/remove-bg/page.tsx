@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     "Remove background from any image instantly with AI. Free, unlimited, no signup. Perfect for product photos, portraits, and graphics.",
   keywords:
     "remove background online free, background remover ai, transparent background image, remove bg unlimited",
-  alternates: { canonical: "https://convoox.netlify.app/remove-bg" },
+  alternates: { canonical: "https://fileora.netlify.app/remove-bg" },
 };
 
 export default function Page() {
@@ -120,7 +120,7 @@ export default function Page() {
                   lineHeight: 1.8,
                 }}
               >
-                Convoox Background Remover uses advanced AI to detect and remove
+                Fileora Background Remover uses advanced AI to detect and remove
                 backgrounds from your images automatically. Perfect for product
                 photography, portraits, profile pictures, and graphic design.
                 Get a clean transparent PNG in seconds  completely free and

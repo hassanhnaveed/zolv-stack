@@ -57,7 +57,7 @@ export function Footer() {
 
         <div style={{ borderTop: "1px solid var(--color-border)", paddingTop: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <p style={{ fontSize: 12, color: "var(--color-text-3)" }}>
-            © {new Date().getFullYear()} convoox. All rights reserved.
+            © {new Date().getFullYear()} fileora. All rights reserved.
           </p>
           <p style={{ fontSize: 12, color: "var(--color-text-3)" }}>
             Built with Next.js 16 · Powered by Sharp

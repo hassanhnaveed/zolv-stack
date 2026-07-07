@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Convert any image to GIF format free online. JPG, PNG, WebP to GIF. No signup, no watermarks, instant download.",
   keywords: "image to gif, jpg to gif, png to gif, convert to gif free online",
-  alternates: { canonical: "https://convoox.netlify.app/image-to-gif" },
+  alternates: { canonical: "https://fileora.netlify.app/image-to-gif" },
 };
 
 export default function Page() {
