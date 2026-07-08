@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,8 +38,13 @@ export async function POST(req: NextRequest) {
 
     const scriptPath = path.join(process.cwd(), "scripts", "remove_bg.py");
 
-    await execFileAsync("python", [scriptPath, tmpInput, tmpOutput], {
-      timeout: 50000,
+    const pythonCmd = process.platform === "win32" ? "py" : "/usr/bin/python3";
+const pythonArgs = process.platform === "win32"
+  ? ["-3.11", scriptPath, tmpInput, tmpOutput]
+  : [scriptPath, tmpInput, tmpOutput];
+
+await execFileAsync(pythonCmd, pythonArgs, {
+      timeout: 300000,
     });
 
     const outputBuffer = fs.readFileSync(tmpOutput);
