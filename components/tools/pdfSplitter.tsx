@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Download, Loader2, Scissors, FileText } from "lucide-react";
-import { formatBytes } from "@/lib/utils";
+import { formatBytes, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
 
 type Mode = "all" | "range";
@@ -71,8 +71,8 @@ export function PdfSplitter() {
       document.body.removeChild(a);
 
       toast.success(isZip ? "Downloaded as ZIP!" : "PDF downloaded!");
-    } catch (err: any) {
-      toast.error(err.message || "Split failed");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Split failed"));
     } finally {
       setLoading(false);
     }

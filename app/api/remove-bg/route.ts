@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -61,10 +62,10 @@ await execFileAsync(pythonCmd, pythonArgs, {
         "Cache-Control": "no-store",
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Background removal error:", err);
     return NextResponse.json(
-      { error: "Background removal failed: " + err.message },
+      { error: "Background removal failed: " + getErrorMessage(err) },
       { status: 500 },
     );
   }

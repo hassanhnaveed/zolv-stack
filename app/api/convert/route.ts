@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
         "X-Converted-Size": outputBuffer.length.toString(),
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Convert error:", err);
     return NextResponse.json(
       { error: "Conversion failed. Please try another file." },
