@@ -643,9 +643,15 @@
 
 import Link from "next/link";
 import { ShieldCheck, Zap, Globe, Lock } from "lucide-react";
-import { TOOL_CONFIG, type ToolSlug } from "@/lib/utils";
-import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { TOOL_CONFIG } from "@/lib/utils";
+import { useCallback, useState } from "react";
 import { SmartUploadWidget } from "@/components/tools/SmartUploadWidget";
+import { HeroConversionGraphic } from "@/components/marketing/HeroConversionGraphic";
+import {
+  DEFAULT_HERO_COPY,
+  type HeroCopy,
+} from "@/lib/format-catalog";
 
 const tools = Object.values(TOOL_CONFIG);
 
@@ -726,6 +732,10 @@ const faqs = [
 
 export default function HomePage() {
   const [openCategory, setOpenCategory] = useState<string>("image");
+  const [heroCopy, setHeroCopy] = useState<HeroCopy>(DEFAULT_HERO_COPY);
+  const handleHeroCopyChange = useCallback((copy: HeroCopy) => {
+    setHeroCopy(copy);
+  }, []);
 
   return (
     <>
@@ -767,105 +777,129 @@ export default function HomePage() {
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
           <div
             style={{
-              textAlign: "center",
-              maxWidth: 740,
-              margin: "0 auto 56px",
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1.15fr) minmax(260px, 0.85fr)",
+              gap: 48,
+              alignItems: "center",
+              marginBottom: 48,
             }}
           >
-            <div className="badge" style={{ marginBottom: 24 }}>
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "var(--color-brand)",
-                  display: "inline-block",
-                }}
-              />
-              Free · Unlimited · No watermarks · No signup
+            <div style={{ textAlign: "left" }}>
+              <div className="badge" style={{ marginBottom: 24 }}>
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "var(--color-brand)",
+                    display: "inline-block",
+                  }}
+                />
+                Free · Unlimited · No watermarks · No signup
+              </div>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${heroCopy.title}-${heroCopy.description}`}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
+                >
+                  <h1
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: "clamp(32px, 5.2vw, 58px)",
+                      fontWeight: 800,
+                      lineHeight: 1.08,
+                      letterSpacing: "-2px",
+                      color: "#fff",
+                      marginBottom: 20,
+                    }}
+                  >
+                    {heroCopy.title}
+                    <br />
+                    <span className="text-gradient">{heroCopy.highlight}</span>
+                  </h1>
+
+                  <p
+                    style={{
+                      fontSize: "clamp(15px, 2vw, 17px)",
+                      color: "var(--color-text-2)",
+                      lineHeight: 1.7,
+                      maxWidth: 540,
+                      marginBottom: 0,
+                      fontWeight: 300,
+                    }}
+                  >
+                    {heroCopy.description}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
             </div>
-
-            <h1
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "clamp(38px, 6vw, 68px)",
-                fontWeight: 800,
-                lineHeight: 1.05,
-                letterSpacing: "-2.5px",
-                color: "#fff",
-                marginBottom: 20,
-              }}
-            >
-              Convert any file.
-              <br />
-              <span className="text-gradient">Free & instant.</span>
-            </h1>
-
-            <p
-              style={{
-                fontSize: "clamp(15px, 2vw, 17px)",
-                color: "var(--color-text-2)",
-                lineHeight: 1.7,
-                maxWidth: 540,
-                margin: "0 auto 32px",
-                fontWeight: 300,
-              }}
-            >
-              Images, PDFs, AI tools  everything in one place. Zero cost, zero
-              watermarks, zero registration.
-            </p>
-
-            {/* CloudConvert-style upload widget */}
-            <SmartUploadWidget />
 
             <div
               style={{
                 display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                gap: 20,
-                marginTop: 28,
+                justifyContent: "flex-end",
+                alignItems: "center",
               }}
             >
-              {[
-                "No signup required",
-                "No watermarks",
-                "Files never stored",
-                "Unlimited conversions",
-              ].map((t) => (
-                <span
-                  key={t}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    fontSize: 13,
-                    color: "var(--color-text-3)",
-                  }}
-                >
-                  <span style={{ color: "var(--color-brand)", fontSize: 16 }}>
-                    ✓
-                  </span>{" "}
-                  {t}
-                </span>
-              ))}
+              <HeroConversionGraphic onCopyChange={handleHeroCopyChange} />
             </div>
+          </div>
 
-            <div style={{ marginTop: 20, textAlign: "center" }}>
-              <Link
-                href="#tools"
+          <div id="upload-widget">
+            <SmartUploadWidget />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: 20,
+              marginTop: 28,
+            }}
+          >
+            {[
+              "No signup required",
+              "No watermarks",
+              "Files never stored",
+              "Unlimited conversions",
+            ].map((t) => (
+              <span
+                key={t}
                 style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
                   fontSize: 13,
                   color: "var(--color-text-3)",
-                  textDecoration: "none",
-                  borderBottom: "1px solid var(--color-border)",
-                  paddingBottom: 2,
-                  transition: "color 0.15s",
                 }}
               >
-                Browse all tools ↓
-              </Link>
-            </div>
+                <span style={{ color: "var(--color-brand)", fontSize: 16 }}>
+                  ✓
+                </span>{" "}
+                {t}
+              </span>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 20, textAlign: "center" }}>
+            <Link
+              href="#tools"
+              style={{
+                fontSize: 13,
+                color: "var(--color-text-3)",
+                textDecoration: "none",
+                borderBottom: "1px solid var(--color-border)",
+                paddingBottom: 2,
+                transition: "color 0.15s",
+              }}
+            >
+              Browse all tools ↓
+            </Link>
           </div>
         </div>
       </section>
