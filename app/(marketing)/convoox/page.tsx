@@ -644,12 +644,14 @@
 import Link from "next/link";
 import { ShieldCheck, Zap, Globe, Lock } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { TOOL_CONFIG } from "@/lib/utils";
+import { TOOL_CONFIG, type ToolSlug } from "@/lib/utils";
 import { useCallback, useState } from "react";
 import { SmartUploadWidget } from "@/components/tools/SmartUploadWidget";
 import { HeroConversionGraphic } from "@/components/marketing/HeroConversionGraphic";
 import {
   DEFAULT_HERO_COPY,
+  HERO_ROTATING_PAIRS,
+  resolveToolFromFormats,
   type HeroCopy,
 } from "@/lib/format-catalog";
 
@@ -733,8 +735,19 @@ const faqs = [
 export default function HomePage() {
   const [openCategory, setOpenCategory] = useState<string>("image");
   const [heroCopy, setHeroCopy] = useState<HeroCopy>(DEFAULT_HERO_COPY);
+  const [preferredTool, setPreferredTool] = useState<ToolSlug | null>(
+    resolveToolFromFormats(
+      HERO_ROTATING_PAIRS[0].source,
+      HERO_ROTATING_PAIRS[0].target,
+    ),
+  );
+
   const handleHeroCopyChange = useCallback((copy: HeroCopy) => {
     setHeroCopy(copy);
+  }, []);
+
+  const handleHeroToolChange = useCallback((tool: ToolSlug | null) => {
+    setPreferredTool(tool);
   }, []);
 
   return (
@@ -845,12 +858,15 @@ export default function HomePage() {
                 alignItems: "center",
               }}
             >
-              <HeroConversionGraphic onCopyChange={handleHeroCopyChange} />
+              <HeroConversionGraphic
+                onCopyChange={handleHeroCopyChange}
+                onToolChange={handleHeroToolChange}
+              />
             </div>
           </div>
 
           <div id="upload-widget">
-            <SmartUploadWidget />
+            <SmartUploadWidget preferredTool={preferredTool ?? undefined} />
           </div>
 
           <div

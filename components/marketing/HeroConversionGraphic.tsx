@@ -10,14 +10,18 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  FORMAT_OPTIONS,
+  getSourceFormatOptions,
+  getTargetFormatOptions,
   HERO_ROTATING_PAIRS,
   getHeroCopy,
   isValidConverterSelection,
+  resolveToolFromFormats,
   type ConverterPair,
+  type FormatOption,
   type FormatValue,
   type HeroCopy,
 } from "@/lib/format-catalog";
+import type { ToolSlug } from "@/lib/utils";
 
 const AUTO_ROTATE_MS = 3200;
 const CARD_SIZE = 118;
@@ -32,7 +36,7 @@ function FormatIcon({
   const color = accent ? "var(--color-brand)" : "rgba(240,242,245,0.88)";
   const props = { size: 34, strokeWidth: 1.65, color };
 
-  if (value === "mov" || value === "gif") return <Film {...props} />;
+  if (value === "gif") return <Film {...props} />;
   if (value === "pdf" || value === "docx") return <FileText {...props} />;
   if (value === "heic" || value === "jpg" || value === "png" || value === "webp")
     return <ImageIcon {...props} />;
@@ -47,7 +51,7 @@ function FormatCard({
   onChange,
 }: {
   value: FormatValue;
-  options: typeof FORMAT_OPTIONS;
+  options: FormatOption[];
   disabledValue: FormatValue;
   highlighted?: boolean;
   onChange: (value: FormatValue) => void;
@@ -167,10 +171,12 @@ function FormatCard({
 
 interface HeroConversionGraphicProps {
   onCopyChange?: (copy: HeroCopy) => void;
+  onToolChange?: (tool: ToolSlug | null) => void;
 }
 
 export function HeroConversionGraphic({
   onCopyChange,
+  onToolChange,
 }: HeroConversionGraphicProps) {
   const [source, setSource] = useState<FormatValue>(
     HERO_ROTATING_PAIRS[0].source,
@@ -185,9 +191,24 @@ export function HeroConversionGraphic({
 
   const shouldAutoRotate = !autoRotateStopped && !isHovered;
 
+  const sourceOptions = getSourceFormatOptions();
+  const targetOptions = getTargetFormatOptions(source);
+
   useEffect(() => {
     onCopyChange?.(getHeroCopy(source, target));
   }, [source, target, onCopyChange]);
+
+  useEffect(() => {
+    onToolChange?.(resolveToolFromFormats(source, target));
+  }, [source, target, onToolChange]);
+
+  useEffect(() => {
+    if (target === "any") return;
+    const validTargets = getTargetFormatOptions(source).map((o) => o.value);
+    if (!validTargets.includes(target)) {
+      setTarget("any");
+    }
+  }, [source, target]);
 
   useEffect(() => {
     if (!shouldAutoRotate) return;
@@ -306,7 +327,7 @@ export function HeroConversionGraphic({
       >
         <FormatCard
           value={source}
-          options={FORMAT_OPTIONS}
+          options={sourceOptions}
           disabledValue={target}
           onChange={handleSourceChange}
         />
@@ -358,7 +379,7 @@ export function HeroConversionGraphic({
 
         <FormatCard
           value={target}
-          options={FORMAT_OPTIONS}
+          options={targetOptions}
           disabledValue={source}
           highlighted
           onChange={handleTargetChange}

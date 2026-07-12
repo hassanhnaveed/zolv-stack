@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -16,6 +16,7 @@ import {
   TOOL_CONFIG,
   type ToolSlug,
 } from "@/lib/utils";
+import { CONVERTER_TOOLS } from "@/lib/format-catalog";
 import { toast } from "sonner";
 
 const ALL_ACCEPT = {
@@ -39,37 +40,65 @@ interface SelectedFile {
   selectedTool: ToolSlug;
 }
 
-export function SmartUploadWidget() {
+interface SmartUploadWidgetProps {
+  preferredTool?: ToolSlug;
+}
+
+export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [selected, setSelected] = useState<SelectedFile | null>(null);
   const [outputUrl, setOutputUrl] = useState<string | null>(null);
   const [outputSize, setOutputSize] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const onDrop = useCallback((accepted: File[]) => {
-    if (accepted.length === 0) return;
-    const file = accepted[0];
-    const mime = file.type;
-    const availableTools = FORMAT_OUTPUT_MAP[mime] ?? [];
+  const pickTool = useCallback(
+    (availableTools: ToolSlug[]) => {
+      if (preferredTool && availableTools.includes(preferredTool)) {
+        return preferredTool;
+      }
+      return availableTools[0];
+    },
+    [preferredTool],
+  );
 
-    if (availableTools.length === 0) {
-      toast.error("Unsupported file format");
-      return;
-    }
+  const onDrop = useCallback(
+    (accepted: File[]) => {
+      if (accepted.length === 0) return;
+      const file = accepted[0];
+      const mime = file.type;
+      const availableTools = (FORMAT_OUTPUT_MAP[mime] ?? []).filter((tool) =>
+        CONVERTER_TOOLS.includes(tool),
+      );
 
-    setSelected({
-      file,
-      preview: file.type.startsWith("image/")
-        ? URL.createObjectURL(file)
-        : undefined,
-      availableTools,
-      selectedTool: availableTools[0],
+      if (availableTools.length === 0) {
+        toast.error("Unsupported file format");
+        return;
+      }
+
+      setSelected({
+        file,
+        preview: file.type.startsWith("image/")
+          ? URL.createObjectURL(file)
+          : undefined,
+        availableTools,
+        selectedTool: pickTool(availableTools),
+      });
+      setPhase("selected");
+      setOutputUrl(null);
+      setOutputSize(null);
+      setErrorMsg("");
+    },
+    [pickTool],
+  );
+
+  useEffect(() => {
+    if (!preferredTool) return;
+    setSelected((prev) => {
+      if (!prev || !prev.availableTools.includes(preferredTool)) return prev;
+      if (prev.selectedTool === preferredTool) return prev;
+      return { ...prev, selectedTool: preferredTool };
     });
-    setPhase("selected");
-    setOutputUrl(null);
-    setOutputSize(null);
-    setErrorMsg("");
-  }, []);
+  }, [preferredTool]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
