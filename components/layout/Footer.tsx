@@ -23,6 +23,14 @@ export function Footer() {
           </div>
 
           <div>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--color-text-3)", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 14 }}>Company</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <Link href="/about" style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>About Us</Link>
+              <Link href="/security" style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>Security</Link>
+            </div>
+          </div>
+
+          <div>
             <p style={{ fontSize: 12, fontWeight: 700, color: "var(--color-text-3)", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 14 }}>Legal</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <Link href="/privacy" style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>Privacy Policy</Link>
