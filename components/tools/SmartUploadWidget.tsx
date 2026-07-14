@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import {
   formatBytes,
+  getErrorMessage,
   FORMAT_OUTPUT_MAP,
   TOOL_CONFIG,
   type ToolSlug,
@@ -91,14 +92,12 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
     [pickTool],
   );
 
-  useEffect(() => {
-    if (!preferredTool) return;
-    setSelected((prev) => {
-      if (!prev || !prev.availableTools.includes(preferredTool)) return prev;
-      if (prev.selectedTool === preferredTool) return prev;
-      return { ...prev, selectedTool: preferredTool };
-    });
-  }, [preferredTool]);
+  const activeTool =
+    selected == null
+      ? null
+      : preferredTool && selected.availableTools.includes(preferredTool)
+        ? preferredTool
+        : selected.selectedTool;
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -115,8 +114,9 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
   };
 
   const convert = async () => {
-    if (!selected) return;
-    const { file, selectedTool } = selected;
+    if (!selected || !activeTool) return;
+    const { file } = selected;
+    const selectedTool = activeTool;
 
     setPhase("converting");
     setErrorMsg("");
@@ -147,16 +147,17 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
       setOutputSize(blob.size);
       setPhase("done");
       toast.success("Conversion complete!");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Conversion failed");
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, "Conversion failed");
+      setErrorMsg(message);
       setPhase("error");
-      toast.error(err.message || "Conversion failed");
+      toast.error(message);
     }
   };
 
   const download = () => {
-    if (!outputUrl || !selected) return;
-    const config = TOOL_CONFIG[selected.selectedTool];
+    if (!outputUrl || !selected || !activeTool) return;
+    const config = TOOL_CONFIG[activeTool];
     const a = document.createElement("a");
     a.href = outputUrl;
     a.download = selected.file.name.replace(/\.[^.]+$/, config.outputExt);
@@ -339,7 +340,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                       flexShrink: 0,
                     }}
                   >
-                    {TOOL_CONFIG[selected.selectedTool].icon}
+                    {TOOL_CONFIG[activeTool!].icon}
                   </div>
                 )}
 
@@ -411,7 +412,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {selected.availableTools.map((t) => {
                     const tc = TOOL_CONFIG[t];
-                    const isActive = selected.selectedTool === t;
+                    const isActive = activeTool === t;
                     return (
                       <button
                         key={t}
@@ -564,7 +565,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
               >
                 {selected.file.name} →{" "}
                 <span style={{ color: "var(--color-brand)", fontWeight: 600 }}>
-                  {TOOL_CONFIG[selected.selectedTool].title}
+                  {TOOL_CONFIG[activeTool!].title}
                 </span>
                 {outputSize ? ` · ${formatBytes(outputSize)}` : ""}
               </p>
