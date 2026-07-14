@@ -450,7 +450,7 @@ import { useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Download, Loader2, Sparkles } from "lucide-react";
-import { formatBytes } from "@/lib/utils";
+import { formatBytes, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function ImageEnhancer() {
@@ -503,8 +503,8 @@ export function ImageEnhancer() {
       setEnhanced(URL.createObjectURL(blob));
       setSliderPos(50);
       toast.success("Image enhanced!");
-    } catch (err: any) {
-      toast.error(err.message || "Enhancement failed");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Enhancement failed"));
     } finally {
       setLoading(false);
     }

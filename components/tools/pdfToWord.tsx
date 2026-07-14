@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Loader2, Download } from "lucide-react";
-import { formatBytes } from "@/lib/utils";
+import { formatBytes, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function PdfToWord() {
@@ -52,8 +52,8 @@ export function PdfToWord() {
       document.body.removeChild(a);
 
       toast.success("Word file downloaded!");
-    } catch (err: any) {
-      toast.error(err.message || "Conversion failed");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Conversion failed"));
     } finally {
       setLoading(false);
     }

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import {
   formatBytes,
+  getErrorMessage,
   getSavingsPct,
   type ToolSlug,
   TOOL_CONFIG,
@@ -145,13 +146,14 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
         ),
       );
       toast.success(`Converted: ${item.file.name}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, "Conversion failed");
       setFiles((prev) =>
         prev.map((f) =>
-          f.id === item.id ? { ...f, status: "error", error: err.message } : f,
+          f.id === item.id ? { ...f, status: "error", error: message } : f,
         ),
       );
-      toast.error(err.message || "Conversion failed");
+      toast.error(message);
     }
   };
 
@@ -203,15 +205,16 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
       );
 
       toast.success("All images combined into one PDF!");
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, "Conversion failed");
       setFiles((prev) =>
         prev.map((f) =>
           f.status === "converting"
-            ? { ...f, status: "error", error: err.message }
+            ? { ...f, status: "error", error: message }
             : f,
         ),
       );
-      toast.error(err.message || "Conversion failed");
+      toast.error(message);
     }
   };
 
