@@ -377,6 +377,43 @@ export const TOOL_CONFIG = {
     icon: "🪄",
     color: "#06B6D4",
   },
+  "docx-to-pdf": {
+    slug: "docx-to-pdf",
+    title: "DOCX to PDF",
+    description: "Convert Word document to PDF",
+    longDesc:
+      "Convert any Word (.docx) document to PDF format. Preserves formatting, images, and layout. Free, unlimited, no signup required.",
+    keywords: [
+      "docx to pdf",
+      "word to pdf",
+      "convert docx to pdf online free",
+    ],
+    accept: {
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
+    },
+    outputExt: ".pdf",
+    outputMime: "application/pdf",
+    icon: "📄",
+    color: "#2563EB",
+  },
+  "pdf-to-txt": {
+    slug: "pdf-to-txt",
+    title: "PDF to TXT",
+    description: "Extract text from PDF",
+    longDesc:
+      "Extract all text content from any PDF and download it as a plain .txt file. Free, unlimited, no signup required.",
+    keywords: [
+      "pdf to txt",
+      "extract text from pdf",
+      "convert pdf to text online free",
+    ],
+    accept: { "application/pdf": [".pdf"] },
+    outputExt: ".txt",
+    outputMime: "text/plain",
+    icon: "📝",
+    color: "#10B981",
+  },
 } as const;
 
 export type ToolSlug = keyof typeof TOOL_CONFIG;
@@ -404,5 +441,39 @@ export const FORMAT_OUTPUT_MAP: Record<string, ToolSlug[]> = {
   "image/webp": ALL_IMAGE_OUTPUTS.filter((t) => t !== "image-to-webp"),
   "image/heic": ALL_IMAGE_OUTPUTS,
   "image/heif": ALL_IMAGE_OUTPUTS,
-  "application/pdf": ["pdf-merge", "pdf-compress", "pdf-to-jpg", "pdf-to-word"],
+  "application/pdf": [
+    "pdf-merge",
+    "pdf-compress",
+    "pdf-to-jpg",
+    "pdf-to-word",
+    "pdf-to-txt",
+  ],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+    "docx-to-pdf",
+  ],
+};
+
+export const TOOL_CATEGORIES: Record<string, ToolSlug[]> = {
+  image: [
+    "image-to-webp",
+    "image-to-jpg",
+    "image-to-png",
+    "image-to-avif",
+    "image-to-gif",
+    "image-to-bmp",
+    "image-to-tiff",
+    "heic-to-jpg",
+    "image-to-pdf",
+    "image-enhance",
+    "remove-bg",
+  ],
+  document: [
+    "pdf-merge",
+    "pdf-compress",
+    "pdf-to-jpg",
+    "pdf-split",
+    "pdf-to-word",
+    "pdf-to-txt",
+    "docx-to-pdf",
+  ],
 };
