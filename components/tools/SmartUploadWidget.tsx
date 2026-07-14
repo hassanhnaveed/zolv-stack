@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -37,29 +37,76 @@ interface SelectedFile {
   file: File;
   preview?: string;
   availableTools: ToolSlug[];
-  selectedTool: ToolSlug;
+  /** Sticky baseline set on drop / manual pick — never synced from preferredTool. */
+  fallbackTool: ToolSlug;
+}
+
+/**
+ * User pick is only honored while preferredTool is unchanged since that pick.
+ * When preferredTool changes, it wins (if available); otherwise we fall back.
+ */
+interface ToolOverride {
+  tool: ToolSlug;
+  preferredAtSelection: ToolSlug | undefined;
 }
 
 interface SmartUploadWidgetProps {
   preferredTool?: ToolSlug;
 }
 
+function pickInitialTool(
+  availableTools: ToolSlug[],
+  preferredTool: ToolSlug | undefined,
+): ToolSlug {
+  if (preferredTool && availableTools.includes(preferredTool)) {
+    return preferredTool;
+  }
+  return availableTools[0];
+}
+
+function resolveActiveTool(
+  availableTools: ToolSlug[],
+  preferredTool: ToolSlug | undefined,
+  override: ToolOverride | null,
+  fallbackTool: ToolSlug,
+): ToolSlug {
+  if (
+    override &&
+    override.preferredAtSelection === preferredTool &&
+    availableTools.includes(override.tool)
+  ) {
+    return override.tool;
+  }
+  if (preferredTool && availableTools.includes(preferredTool)) {
+    return preferredTool;
+  }
+  if (availableTools.includes(fallbackTool)) {
+    return fallbackTool;
+  }
+  return availableTools[0];
+}
+
 export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [selected, setSelected] = useState<SelectedFile | null>(null);
+  const [toolOverride, setToolOverride] = useState<ToolOverride | null>(null);
+  const [activeTool, setActiveTool] = useState<ToolSlug | null>(null);
   const [outputUrl, setOutputUrl] = useState<string | null>(null);
   const [outputSize, setOutputSize] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const pickTool = useCallback(
-    (availableTools: ToolSlug[]) => {
-      if (preferredTool && availableTools.includes(preferredTool)) {
-        return preferredTool;
-      }
-      return availableTools[0];
-    },
-    [preferredTool],
-  );
+  // Pure derivation from props + local intent — no useEffect / render setState sync.
+  const resolvedTool = selected
+    ? resolveActiveTool(
+        selected.availableTools,
+        preferredTool,
+        toolOverride,
+        selected.fallbackTool,
+      )
+    : null;
+
+  // Frozen at convert start so UI / download stay consistent through converting + done.
+  const displayTool = activeTool ?? resolvedTool;
 
   const onDrop = useCallback(
     (accepted: File[]) => {
@@ -81,24 +128,17 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
           ? URL.createObjectURL(file)
           : undefined,
         availableTools,
-        selectedTool: pickTool(availableTools),
+        fallbackTool: pickInitialTool(availableTools, preferredTool),
       });
+      setToolOverride(null);
+      setActiveTool(null);
       setPhase("selected");
       setOutputUrl(null);
       setOutputSize(null);
       setErrorMsg("");
     },
-    [pickTool],
+    [preferredTool],
   );
-
-  useEffect(() => {
-    if (!preferredTool) return;
-    setSelected((prev) => {
-      if (!prev || !prev.availableTools.includes(preferredTool)) return prev;
-      if (prev.selectedTool === preferredTool) return prev;
-      return { ...prev, selectedTool: preferredTool };
-    });
-  }, [preferredTool]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -111,13 +151,16 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
 
   const selectTool = (tool: ToolSlug) => {
     if (!selected) return;
-    setSelected({ ...selected, selectedTool: tool });
+    setToolOverride({ tool, preferredAtSelection: preferredTool });
+    setSelected({ ...selected, fallbackTool: tool });
   };
 
   const convert = async () => {
-    if (!selected) return;
-    const { file, selectedTool } = selected;
+    if (!selected || !resolvedTool) return;
+    const { file } = selected;
+    const selectedTool = resolvedTool;
 
+    setActiveTool(selectedTool);
     setPhase("converting");
     setErrorMsg("");
 
@@ -147,16 +190,19 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
       setOutputSize(blob.size);
       setPhase("done");
       toast.success("Conversion complete!");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Conversion failed");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Conversion failed";
+      setActiveTool(null);
+      setErrorMsg(message);
       setPhase("error");
-      toast.error(err.message || "Conversion failed");
+      toast.error(message);
     }
   };
 
   const download = () => {
-    if (!outputUrl || !selected) return;
-    const config = TOOL_CONFIG[selected.selectedTool];
+    if (!outputUrl || !selected || !displayTool) return;
+    const config = TOOL_CONFIG[displayTool];
     const a = document.createElement("a");
     a.href = outputUrl;
     a.download = selected.file.name.replace(/\.[^.]+$/, config.outputExt);
@@ -168,6 +214,8 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
   const reset = () => {
     setPhase("idle");
     setSelected(null);
+    setToolOverride(null);
+    setActiveTool(null);
     setOutputUrl(null);
     setOutputSize(null);
     setErrorMsg("");
@@ -339,7 +387,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                       flexShrink: 0,
                     }}
                   >
-                    {TOOL_CONFIG[selected.selectedTool].icon}
+                    {displayTool ? TOOL_CONFIG[displayTool].icon : "📄"}
                   </div>
                 )}
 
@@ -411,7 +459,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {selected.availableTools.map((t) => {
                     const tc = TOOL_CONFIG[t];
-                    const isActive = selected.selectedTool === t;
+                    const isActive = displayTool === t;
                     return (
                       <button
                         key={t}
@@ -564,7 +612,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
               >
                 {selected.file.name} →{" "}
                 <span style={{ color: "var(--color-brand)", fontWeight: 600 }}>
-                  {TOOL_CONFIG[selected.selectedTool].title}
+                  {displayTool ? TOOL_CONFIG[displayTool].title : ""}
                 </span>
                 {outputSize ? ` · ${formatBytes(outputSize)}` : ""}
               </p>
