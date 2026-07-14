@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { PrivacyPageContent } from "@/components/marketing/company/PrivacyPageContent";
+import { SecurityPageContent } from "@/components/marketing/company/SecurityPageContent";
 
-export const metadata: Metadata = { title: "Privacy Policy", alternates: { canonical: "/privacy" } };
+export const metadata: Metadata = { title: "Security", alternates: { canonical: "/security" } };
 
-export default function PrivacyPage() {
+export default function SecurityPage() {
   return (
     <>
       <Navbar />
       <main style={{ paddingTop: 60 }}>
-        <PrivacyPageContent />
+        <SecurityPageContent />
       </main>
       <Footer />
     </>

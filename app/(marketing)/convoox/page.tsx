@@ -642,9 +642,18 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Zap, Globe, Lock } from "lucide-react";
+import { ShieldCheck, Zap, Globe, Lock } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { TOOL_CONFIG, type ToolSlug } from "@/lib/utils";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { SmartUploadWidget } from "@/components/tools/SmartUploadWidget";
+import { HeroConversionGraphic } from "@/components/marketing/HeroConversionGraphic";
+import {
+  DEFAULT_HERO_COPY,
+  HERO_ROTATING_PAIRS,
+  resolveToolFromFormats,
+  type HeroCopy,
+} from "@/lib/format-catalog";
 
 const tools = Object.values(TOOL_CONFIG);
 
@@ -725,6 +734,21 @@ const faqs = [
 
 export default function HomePage() {
   const [openCategory, setOpenCategory] = useState<string>("image");
+  const [heroCopy, setHeroCopy] = useState<HeroCopy>(DEFAULT_HERO_COPY);
+  const [preferredTool, setPreferredTool] = useState<ToolSlug | null>(
+    resolveToolFromFormats(
+      HERO_ROTATING_PAIRS[0].source,
+      HERO_ROTATING_PAIRS[0].target,
+    ),
+  );
+
+  const handleHeroCopyChange = useCallback((copy: HeroCopy) => {
+    setHeroCopy(copy);
+  }, []);
+
+  const handleHeroToolChange = useCallback((tool: ToolSlug | null) => {
+    setPreferredTool(tool);
+  }, []);
 
   return (
     <>
@@ -766,102 +790,132 @@ export default function HomePage() {
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
           <div
             style={{
-              textAlign: "center",
-              maxWidth: 740,
-              margin: "0 auto 56px",
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1.15fr) minmax(260px, 0.85fr)",
+              gap: 48,
+              alignItems: "center",
+              marginBottom: 48,
             }}
           >
-            <div className="badge" style={{ marginBottom: 24 }}>
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "var(--color-brand)",
-                  display: "inline-block",
-                }}
-              />
-              Free · Unlimited · No watermarks · No signup
-            </div>
-
-            <h1
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "clamp(38px, 6vw, 68px)",
-                fontWeight: 800,
-                lineHeight: 1.05,
-                letterSpacing: "-2.5px",
-                color: "#fff",
-                marginBottom: 20,
-              }}
-            >
-              Convert any file.
-              <br />
-              <span className="text-gradient">Free & instant.</span>
-            </h1>
-
-            <p
-              style={{
-                fontSize: "clamp(15px, 2vw, 17px)",
-                color: "var(--color-text-2)",
-                lineHeight: 1.7,
-                maxWidth: 540,
-                margin: "0 auto 32px",
-                fontWeight: 300,
-              }}
-            >
-              Images, PDFs, AI tools  everything in one place. Zero cost, zero
-              watermarks, zero registration.
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                gap: 12,
-              }}
-            >
-              <Link href="/image-to-webp" className="btn-primary">
-                Start Converting <ArrowRight size={16} />
-              </Link>
-              <Link href="#tools" className="btn-ghost">
-                See all tools
-              </Link>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                gap: 20,
-                marginTop: 28,
-              }}
-            >
-              {[
-                "No signup required",
-                "No watermarks",
-                "Files never stored",
-                "Unlimited conversions",
-              ].map((t) => (
+            <div style={{ textAlign: "left" }}>
+              <div className="badge" style={{ marginBottom: 24 }}>
                 <span
-                  key={t}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    fontSize: 13,
-                    color: "var(--color-text-3)",
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "var(--color-brand)",
+                    display: "inline-block",
                   }}
+                />
+                Free · Unlimited · No watermarks · No signup
+              </div>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${heroCopy.title}-${heroCopy.description}`}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
                 >
-                  <span style={{ color: "var(--color-brand)", fontSize: 16 }}>
-                    ✓
-                  </span>{" "}
-                  {t}
-                </span>
-              ))}
+                  <h1
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: "clamp(32px, 5.2vw, 58px)",
+                      fontWeight: 800,
+                      lineHeight: 1.08,
+                      letterSpacing: "-2px",
+                      color: "#fff",
+                      marginBottom: 20,
+                    }}
+                  >
+                    {heroCopy.title}
+                    <br />
+                    <span className="text-gradient">{heroCopy.highlight}</span>
+                  </h1>
+
+                  <p
+                    style={{
+                      fontSize: "clamp(15px, 2vw, 17px)",
+                      color: "var(--color-text-2)",
+                      lineHeight: 1.7,
+                      maxWidth: 540,
+                      marginBottom: 0,
+                      fontWeight: 300,
+                    }}
+                  >
+                    {heroCopy.description}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
             </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+              }}
+            >
+              <HeroConversionGraphic
+                onCopyChange={handleHeroCopyChange}
+                onToolChange={handleHeroToolChange}
+              />
+            </div>
+          </div>
+
+          <div id="upload-widget">
+            <SmartUploadWidget preferredTool={preferredTool ?? undefined} />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: 20,
+              marginTop: 28,
+            }}
+          >
+            {[
+              "No signup required",
+              "No watermarks",
+              "Files never stored",
+              "Unlimited conversions",
+            ].map((t) => (
+              <span
+                key={t}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 13,
+                  color: "var(--color-text-3)",
+                }}
+              >
+                <span style={{ color: "var(--color-brand)", fontSize: 16 }}>
+                  ✓
+                </span>{" "}
+                {t}
+              </span>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 20, textAlign: "center" }}>
+            <Link
+              href="#tools"
+              style={{
+                fontSize: 13,
+                color: "var(--color-text-3)",
+                textDecoration: "none",
+                borderBottom: "1px solid var(--color-border)",
+                paddingBottom: 2,
+                transition: "color 0.15s",
+              }}
+            >
+              Browse all tools ↓
+            </Link>
           </div>
         </div>
       </section>
@@ -1083,7 +1137,6 @@ export default function HomePage() {
       <section
         style={{
           padding: "80px 24px",
-          background: "var(--color-bg-2)",
           borderTop: "1px solid var(--color-border)",
           borderBottom: "1px solid var(--color-border)",
         }}
@@ -1121,20 +1174,22 @@ export default function HomePage() {
             }}
           >
             {whyItems.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="card" style={{ padding: "24px" }}>
+              <div key={title} className="feature-card glow-hover" style={{ padding: "24px" }}>
                 <div
+                  className="feature-card__icon"
                   style={{
                     width: 40,
                     height: 40,
                     borderRadius: 10,
                     background: "rgba(0,208,132,0.1)",
+                    border: "1px solid rgba(0,208,132,0.15)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     marginBottom: 16,
                   }}
                 >
-                  <Icon size={18} color="var(--color-brand)" />
+                  <Icon size={18} color="var(--color-brand)" strokeWidth={2} />
                 </div>
                 <p
                   style={{
@@ -1143,6 +1198,7 @@ export default function HomePage() {
                     fontSize: 15,
                     color: "var(--color-text-1)",
                     marginBottom: 8,
+                    letterSpacing: "-0.3px",
                   }}
                 >
                   {title}
@@ -1150,8 +1206,9 @@ export default function HomePage() {
                 <p
                   style={{
                     fontSize: 13,
-                    color: "var(--color-text-3)",
-                    lineHeight: 1.6,
+                    color: "var(--color-text-2)",
+                    lineHeight: 1.65,
+                    margin: 0,
                   }}
                 >
                   {desc}
@@ -1183,7 +1240,7 @@ export default function HomePage() {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: 32,
+              gap: 20,
             }}
           >
             {[
@@ -1203,7 +1260,11 @@ export default function HomePage() {
                 desc: "Files convert in seconds. Download individually or as a ZIP archive.",
               },
             ].map(({ num, title, desc }) => (
-              <div key={num} style={{ textAlign: "center" }}>
+              <div
+                key={num}
+                className="feature-card glow-hover"
+                style={{ padding: "28px 24px", textAlign: "center", alignItems: "center" }}
+              >
                 <p
                   style={{
                     fontFamily: "var(--font-display)",
@@ -1212,16 +1273,19 @@ export default function HomePage() {
                     letterSpacing: "-2px",
                     color: "rgba(0,208,132,0.2)",
                     marginBottom: 8,
+                    lineHeight: 1,
                   }}
                 >
                   {num}
                 </p>
                 <p
                   style={{
+                    fontFamily: "var(--font-display)",
                     fontWeight: 700,
                     fontSize: 16,
                     color: "var(--color-text-1)",
                     marginBottom: 8,
+                    letterSpacing: "-0.3px",
                   }}
                 >
                   {title}
@@ -1229,8 +1293,9 @@ export default function HomePage() {
                 <p
                   style={{
                     fontSize: 13,
-                    color: "var(--color-text-3)",
-                    lineHeight: 1.6,
+                    color: "var(--color-text-2)",
+                    lineHeight: 1.65,
+                    margin: 0,
                   }}
                 >
                   {desc}
@@ -1280,13 +1345,15 @@ export default function HomePage() {
           />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {faqs.map(({ q, a }) => (
-              <div key={q} className="card" style={{ padding: "20px 24px" }}>
+              <div key={q} className="feature-card glow-hover" style={{ padding: "20px 24px" }}>
                 <p
                   style={{
+                    fontFamily: "var(--font-display)",
                     fontWeight: 600,
                     fontSize: 15,
                     color: "var(--color-text-1)",
                     marginBottom: 8,
+                    letterSpacing: "-0.2px",
                   }}
                 >
                   {q}
@@ -1294,8 +1361,9 @@ export default function HomePage() {
                 <p
                   style={{
                     fontSize: 14,
-                    color: "var(--color-text-3)",
+                    color: "var(--color-text-2)",
                     lineHeight: 1.7,
+                    margin: 0,
                   }}
                 >
                   {a}
@@ -1303,47 +1371,6 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Bottom CTA */}
-      <section
-        style={{
-          padding: "80px 24px",
-          borderTop: "1px solid var(--color-border)",
-          textAlign: "center",
-        }}
-      >
-        <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(26px, 4vw, 40px)",
-              fontWeight: 800,
-              letterSpacing: "-1.5px",
-              color: "#fff",
-              marginBottom: 16,
-            }}
-          >
-            Ready to convert?
-          </h2>
-          <p
-            style={{
-              fontSize: 15,
-              color: "var(--color-text-2)",
-              marginBottom: 28,
-            }}
-          >
-            Join thousands of users who convert files with Convoox every day —
-            free, fast, private.
-          </p>
-          <Link
-            href="/image-to-webp"
-            className="btn-primary"
-            style={{ fontSize: 16, padding: "14px 32px" }}
-          >
-            Start Converting Free <ArrowRight size={18} />
-          </Link>
         </div>
       </section>
 

@@ -3,12 +3,14 @@
 import { Converter } from "@/components/tools/Converter";
 import { TOOL_CONFIG, type ToolSlug } from "@/lib/utils";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { PdfSplitter } from "./pdfSplitter";
 import { PdfToWord } from "./pdfToWord";
 
 export function ToolPage({ slug }: { slug: ToolSlug }) {
+  const router = useRouter();
   const [activeTool, setActiveTool] = useState<ToolSlug>(slug);
   const config = TOOL_CONFIG[activeTool];
   const otherTools = Object.values(TOOL_CONFIG).filter(
@@ -78,20 +80,30 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
         />
 
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <Link
-            href="/"
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/convoox");
+              }
+            }}
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
               fontSize: 13,
               color: "var(--color-text-3)",
-              textDecoration: "none",
+              background: "transparent",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              fontFamily: "inherit",
               marginBottom: 32,
             }}
           >
-            <ArrowLeft size={14} /> All tools
-          </Link>
+            <ArrowLeft size={14} /> Back
+          </button>
 
           <div
             style={{

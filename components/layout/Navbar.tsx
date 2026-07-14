@@ -125,13 +125,6 @@ export function Navbar() {
 
           {/* CTA */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <Link
-              href="/image-to-webp"
-              className="btn-primary hidden md:inline-flex"
-              style={{ fontSize: 13, padding: "8px 16px" }}
-            >
-              Start Converting
-            </Link>
             <button
               className="md:hidden"
               onClick={() => setOpen(!open)}
@@ -248,14 +241,6 @@ export function Navbar() {
                     {t.title}
                   </Link>
                 ))}
-              <Link
-                href="/image-to-webp"
-                onClick={() => setOpen(false)}
-                className="btn-primary"
-                style={{ marginTop: 12, textAlign: "center", fontSize: 14 }}
-              >
-                Start Converting
-              </Link>
             </div>
           </motion.div>
         )}

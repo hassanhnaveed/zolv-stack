@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { Zap } from "lucide-react";
-import { TOOL_CONFIG } from "@/lib/utils";
 
 export function Footer() {
-  const tools = Object.values(TOOL_CONFIG);
   return (
     <footer style={{ borderTop: "1px solid var(--color-border)", marginTop: 80 }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 32px" }}>
@@ -25,24 +23,10 @@ export function Footer() {
           </div>
 
           <div>
-            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--color-text-3)", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 14 }}>Image Tools</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--color-text-3)", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 14 }}>Company</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {tools.filter(t => !t.slug.startsWith("pdf")).map(t => (
-                <Link key={t.slug} href={`/${t.slug}`} style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>
-                  {t.title}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--color-text-3)", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 14 }}>PDF Tools</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {tools.filter(t => t.slug.startsWith("pdf")).map(t => (
-                <Link key={t.slug} href={`/${t.slug}`} style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>
-                  {t.title}
-                </Link>
-              ))}
+              <Link href="/about" style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>About Us</Link>
+              <Link href="/security" style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>Security</Link>
             </div>
           </div>
 
@@ -51,6 +35,13 @@ export function Footer() {
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <Link href="/privacy" style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>Privacy Policy</Link>
               <Link href="/terms" style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>Terms of Service</Link>
+            </div>
+          </div>
+
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--color-text-3)", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 14 }}>Contact</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <Link href="/contact" style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>Contact Us</Link>
             </div>
           </div>
         </div>
