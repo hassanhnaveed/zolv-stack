@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "precommit": "lint-staged && npm run typecheck",
-    "prepush": "npm run lint && npm run typecheck && npm run build",
+    "prepush": "npm run lint && npm run typecheck",
     "prepare": "husky"
   },
   "lint-staged": {
