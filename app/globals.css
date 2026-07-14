@@ -139,6 +139,18 @@
     box-shadow: 0 0 0 3px rgba(0, 208, 132, 0.08);
   }
 
+  .contact-form__textarea {
+    resize: vertical;
+    min-height: 140px;
+    line-height: 1.6;
+  }
+
+  @media (min-width: 640px) {
+    .contact-form__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+  }
+
   /* ── Text gradient ── */
   .text-gradient {
     background: linear-gradient(135deg, #00D084 0%, #00B8E0 100%);

@@ -37,6 +37,13 @@ export function Footer() {
               <Link href="/terms" style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>Terms of Service</Link>
             </div>
           </div>
+
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--color-text-3)", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 14 }}>Contact</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <Link href="/contact" style={{ fontSize: 13, color: "var(--color-text-2)", textDecoration: "none" }}>Contact Us</Link>
+            </div>
+          </div>
         </div>
 
         <div style={{ borderTop: "1px solid var(--color-border)", paddingTop: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
