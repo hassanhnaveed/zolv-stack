@@ -1,27 +1,30 @@
-# Convoox
+# zolv-stack
 
-Free, unlimited, no-watermark file conversion tool.
-Built with Next.js 16, Sharp, Tailwind CSS v4, pdf-lib.
+Open-source, free file conversion toolkit built with Next.js.
 
-## Tools included
-- Image → WebP
-- WebP → JPG
-- WebP → PNG
-- HEIC → JPG
-- Image → PDF
-- PDF Merge
-- PDF Compress
-- PDF To JGP
+Convert images and documents in the browser — no account required for core tools.
+
+## Features
+
+- Image conversion (JPG, PNG, WebP, AVIF, GIF, BMP, TIFF, HEIC)
+- Image to PDF
+- PDF merge, compress, split, and related document tools
+- Health check endpoint at `/api/health`
 
 ## Stack
+
 | Tool | Version |
 |------|---------|
-| Next.js | 16.2.4 |
-| React | 19.1 |
-| Sharp | 0.34.5 |
-| Tailwind CSS | v4.1.6 |
-| pdf-lib | 1.17.1 |
-| Framer Motion | 11.x |
+| Next.js | 16 |
+| React | 19 |
+| Sharp | 0.34 |
+| Tailwind CSS | v4 |
+| pdf-lib | 1.17 |
+
+## Requirements
+
+- Node.js LTS
+- npm
 
 ## Setup
 
@@ -29,74 +32,54 @@ Built with Next.js 16, Sharp, Tailwind CSS v4, pdf-lib.
 # 1. Install dependencies
 npm install
 
-# 2. Create .env.local
-.env.local
-# Edit NEXT_PUBLIC_APP_URL to your domain
+# 2. Copy env example and edit if needed
+cp .env.example .env.local
 
-# 3. Run dev server
+# 3. Start the dev server
 npm run dev
 ```
 
-Open http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000).
 
-## Production (VPS)
+### Environment variables
+
+| Name | Required | Description |
+|------|----------|-------------|
+| `NEXT_PUBLIC_APP_URL` | Recommended | Public site URL used for metadata, sitemap, and robots (e.g. `https://yourdomain.com`) |
+
+Never commit `.env`, `.env.local`, or SSH/private keys. Production secrets (deploy host, keys) belong in GitHub Environment secrets, not the repo.
+
+## Scripts
 
 ```bash
-npm run build
-npm start
+npm run dev        # development
+npm run lint       # ESLint
+npm run typecheck  # TypeScript
+npm run build      # production build
+npm run start      # serve production build on port 3000
 ```
 
-### With PM2
+## Contributing
+
+1. Create a branch: `feature/...`, `fix/...`, or `chore/...`
+2. Make your changes
+3. Open a pull request into `main`
+4. Ensure CI passes (lint, typecheck, build)
+
+Husky runs lint + typecheck locally on commit/push to catch issues early.
+
+## Production notes
+
+- Prefer reverse-proxying with Nginx to `127.0.0.1:3000`
+- Keep the app process managed with PM2 (or systemd)
+- Deploy secrets should stay in your host/CI secret store
+
+Example health check:
+
 ```bash
-npm install -g pm2
-pm2 start npm --name "Convoox" -- start
-pm2 save && pm2 startup
+curl http://127.0.0.1:3000/api/health
 ```
 
-### Nginx config
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
+## License
 
-    client_max_body_size 55M;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-SSL: `certbot --nginx -d yourdomain.com`
-
-## Adding Google Ads (future)
-
-In `app/layout.tsx`, add inside `<head>`:
-```html
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXX" crossOrigin="anonymous"></script>
-```
-
-Then place `<ins class="adsbygoogle">` components where needed.
-
-## Adding new tools (future)
-
-1. Add config to `lib/utils.ts` TOOL_CONFIG
-2. Add conversion logic to `app/api/convert/route.ts` or `app/api/pdf/route.ts`
-3. Create `app/(tools)/new-tool/page.tsx` using `<ToolPage slug="new-tool" />`
-4. Done!
-
-## SEO checklist
-- [x] Per-page metadata (title, description, canonical)
-- [x] Open Graph tags
-- [x] JSON-LD Schema markup
-- [x] sitemap.xml
-- [x] robots.txt
-- [x] Security headers
-- [x] Mobile responsive
-- [x] Core Web Vitals optimized (Turbopack, Sharp server-side)
+[MIT](./LICENSE)
