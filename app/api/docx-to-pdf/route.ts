@@ -15,22 +15,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
   }
 
-  const tempDir = await mkdtemp(path.join(tmpdir(), "docx-"));
+  const tempDir = await mkdtemp(path.join(tmpdir(), "office-"));
   const inputPath = path.join(tempDir, file.name);
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(inputPath, buffer);
 
   try {
     const sofficeCmd =
-      process.platform === "win32"
-        ? `"C:\\Program Files\\LibreOffice\\program\\soffice.exe"`
-        : "soffice";
+  process.platform === "win32"
+    ? `"C:\\Program Files\\LibreOffice\\program\\soffice.exe"`
+    : "soffice";
 
-    await execAsync(
-      `${sofficeCmd} --headless --convert-to pdf --outdir "${tempDir}" "${inputPath}"`
-    );
+await execAsync(
+  `${sofficeCmd} --headless --convert-to pdf --outdir "${tempDir}" "${inputPath}" -env:UserInstallation=file://${tempDir}/loprofile`
+);
 
-    const outputName = file.name.replace(/\.docx$/i, ".pdf");
+    // Input ka jo bhi extension ho (.doc, .docx, .odt, .rtf, .txt, .html, .md),
+    // output hamesha .pdf hi hoga
+    const outputName = file.name.replace(/\.[^.]+$/, ".pdf");
     const outputPath = path.join(tempDir, outputName);
     const pdfBuffer = await readFile(outputPath);
 
