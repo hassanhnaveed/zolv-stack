@@ -38,17 +38,12 @@ interface SelectedFile {
   file: File;
   preview?: string;
   availableTools: ToolSlug[];
-  /** Sticky baseline set on drop / manual pick — never synced from preferredTool. */
-  fallbackTool: ToolSlug;
-}
-
-/**
- * User pick is only honored while preferredTool is unchanged since that pick.
- * When preferredTool changes, it wins (if available); otherwise we fall back.
- */
-interface ToolOverride {
-  tool: ToolSlug;
-  preferredAtSelection: ToolSlug | undefined;
+  /**
+   * Sticky Convert-to choice for this upload.
+   * Captured once on drop from preferredTool (hero), then only updated by
+   * manual user picks — never follows later hero auto-rotate changes.
+   */
+  lockedTool: ToolSlug;
 }
 
 interface SmartUploadWidgetProps {
@@ -65,24 +60,12 @@ function pickInitialTool(
   return availableTools[0];
 }
 
-function resolveActiveTool(
+function resolveLockedTool(
   availableTools: ToolSlug[],
-  preferredTool: ToolSlug | undefined,
-  override: ToolOverride | null,
-  fallbackTool: ToolSlug,
+  lockedTool: ToolSlug,
 ): ToolSlug {
-  if (
-    override &&
-    override.preferredAtSelection === preferredTool &&
-    availableTools.includes(override.tool)
-  ) {
-    return override.tool;
-  }
-  if (preferredTool && availableTools.includes(preferredTool)) {
-    return preferredTool;
-  }
-  if (availableTools.includes(fallbackTool)) {
-    return fallbackTool;
+  if (availableTools.includes(lockedTool)) {
+    return lockedTool;
   }
   return availableTools[0];
 }
@@ -90,20 +73,14 @@ function resolveActiveTool(
 export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [selected, setSelected] = useState<SelectedFile | null>(null);
-  const [toolOverride, setToolOverride] = useState<ToolOverride | null>(null);
   const [activeTool, setActiveTool] = useState<ToolSlug | null>(null);
   const [outputUrl, setOutputUrl] = useState<string | null>(null);
   const [outputSize, setOutputSize] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Pure derivation from props + local intent — no useEffect / render setState sync.
+  // After upload, Convert-to is frozen to lockedTool until reset.
   const resolvedTool = selected
-    ? resolveActiveTool(
-        selected.availableTools,
-        preferredTool,
-        toolOverride,
-        selected.fallbackTool,
-      )
+    ? resolveLockedTool(selected.availableTools, selected.lockedTool)
     : null;
 
   // Frozen at convert start so UI / download stay consistent through converting + done.
@@ -129,9 +106,9 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
           ? URL.createObjectURL(file)
           : undefined,
         availableTools,
-        fallbackTool: pickInitialTool(availableTools, preferredTool),
+        // Snapshot current showcase target once; hero rotation must not change this.
+        lockedTool: pickInitialTool(availableTools, preferredTool),
       });
-      setToolOverride(null);
       setActiveTool(null);
       setPhase("selected");
       setOutputUrl(null);
@@ -159,8 +136,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
   const selectTool = (tool: ToolSlug, e?: MouseEvent<HTMLButtonElement>) => {
     e?.stopPropagation();
     if (!selected) return;
-    setToolOverride({ tool, preferredAtSelection: preferredTool });
-    setSelected({ ...selected, fallbackTool: tool });
+    setSelected({ ...selected, lockedTool: tool });
   };
 
   const convert = async (e?: MouseEvent<HTMLButtonElement>) => {
@@ -224,7 +200,6 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
     e?.stopPropagation();
     setPhase("idle");
     setSelected(null);
-    setToolOverride(null);
     setActiveTool(null);
     setOutputUrl(null);
     setOutputSize(null);
