@@ -9,7 +9,7 @@
   --color-brand-glow: rgba(0, 208, 132, 0.15);
 
   --color-bg: #111318;
-  
+  --color-bg-2: #161A20;
   --color-bg-3: #1C2028;
   --color-bg-4: #222730;
 
@@ -61,14 +61,13 @@
     background: var(--color-bg-2);
     border: 1px solid var(--color-border);
     border-radius: 16px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.2s ease;
   }
-  .card:hover {
-    border-color: var(--color-border-hover);
-  }
+  .card:hover,
   .card-glow:hover {
-    border-color: var(--color-border-brand);
-    box-shadow: 0 0 32px var(--color-brand-glow);
+    border-color: rgba(0, 208, 132, 0.4);
+    background: rgba(0, 208, 132, 0.03);
+    box-shadow: 0 0 40px var(--color-brand-glow);
   }
 
   /* ── Buttons ── */
@@ -253,7 +252,8 @@
     display: block;
   }
   .tool-card:hover {
-    border-color: var(--color-border-brand);
+    border-color: rgba(0, 208, 132, 0.4);
+    background: rgba(0, 208, 132, 0.03);
     box-shadow: 0 0 40px var(--color-brand-glow);
     transform: translateY(-3px);
   }

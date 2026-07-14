@@ -47,7 +47,7 @@ export function FeatureCardGrid({
     <section
       style={{
         padding: variant === "alt" ? "20px 24px 32px" : "16px 24px 32px",
-        background: variant === "alt" ? "var(--color-bg-2)" : "transparent",
+        background: "transparent",
         // borderTop: variant === "alt" ? "1px solid var(--color-border)" : undefined,
       }}
     >

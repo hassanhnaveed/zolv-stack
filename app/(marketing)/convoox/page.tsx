@@ -1137,7 +1137,6 @@ export default function HomePage() {
       <section
         style={{
           padding: "80px 24px",
-          background: "var(--color-bg-2)",
           borderTop: "1px solid var(--color-border)",
           borderBottom: "1px solid var(--color-border)",
         }}
@@ -1175,20 +1174,22 @@ export default function HomePage() {
             }}
           >
             {whyItems.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="card" style={{ padding: "24px" }}>
+              <div key={title} className="feature-card glow-hover" style={{ padding: "24px" }}>
                 <div
+                  className="feature-card__icon"
                   style={{
                     width: 40,
                     height: 40,
                     borderRadius: 10,
                     background: "rgba(0,208,132,0.1)",
+                    border: "1px solid rgba(0,208,132,0.15)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     marginBottom: 16,
                   }}
                 >
-                  <Icon size={18} color="var(--color-brand)" />
+                  <Icon size={18} color="var(--color-brand)" strokeWidth={2} />
                 </div>
                 <p
                   style={{
@@ -1197,6 +1198,7 @@ export default function HomePage() {
                     fontSize: 15,
                     color: "var(--color-text-1)",
                     marginBottom: 8,
+                    letterSpacing: "-0.3px",
                   }}
                 >
                   {title}
@@ -1204,8 +1206,9 @@ export default function HomePage() {
                 <p
                   style={{
                     fontSize: 13,
-                    color: "var(--color-text-3)",
-                    lineHeight: 1.6,
+                    color: "var(--color-text-2)",
+                    lineHeight: 1.65,
+                    margin: 0,
                   }}
                 >
                   {desc}
@@ -1237,7 +1240,7 @@ export default function HomePage() {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: 32,
+              gap: 20,
             }}
           >
             {[
@@ -1257,7 +1260,11 @@ export default function HomePage() {
                 desc: "Files convert in seconds. Download individually or as a ZIP archive.",
               },
             ].map(({ num, title, desc }) => (
-              <div key={num} style={{ textAlign: "center" }}>
+              <div
+                key={num}
+                className="feature-card glow-hover"
+                style={{ padding: "28px 24px", textAlign: "center", alignItems: "center" }}
+              >
                 <p
                   style={{
                     fontFamily: "var(--font-display)",
@@ -1266,16 +1273,19 @@ export default function HomePage() {
                     letterSpacing: "-2px",
                     color: "rgba(0,208,132,0.2)",
                     marginBottom: 8,
+                    lineHeight: 1,
                   }}
                 >
                   {num}
                 </p>
                 <p
                   style={{
+                    fontFamily: "var(--font-display)",
                     fontWeight: 700,
                     fontSize: 16,
                     color: "var(--color-text-1)",
                     marginBottom: 8,
+                    letterSpacing: "-0.3px",
                   }}
                 >
                   {title}
@@ -1283,8 +1293,9 @@ export default function HomePage() {
                 <p
                   style={{
                     fontSize: 13,
-                    color: "var(--color-text-3)",
-                    lineHeight: 1.6,
+                    color: "var(--color-text-2)",
+                    lineHeight: 1.65,
+                    margin: 0,
                   }}
                 >
                   {desc}
@@ -1334,13 +1345,15 @@ export default function HomePage() {
           />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {faqs.map(({ q, a }) => (
-              <div key={q} className="card" style={{ padding: "20px 24px" }}>
+              <div key={q} className="feature-card glow-hover" style={{ padding: "20px 24px" }}>
                 <p
                   style={{
+                    fontFamily: "var(--font-display)",
                     fontWeight: 600,
                     fontSize: 15,
                     color: "var(--color-text-1)",
                     marginBottom: 8,
+                    letterSpacing: "-0.2px",
                   }}
                 >
                   {q}
@@ -1348,8 +1361,9 @@ export default function HomePage() {
                 <p
                   style={{
                     fontSize: 14,
-                    color: "var(--color-text-3)",
+                    color: "var(--color-text-2)",
                     lineHeight: 1.7,
+                    margin: 0,
                   }}
                 >
                   {a}
