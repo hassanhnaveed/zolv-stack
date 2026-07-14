@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import {
   formatBytes,
+  getErrorMessage,
   FORMAT_OUTPUT_MAP,
   TOOL_CONFIG,
   type ToolSlug,
@@ -199,8 +200,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
       setPhase("done");
       toast.success("Conversion complete!");
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Conversion failed";
+      const message = getErrorMessage(err, "Conversion failed");
       setActiveTool(null);
       setErrorMsg(message);
       setPhase("error");

@@ -193,21 +193,20 @@ export function HeroConversionGraphic({
 
   const sourceOptions = getSourceFormatOptions();
   const targetOptions = getTargetFormatOptions(source);
-
   // Derive a valid target instead of resetting state in an effect / during render.
-  const resolvedTarget: FormatValue =
+  const activeTarget: FormatValue =
     target === "any" ||
     targetOptions.some((option) => option.value === target)
       ? target
       : "any";
 
   useEffect(() => {
-    onCopyChange?.(getHeroCopy(source, resolvedTarget));
-  }, [source, resolvedTarget, onCopyChange]);
+    onCopyChange?.(getHeroCopy(source, activeTarget));
+  }, [source, activeTarget, onCopyChange]);
 
   useEffect(() => {
-    onToolChange?.(resolveToolFromFormats(source, resolvedTarget));
-  }, [source, resolvedTarget, onToolChange]);
+    onToolChange?.(resolveToolFromFormats(source, activeTarget));
+  }, [source, activeTarget, onToolChange]);
 
   useEffect(() => {
     if (!shouldAutoRotate) return;
@@ -226,8 +225,8 @@ export function HeroConversionGraphic({
   }, [shouldAutoRotate]);
 
   const canConvert = useMemo(
-    () => isValidConverterSelection(source, resolvedTarget),
-    [source, resolvedTarget],
+    () => isValidConverterSelection(source, activeTarget),
+    [source, activeTarget],
   );
 
   const stopAutoRotate = () => {
@@ -239,15 +238,15 @@ export function HeroConversionGraphic({
     setSwapSpin((n) => n + 180);
 
     // Completed pair → lock source, open the other as Any
-    if (source !== "any" && resolvedTarget !== "any") {
+    if (source !== "any" && activeTarget !== "any") {
       setSource(value);
       setTarget("any");
       return;
     }
 
     // Filling open source while target is locked
-    if (source === "any" && resolvedTarget !== "any") {
-      setSource(value === resolvedTarget ? "any" : value);
+    if (source === "any" && activeTarget !== "any") {
+      setSource(value === activeTarget ? "any" : value);
       return;
     }
 
@@ -261,14 +260,14 @@ export function HeroConversionGraphic({
     setSwapSpin((n) => n + 180);
 
     // Completed pair → lock target, open source as Any
-    if (source !== "any" && resolvedTarget !== "any") {
+    if (source !== "any" && activeTarget !== "any") {
       setTarget(value);
       setSource("any");
       return;
     }
 
     // Filling open target while source is locked (PNG → Any → JPG)
-    if (resolvedTarget === "any" && source !== "any") {
+    if (activeTarget === "any" && source !== "any") {
       setTarget(value === source ? "any" : value);
       return;
     }
@@ -281,7 +280,7 @@ export function HeroConversionGraphic({
   const swapFormats = () => {
     stopAutoRotate();
     setSwapSpin((n) => n + 180);
-    setSource(resolvedTarget);
+    setSource(activeTarget);
     setTarget(source);
   };
 
@@ -327,7 +326,7 @@ export function HeroConversionGraphic({
         <FormatCard
           value={source}
           options={sourceOptions}
-          disabledValue={resolvedTarget}
+          disabledValue={activeTarget}
           onChange={handleSourceChange}
         />
 
@@ -377,7 +376,7 @@ export function HeroConversionGraphic({
         </div>
 
         <FormatCard
-          value={resolvedTarget}
+          value={activeTarget}
           options={targetOptions}
           disabledValue={source}
           highlighted
@@ -395,7 +394,7 @@ export function HeroConversionGraphic({
         }}
       >
         {canConvert
-          ? `${source} to ${resolvedTarget} ready`
+          ? `${source} to ${activeTarget} ready`
           : "Choose different source and target formats"}
       </span>
     </div>
