@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, type MouseEvent } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -140,22 +140,30 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
     [preferredTool],
   );
 
+  // Click-to-open only while idle. After a file is chosen, Convert / Download /
+  // format buttons live inside this root — without noClick they reopen the picker.
+  const allowClickToOpen = phase === "idle";
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: ALL_ACCEPT,
     maxSize: 200 * 1024 * 1024,
     maxFiles: 1,
+    noClick: !allowClickToOpen,
+    noKeyboard: !allowClickToOpen,
     onDropRejected: () =>
       toast.error("File rejected — check format or size (max 200MB)"),
   });
 
-  const selectTool = (tool: ToolSlug) => {
+  const selectTool = (tool: ToolSlug, e?: MouseEvent<HTMLButtonElement>) => {
+    e?.stopPropagation();
     if (!selected) return;
     setToolOverride({ tool, preferredAtSelection: preferredTool });
     setSelected({ ...selected, fallbackTool: tool });
   };
 
-  const convert = async () => {
+  const convert = async (e?: MouseEvent<HTMLButtonElement>) => {
+    e?.stopPropagation();
     if (!selected || !resolvedTool) return;
     const { file } = selected;
     const selectedTool = resolvedTool;
@@ -200,7 +208,8 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
     }
   };
 
-  const download = () => {
+  const download = (e?: MouseEvent<HTMLButtonElement>) => {
+    e?.stopPropagation();
     if (!outputUrl || !selected || !displayTool) return;
     const config = TOOL_CONFIG[displayTool];
     const a = document.createElement("a");
@@ -211,7 +220,8 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
     document.body.removeChild(a);
   };
 
-  const reset = () => {
+  const reset = (e?: MouseEvent<HTMLButtonElement>) => {
+    e?.stopPropagation();
     setPhase("idle");
     setSelected(null);
     setToolOverride(null);
@@ -419,6 +429,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                 </div>
 
                 <button
+                  type="button"
                   onClick={reset}
                   style={{
                     background: "transparent",
@@ -463,7 +474,8 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                     return (
                       <button
                         key={t}
-                        onClick={() => selectTool(t)}
+                        type="button"
+                        onClick={(e) => selectTool(t, e)}
                         disabled={phase === "converting"}
                         style={{
                           display: "flex",
@@ -499,6 +511,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
               {/* Action row */}
               <div style={{ display: "flex", gap: 10 }}>
                 <button
+                  type="button"
                   onClick={convert}
                   disabled={phase === "converting"}
                   style={{
@@ -536,6 +549,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                   )}
                 </button>
                 <button
+                  type="button"
                   onClick={reset}
                   disabled={phase === "converting"}
                   style={{
@@ -625,6 +639,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                 }}
               >
                 <button
+                  type="button"
                   onClick={download}
                   style={{
                     display: "flex",
@@ -645,6 +660,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                   Download
                 </button>
                 <button
+                  type="button"
                   onClick={reset}
                   style={{
                     background: "var(--color-bg-3)",
