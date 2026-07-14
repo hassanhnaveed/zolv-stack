@@ -51,6 +51,15 @@ const ALL_ACCEPT = {
   "image/webp": [".webp"],
   "image/heic": [".heic", ".heif"],
   "application/pdf": [".pdf"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    [".docx"],
+  "application/msword": [".doc"],
+  "application/vnd.oasis.opendocument.text": [".odt"],
+  "application/rtf": [".rtf"],
+  "text/rtf": [".rtf"],
+  "text/plain": [".txt"],
+  "text/html": [".html", ".htm"],
+  "text/markdown": [".md"],
 };
 
 export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
@@ -113,10 +122,23 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
       fd.append("tool", selectedTool);
       fd.append("quality", quality.toString());
 
-      const endpoint =
-        selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
-          ? "/api/pdf"
-          : "/api/convert";
+      const officeToPdfTools = [
+  "docx-to-pdf",
+  "doc-to-pdf",
+  "odt-to-pdf",
+  "rtf-to-pdf",
+  "txt-to-pdf",
+  "html-to-pdf",
+  "md-to-pdf",
+];
+
+const endpoint = officeToPdfTools.includes(selectedTool)
+  ? "/api/docx-to-pdf"
+  : selectedTool === "pdf-to-txt"
+  ? "/api/pdf-to-txt"
+  : selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
+  ? "/api/pdf"
+  : "/api/convert";
       const res = await fetch(endpoint, { method: "POST", body: fd });
 
       if (!res.ok) {
@@ -553,7 +575,7 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
           <p
             style={{ fontSize: 12, color: "var(--color-text-3)", marginTop: 8 }}
           >
-            Supports JPG, PNG, WebP, HEIC, GIF, BMP, TIFF, AVIF, PDF
+            Supports JPG, PNG, WebP, HEIC, GIF, BMP, TIFF, AVIF, PDF, DOCX
           </p>
         </motion.div>
       </div>
