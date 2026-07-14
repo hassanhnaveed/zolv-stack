@@ -5,6 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function getErrorMessage(
+  err: unknown,
+  fallback = "Something went wrong",
+): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "string") return err;
+  return fallback;
+}
+
 export function formatBytes(bytes: number, decimals = 1): string {
   if (bytes === 0) return "0 B";
   const k = 1024;

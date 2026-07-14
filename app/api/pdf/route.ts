@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PDFDocument } from "pdf-lib";
 import sharp from "sharp";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -179,16 +180,16 @@ export async function POST(req: NextRequest) {
             "Cache-Control": "no-store",
           },
         });
-      } catch (e: any) {
-        console.error("PDF to JPG error:", e.message);
+      } catch (e: unknown) {
+        console.error("PDF to JPG error:", getErrorMessage(e));
         return NextResponse.json(
-          { error: e.message || "Conversion failed" },
+          { error: getErrorMessage(e, "Conversion failed") },
           { status: 501 },
         );
       }
     }
     return NextResponse.json({ error: "Unknown PDF tool" }, { status: 400 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("PDF error:", err);
     return NextResponse.json(
       { error: "PDF processing failed." },

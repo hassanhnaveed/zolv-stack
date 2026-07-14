@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -56,10 +57,10 @@ export async function POST(req: NextRequest) {
         "Cache-Control": "no-store",
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("PDF to Word error:", err);
     return NextResponse.json(
-      { error: "Conversion failed: " + err.message },
+      { error: "Conversion failed: " + getErrorMessage(err) },
       { status: 500 },
     );
   }

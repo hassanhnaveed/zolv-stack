@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PDFDocument } from "pdf-lib";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -132,10 +133,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("PDF Split error:", err);
     return NextResponse.json(
-      { error: "PDF split failed: " + err.message },
+      { error: "PDF split failed: " + getErrorMessage(err) },
       { status: 500 },
     );
   }
