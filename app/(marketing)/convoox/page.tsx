@@ -447,60 +447,63 @@ export default function HomePage() {
                     animation: "fadeIn 0.25s ease",
                   }}
                 >
-                  {cat.tools.map((tool) => (
-                    <Link
-                      key={tool.slug}
-                      href={`/${tool.slug}`}
-                      className="tool-card"
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: 14,
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 12,
-                            flexShrink: 0,
-                            background: `${tool.color}15`,
-                            border: `1px solid ${tool.color}25`,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: 20,
-                          }}
-                        >
-                          {tool.icon}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p
-                            style={{
-                              fontFamily: "var(--font-display)",
-                              fontWeight: 700,
-                              fontSize: 15,
-                              color: "var(--color-text-1)",
-                              marginBottom: 4,
-                            }}
-                          >
-                            {tool.title}
-                          </p>
-                          <p
-                            style={{
-                              fontSize: 13,
-                              color: "var(--color-text-3)",
-                              lineHeight: 1.5,
-                            }}
-                          >
-                            {tool.description}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                 {cat.tools.map((t) => {
+  const isComingSoon = t.slug === "image-enhance" || t.slug === "remove-bg";
+  return (
+    <Link
+      key={t.slug}
+      href={isComingSoon ? "#" : `/${t.slug}`}
+      onClick={(e) => isComingSoon && e.preventDefault()}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "12px 16px",
+        background: "var(--color-bg-2)",
+        border: "1px solid var(--color-border)",
+        borderRadius: 12,
+        textDecoration: "none",
+        transition: "border-color 0.2s",
+        position: "relative",
+        opacity: isComingSoon ? 0.5 : 1,
+        cursor: isComingSoon ? "not-allowed" : "pointer",
+      }}
+    >
+      {isComingSoon && (
+        <span
+          style={{
+            position: "absolute",
+            top: 6,
+            right: 6,
+            fontSize: 9,
+            fontWeight: 700,
+            background: "rgba(245,158,11,0.15)",
+            color: "#F59E0B",
+            padding: "2px 6px",
+            borderRadius: 99,
+          }}
+        >
+          Coming Soon
+        </span>
+      )}
+      <span style={{ fontSize: 18 }}>{t.icon}</span>
+      <div>
+        <p
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--color-text-1)",
+          }}
+        >
+          {t.title}
+        </p>
+        <p style={{ fontSize: 11, color: "var(--color-text-3)" }}>
+          {t.description}
+        </p>
+      </div>
+    </Link>
+  );
+})}
                 </div>
               ),
           )}

@@ -113,33 +113,57 @@ export function OtherTools({ activeTool }: { activeTool: ToolSlug }) {
                   gap: 12,
                 }}
               >
-                {cat.tools.map((t) => (
-                  <Link
-                    key={t.slug}
-                    href={`/${t.slug}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                      padding: "12px 16px",
-                      background: "var(--color-bg-2)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: 12,
-                      textDecoration: "none",
-                      transition: "border-color 0.2s",
-                    }}
-                  >
-                    <span style={{ fontSize: 18 }}>{t.icon}</span>
-                    <div>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-1)" }}>
-                        {t.title}
-                      </p>
-                      <p style={{ fontSize: 11, color: "var(--color-text-3)" }}>
-                        {t.description}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                {cat.tools.map((t) => {
+  const isComingSoon = t.slug === "image-enhance" || t.slug === "remove-bg";
+  return (
+    <Link
+      key={t.slug}
+      href={isComingSoon ? "#" : `/${t.slug}`}
+      onClick={(e) => isComingSoon && e.preventDefault()}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "12px 16px",
+        background: "var(--color-bg-2)",
+        border: "1px solid var(--color-border)",
+        borderRadius: 12,
+        textDecoration: "none",
+        transition: "border-color 0.2s",
+        position: "relative",
+        opacity: isComingSoon ? 0.5 : 1,
+        cursor: isComingSoon ? "not-allowed" : "pointer",
+      }}
+    >
+      {isComingSoon && (
+        <span
+          style={{
+            position: "absolute",
+            top: 6,
+            right: 6,
+            fontSize: 9,
+            fontWeight: 700,
+            background: "rgba(245,158,11,0.15)",
+            color: "#F59E0B",
+            padding: "2px 6px",
+            borderRadius: 99,
+          }}
+        >
+          Coming Soon
+        </span>
+      )}
+      <span style={{ fontSize: 18 }}>{t.icon}</span>
+      <div>
+        <p style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-1)" }}>
+          {t.title}
+        </p>
+        <p style={{ fontSize: 11, color: "var(--color-text-3)" }}>
+          {t.description}
+        </p>
+      </div>
+    </Link>
+  );
+})}
               </div>
             ),
         )}
