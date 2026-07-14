@@ -535,6 +535,39 @@ export const FORMAT_OUTPUT_MAP: Record<string, ToolSlug[]> = {
   "text/markdown": ["md-to-pdf"],
 };
 
+// export const TOOL_CATEGORIES: Record<string, ToolSlug[]> = {
+//   image: [
+//     "image-to-webp",
+//     "image-to-jpg",
+//     "image-to-png",
+//     "image-to-avif",
+//     "image-to-gif",
+//     "image-to-bmp",
+//     "image-to-tiff",
+//     "heic-to-jpg",
+//     "image-to-pdf",
+//     "image-enhance",
+//     "remove-bg",
+//   ],
+//   document: [
+//     "pdf-merge",
+//     "pdf-compress",
+//     "pdf-to-jpg",
+//     "pdf-split",
+//     "pdf-to-word",
+//     "pdf-to-txt",
+//     "docx-to-pdf",
+//     "doc-to-pdf",
+//     "odt-to-pdf",
+//     "rtf-to-pdf",
+//     "txt-to-pdf",
+//     "html-to-pdf",
+//     "md-to-pdf",
+//   ],
+// };
+
+// new
+
 export const TOOL_CATEGORIES: Record<string, ToolSlug[]> = {
   image: [
     "image-to-webp",
@@ -546,16 +579,16 @@ export const TOOL_CATEGORIES: Record<string, ToolSlug[]> = {
     "image-to-tiff",
     "heic-to-jpg",
     "image-to-pdf",
-    "image-enhance",
-    "remove-bg",
   ],
-  document: [
+  pdf: [
     "pdf-merge",
     "pdf-compress",
     "pdf-to-jpg",
     "pdf-split",
     "pdf-to-word",
     "pdf-to-txt",
+  ],
+  document: [
     "docx-to-pdf",
     "doc-to-pdf",
     "odt-to-pdf",
@@ -564,4 +597,5 @@ export const TOOL_CATEGORIES: Record<string, ToolSlug[]> = {
     "html-to-pdf",
     "md-to-pdf",
   ],
+  ai: ["image-enhance", "remove-bg"],
 };

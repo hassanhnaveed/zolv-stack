@@ -1,4 +1,4 @@
-// new category code
+
 
 "use client";
 
@@ -16,26 +16,6 @@ import {
   type HeroCopy,
 } from "@/lib/format-catalog";
 
-// const tools = Object.values(TOOL_CONFIG);
-
-// const imageTools = tools.filter(
-//   (t) =>
-//     !t.slug.startsWith("pdf") &&
-//     t.slug !== "image-enhance" &&
-//     t.slug !== "remove-bg",
-// );
-// const pdfTools = tools.filter((t) => t.slug.startsWith("pdf"));
-// const aiTools = tools.filter(
-//   (t) => t.slug === "image-enhance" || t.slug === "remove-bg",
-// );
-
-// const categories = [
-//   { id: "image", label: "🖼️ Image Tools", tools: imageTools, color: "#00D084" },
-//   { id: "pdf", label: "📄 PDF Tools", tools: pdfTools, color: "#6366F1" },
-//   { id: "ai", label: "✨ AI Tools", tools: aiTools, color: "#8B5CF6" },
-// ];
-
-//new
 const tools = Object.values(TOOL_CONFIG);
 
 // Naye document-conversion tools ki list — ye office format se PDF banate hain

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { BackButton, OtherTools } from "@/components/tools/ToolNav";
 import { BackgroundRemover } from "@/components/tools/BackgroundRemover";
 
 export const metadata: Metadata = {
@@ -39,6 +40,7 @@ export default function Page() {
           />
 
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+            <BackButton />
             <div
               style={{
                 display: "flex",
@@ -129,8 +131,9 @@ export default function Page() {
             </div>
           </div>
         </section>
+        <OtherTools activeTool="remove-bg" />
       </main>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

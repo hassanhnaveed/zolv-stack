@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { BackButton, OtherTools } from "@/components/tools/ToolNav";
 import { ImageEnhancer } from "../../../components/tools/ImageEnhancer";
 
 export const metadata: Metadata = {
@@ -39,6 +39,7 @@ export default function Page() {
           />
 
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+            <BackButton/>
             <div
               style={{
                 display: "flex",
@@ -132,6 +133,7 @@ export default function Page() {
             </div>
           </div>
         </section>
+        <OtherTools activeTool="image-enhance" />
       </main>
     </>
   );
