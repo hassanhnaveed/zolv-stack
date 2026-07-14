@@ -193,7 +193,8 @@ export function HeroConversionGraphic({
 
   const sourceOptions = getSourceFormatOptions();
   const targetOptions = getTargetFormatOptions(source);
-  const activeTarget =
+  // Derive a valid target instead of resetting state in an effect / during render.
+  const activeTarget: FormatValue =
     target === "any" ||
     targetOptions.some((option) => option.value === target)
       ? target
@@ -237,15 +238,15 @@ export function HeroConversionGraphic({
     setSwapSpin((n) => n + 180);
 
     // Completed pair → lock source, open the other as Any
-    if (source !== "any" && target !== "any") {
+    if (source !== "any" && activeTarget !== "any") {
       setSource(value);
       setTarget("any");
       return;
     }
 
     // Filling open source while target is locked
-    if (source === "any" && target !== "any") {
-      setSource(value === target ? "any" : value);
+    if (source === "any" && activeTarget !== "any") {
+      setSource(value === activeTarget ? "any" : value);
       return;
     }
 
@@ -259,14 +260,14 @@ export function HeroConversionGraphic({
     setSwapSpin((n) => n + 180);
 
     // Completed pair → lock target, open source as Any
-    if (source !== "any" && target !== "any") {
+    if (source !== "any" && activeTarget !== "any") {
       setTarget(value);
       setSource("any");
       return;
     }
 
     // Filling open target while source is locked (PNG → Any → JPG)
-    if (target === "any" && source !== "any") {
+    if (activeTarget === "any" && source !== "any") {
       setTarget(value === source ? "any" : value);
       return;
     }
@@ -279,7 +280,7 @@ export function HeroConversionGraphic({
   const swapFormats = () => {
     stopAutoRotate();
     setSwapSpin((n) => n + 180);
-    setSource(target);
+    setSource(activeTarget);
     setTarget(source);
   };
 
