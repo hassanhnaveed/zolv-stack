@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Convert any image to TIFF format free online. High quality lossless format for professional photography. No signup, no watermarks.",
   keywords:
     "image to tiff, jpg to tiff, png to tiff, convert to tiff free online",
-  alternates: { canonical: "https://convoox.netlify.app/image-to-tiff" },
+  alternates: { canonical: "https://fileora.netlify.app/image-to-tiff" },
 };
 
 export default function Page() {

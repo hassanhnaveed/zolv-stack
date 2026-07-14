@@ -21,7 +21,7 @@ export function BackButton() {
         if (typeof window !== "undefined" && window.history.length > 1) {
           router.back();
         } else {
-          router.push("/convoox");
+          router.push("/fileora");
         }
       }}
       style={{

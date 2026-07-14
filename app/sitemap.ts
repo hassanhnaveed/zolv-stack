@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { TOOL_CONFIG } from "@/lib/utils";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_APP_URL || "https://convoox.netlify.app";
+  const base = process.env.NEXT_PUBLIC_APP_URL || "https://fileora.netlify.app";
   const now = new Date();
 
   const toolPages = Object.keys(TOOL_CONFIG).map(slug => ({
@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     { url: base, lastModified: now, changeFrequency: "weekly", priority: 1 },
+    { url: `${base}/fileora`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.95 },
     ...toolPages,
     { url: `${base}/about`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
     { url: `${base}/security`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },

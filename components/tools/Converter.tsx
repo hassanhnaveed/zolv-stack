@@ -282,7 +282,7 @@ const endpoint = officeToPdfTools.includes(selectedTool)
       const content = await zip.generateAsync({ type: "blob" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(content);
-      a.download = `convoox-${selectedTool}.zip`;
+      a.download = `fileora-${selectedTool}.zip`;
       a.click();
     } catch {
       toast.error("Could not create ZIP");

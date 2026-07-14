@@ -73,8 +73,8 @@ const whyItems = [
 
 const faqs = [
   {
-    q: "Is Convoox really free to use?",
-    a: "Yes — all tools on Convoox are completely free. No hidden fees, no credit card, no account required. Convert unlimited files.",
+    q: "Is Fileora really free to use?",
+    a: "Yes — all tools on Fileora are completely free. No hidden fees, no credit card, no account required. Convert unlimited files.",
   },
   {
     q: "Are my files stored on your servers?",
@@ -94,7 +94,7 @@ const faqs = [
   },
   {
     q: "What image formats can I convert?",
-    a: "Convoox supports JPG, JPEG, PNG, GIF, BMP, TIFF, AVIF, HEIC, HEIF, and WebP as input formats depending on the tool.",
+    a: "Fileora supports JPG, JPEG, PNG, GIF, BMP, TIFF, AVIF, HEIC, HEIF, and WebP as input formats depending on the tool.",
   },
   {
     q: "Can I convert multiple files at once?",
@@ -510,7 +510,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Convoox */}
+      {/* Why Fileora */}
       <section
         style={{
           padding: "80px 24px",
@@ -530,7 +530,7 @@ export default function HomePage() {
                 marginBottom: 12,
               }}
             >
-              Why Convoox?
+              Why Fileora?
             </h2>
             <p
               style={{

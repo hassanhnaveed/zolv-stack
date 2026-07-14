@@ -12,7 +12,7 @@ export function AboutPageContent() {
 
       <CompanyPageSection style={{ paddingTop: 12, paddingBottom: 4 }}>
         <CalloutBanner icon={Layers}>
-          Convoox is a free online file conversion platform built for people who need fast, reliable tools without the hassle of signups, watermarks, or limits. Our mission is simple: make file conversion effortless. Whether you are converting images to WebP, merging PDFs, or enhancing photos, Convoox gives you professional results in seconds — right in your browser.
+          Fileora is a free online file conversion platform built for people who need fast, reliable tools without the hassle of signups, watermarks, or limits. Our mission is simple: make file conversion effortless. Whether you are converting images to WebP, merging PDFs, or enhancing photos, Fileora gives you professional results in seconds — right in your browser.
         </CalloutBanner>
       </CompanyPageSection>
 
@@ -21,12 +21,12 @@ export function AboutPageContent() {
           {
             icon: Layers,
             title: "What We Do",
-            body: "Convoox offers a growing suite of free file conversion tools — image format conversion, PDF merge and compress, background removal, and more. Every tool is designed to be intuitive: upload your files, click convert, and download the result. No learning curve, no unnecessary steps.",
+            body: "Fileora offers a growing suite of free file conversion tools — image format conversion, PDF merge and compress, background removal, and more. Every tool is designed to be intuitive: upload your files, click convert, and download the result. No learning curve, no unnecessary steps.",
           },
           {
             icon: Target,
-            title: "Why We Built Convoox",
-            body: "Most online converters are cluttered with ads, hidden paywalls, and confusing interfaces. We built Convoox to be the opposite — a clean, fast, and trustworthy platform where anyone can convert files without creating an account or worrying about their data.",
+            title: "Why We Built Fileora",
+            body: "Most online converters are cluttered with ads, hidden paywalls, and confusing interfaces. We built Fileora to be the opposite — a clean, fast, and trustworthy platform where anyone can convert files without creating an account or worrying about their data.",
           },
           {
             icon: Zap,
@@ -36,7 +36,7 @@ export function AboutPageContent() {
           {
             icon: Sparkles,
             title: "Easy to Use",
-            body: "We believe great tools should be accessible to everyone. Convoox works on any modern browser, requires no software installation, and keeps the interface minimal so you can focus on getting your work done.",
+            body: "We believe great tools should be accessible to everyone. Fileora works on any modern browser, requires no software installation, and keeps the interface minimal so you can focus on getting your work done.",
           },
         ]}
         variant="alt"
@@ -57,7 +57,7 @@ export function AboutPageContent() {
           Our Commitment
         </h2>
         <CalloutBanner icon={BadgeCheck} delay={0}>
-          We are committed to keeping Convoox free, private, and continuously improving. Your files are processed securely and never stored on our servers. We listen to what our users need and regularly add new tools and formats to make Convoox the go-to destination for everyday file conversion.
+          We are committed to keeping Fileora free, private, and continuously improving. Your files are processed securely and never stored on our servers. We listen to what our users need and regularly add new tools and formats to make Fileora the go-to destination for everyday file conversion.
         </CalloutBanner>
       </CompanyPageSection>
     </div>

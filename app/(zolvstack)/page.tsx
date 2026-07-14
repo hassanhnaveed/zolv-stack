@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { FileoraBadge } from "@/components/brand/FileoraBadge";
 
 const products = [
   {
-    name: "Convoox",
+    name: "Fileora",
     tagline: "Free File Converter",
     description:
       "Convert any image format, remove backgrounds, enhance photos with AI, merge & compress PDFs. Unlimited, no signup, no watermarks.",
-    href: "/convoox",
-    icon: "⚡",
+    href: "/fileora",
     color: "#00D084",
     tags: ["Image Converter", "PDF Tools", "AI Enhancer", "Background Remover"],
   },
@@ -228,7 +228,7 @@ export default function ZolvStackHome() {
             Our products
           </h2>
         </div>
-        {/* convoox box */}
+        {/* fileora box */}
         <div
           style={{
             display: "grid",
@@ -276,21 +276,7 @@ export default function ZolvStackHome() {
                     marginBottom: 20,
                   }}
                 >
-                  <div
-                    style={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: 14,
-                      background: `${product.color}15`,
-                      border: `1px solid ${product.color}25`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 24,
-                    }}
-                  >
-                    {product.icon}
-                  </div>
+                  <FileoraBadge size={52} markSize={32} radius={14} />
                   <span
                     style={{
                       fontSize: 12,

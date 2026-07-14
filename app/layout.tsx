@@ -2,14 +2,16 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://fileora.netlify.app";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://convoox.netlify.app"),
+  metadataBase: new URL(APP_URL),
   title: {
-    default: "Convoox — Free Online File Converter | Image to WebP, PDF, HEIC & More",
-    template: "%s | convoox — Free File Converter",
+    default: "Fileora — Free Online File Converter | Image to WebP, PDF, HEIC & More",
+    template: "%s | Fileora — Free File Converter",
   },
   description:
-    "convoox is a free online file converter. Convert images to WebP, JPG to PDF, HEIC to JPG, merge & compress PDFs. No signup, no watermarks, no limits. Fast & private.",
+    "Fileora is a free online file converter. Convert images to WebP, JPG to PDF, HEIC to JPG, merge & compress PDFs. No signup, no watermarks, no limits. Fast & private.",
   keywords: [
     "free file converter",
     "image to webp converter",
@@ -26,27 +28,27 @@ export const metadata: Metadata = {
     "online file converter no watermark",
     "free image converter no signup",
     "bulk image converter",
-    "convoox",
+    "fileora",
   ],
-  authors: [{ name: "convoox" }],
-  creator: "convoox",
-  publisher: "convoox",
+  authors: [{ name: "Fileora" }],
+  creator: "Fileora",
+  publisher: "Fileora",
   category: "Technology",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://convoox.netlify.app",
-    siteName: "convoox",
-    title: "convoox — Free Online File Converter | No Limits, No Watermarks",
+    url: APP_URL,
+    siteName: "Fileora",
+    title: "Fileora — Free Online File Converter | No Limits, No Watermarks",
     description:
       "Convert images to WebP, JPG to PDF, merge PDFs & more. 100% free, no signup required, no watermarks. Fast & private.",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "convoox — Free File Converter" }],
+    images: [{ url: "/og.png?v=3", width: 1200, height: 630, alt: "Fileora — Free File Converter" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "convoox — Free Online File Converter",
+    title: "Fileora — Free Online File Converter",
     description: "Convert images & PDFs for free. No limits, no watermarks, no signup.",
-    images: ["/og.png"],
+    images: ["/og.png?v=3"],
   },
   robots: {
     index: true,
@@ -59,7 +61,15 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-  alternates: { canonical: "https://convoox.netlify.app" },
+  alternates: { canonical: APP_URL },
+  icons: {
+    icon: [
+      { url: "/favicon.svg?v=3", type: "image/svg+xml" },
+      { url: "/favicon.ico?v=3", sizes: "32x32" },
+    ],
+    apple: [{ url: "/icons/icon-192.png?v=3", sizes: "192x192" }],
+  },
+  manifest: "/manifest.json?v=3",
 };
 
 export const viewport: Viewport = {
@@ -73,22 +83,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="anonymous" />
-<link rel="dns-prefetch" href="https://api.fontshare.com" />
-<link
-  href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,600&f[]=satoshi@300,400,500,700&display=swap"
-  rel="stylesheet"
-  fetchPriority="low"
-/>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="manifest" href="/manifest.json" />
+        <link rel="dns-prefetch" href="https://api.fontshare.com" />
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,600&f[]=satoshi@300,400,500,700&display=swap"
+          rel="stylesheet"
+          fetchPriority="low"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              name: "convoox",
-              url: process.env.NEXT_PUBLIC_APP_URL || "https://convoox.netlify.app",
+              name: "Fileora",
+              url: APP_URL,
               description:
                 "Free online file converter — convert images to WebP, JPG to PDF, HEIC to JPG, merge & compress PDFs.",
               applicationCategory: "UtilitiesApplication",
