@@ -287,6 +287,10 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
             <DropzoneIdleContent
               isDragActive={isDragActive}
               onOpenFilePicker={open}
+              onFilesSelected={onDrop}
+              accept={ALL_ACCEPT}
+              maxFiles={1}
+              maxSize={200 * 1024 * 1024}
               dragTitle="Drop to detect format"
               meta="JPG · PNG · WebP · HEIC · GIF · BMP · TIFF · AVIF · PDF — up to 200 MB"
             />

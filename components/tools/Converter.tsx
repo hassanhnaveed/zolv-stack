@@ -518,6 +518,10 @@ const endpoint = officeToPdfTools.includes(selectedTool)
         <DropzoneIdleContent
           isDragActive={isDragActive}
           onOpenFilePicker={open}
+          onFilesSelected={onDrop}
+          accept={ALL_ACCEPT}
+          maxFiles={20}
+          maxSize={200 * 1024 * 1024}
           dragTitle="Drop files here"
           meta={
             selectedTool === "image-to-pdf"

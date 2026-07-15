@@ -83,6 +83,14 @@ export function BackgroundRemover() {
           <DropzoneIdleContent
             isDragActive={isDragActive}
             onOpenFilePicker={open}
+            onFilesSelected={onDrop}
+            accept={{
+              "image/jpeg": [".jpg", ".jpeg"],
+              "image/png": [".png"],
+              "image/webp": [".webp"],
+            }}
+            maxFiles={1}
+            maxSize={15 * 1024 * 1024}
             dragTitle="Drop image here"
             meta="JPG, PNG, WebP · Max 15MB · 100% free · Unlimited · AI-powered"
           />

@@ -93,6 +93,10 @@ export function PdfSplitter() {
           <DropzoneIdleContent
             isDragActive={isDragActive}
             onOpenFilePicker={open}
+            onFilesSelected={onDrop}
+            accept={{ "application/pdf": [".pdf"] }}
+            maxFiles={1}
+            maxSize={50 * 1024 * 1024}
             dragTitle="Drop PDF here"
             meta="PDF only, max 50MB"
           />
