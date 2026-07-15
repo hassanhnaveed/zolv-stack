@@ -11,11 +11,26 @@ export type FormatValue =
   | "tiff"
   | "heic"
   | "pdf"
-  | "docx";
+  | "docx"
+  | "doc"
+  | "odt"
+  | "rtf"
+  | "txt"
+  | "html"
+  | "md";
+
+export type FormatCategoryId = "image" | "document";
 
 export interface FormatOption {
-  value: FormatValue;
+  value: Exclude<FormatValue, "any">;
   label: string;
+  category: FormatCategoryId;
+}
+
+export interface FormatOptionGroup {
+  id: FormatCategoryId;
+  label: "Image" | "Document";
+  options: FormatOption[];
 }
 
 export interface ConverterPair {
@@ -23,7 +38,17 @@ export interface ConverterPair {
   target: FormatValue;
 }
 
-/** Conversion tools available in the project (excludes AI utilities). */
+const OFFICE_TO_PDF_TOOLS: ToolSlug[] = [
+  "docx-to-pdf",
+  "doc-to-pdf",
+  "odt-to-pdf",
+  "rtf-to-pdf",
+  "txt-to-pdf",
+  "html-to-pdf",
+  "md-to-pdf",
+];
+
+/** Pair-conversion tools for the hero / upload widget (no PDF utilities / AI). */
 export const CONVERTER_TOOLS: ToolSlug[] = [
   "image-to-webp",
   "image-to-jpg",
@@ -34,10 +59,9 @@ export const CONVERTER_TOOLS: ToolSlug[] = [
   "image-to-tiff",
   "heic-to-jpg",
   "image-to-pdf",
-  "pdf-merge",
-  "pdf-compress",
   "pdf-to-jpg",
   "pdf-to-word",
+  ...OFFICE_TO_PDF_TOOLS,
 ];
 
 const FORMAT_LABELS: Record<Exclude<FormatValue, "any">, string> = {
@@ -51,7 +75,43 @@ const FORMAT_LABELS: Record<Exclude<FormatValue, "any">, string> = {
   heic: "HEIC",
   pdf: "PDF",
   docx: "DOCX",
+  doc: "DOC",
+  odt: "ODT",
+  rtf: "RTF",
+  txt: "TXT",
+  html: "HTML",
+  md: "MD",
 };
+
+const IMAGE_FORMATS = [
+  "jpg",
+  "png",
+  "webp",
+  "gif",
+  "avif",
+  "bmp",
+  "tiff",
+  "heic",
+] as const;
+
+const DOCUMENT_FORMATS = [
+  "pdf",
+  "docx",
+  "doc",
+  "odt",
+  "rtf",
+  "txt",
+  "html",
+  "md",
+] as const;
+
+const DOCUMENT_FORMAT_SET = new Set<string>(DOCUMENT_FORMATS);
+
+function categoryForFormat(
+  value: Exclude<FormatValue, "any">,
+): FormatCategoryId {
+  return DOCUMENT_FORMAT_SET.has(value) ? "document" : "image";
+}
 
 const MIME_TO_FORMAT: Record<string, FormatValue> = {
   "image/jpeg": "jpg",
@@ -65,6 +125,15 @@ const MIME_TO_FORMAT: Record<string, FormatValue> = {
   "image/heic": "heic",
   "image/heif": "heic",
   "application/pdf": "pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    "docx",
+  "application/msword": "doc",
+  "application/vnd.oasis.opendocument.text": "odt",
+  "application/rtf": "rtf",
+  "text/rtf": "rtf",
+  "text/plain": "txt",
+  "text/html": "html",
+  "text/markdown": "md",
 };
 
 const FORMAT_TO_MIME: Partial<Record<Exclude<FormatValue, "any">, string>> = {
@@ -77,53 +146,68 @@ const FORMAT_TO_MIME: Partial<Record<Exclude<FormatValue, "any">, string>> = {
   tiff: "image/tiff",
   heic: "image/heic",
   pdf: "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  doc: "application/msword",
+  odt: "application/vnd.oasis.opendocument.text",
+  rtf: "application/rtf",
+  txt: "text/plain",
+  html: "text/html",
+  md: "text/markdown",
 };
 
 /** Input formats supported by the upload widget and conversion APIs. */
-export const SOURCE_FORMATS: Exclude<FormatValue, "any" | "docx">[] = [
-  "jpg",
-  "png",
-  "webp",
-  "gif",
-  "avif",
-  "bmp",
-  "tiff",
-  "heic",
-  "pdf",
+export const SOURCE_FORMATS: Exclude<FormatValue, "any">[] = [
+  ...IMAGE_FORMATS,
+  ...DOCUMENT_FORMATS,
 ];
 
-function toFormatOption(value: FormatValue): FormatOption {
-  if (value === "any") return { value, label: "Any" };
-  return { value, label: FORMAT_LABELS[value] };
+function toFormatOption(value: Exclude<FormatValue, "any">): FormatOption {
+  return {
+    value,
+    label: FORMAT_LABELS[value],
+    category: categoryForFormat(value),
+  };
 }
 
-export function getSourceFormatOptions(): FormatOption[] {
-  return [
-    { value: "any", label: "Any" },
-    ...SOURCE_FORMATS.map((value) => toFormatOption(value)),
-  ];
-}
-
-function toolToTargetFormat(tool: ToolSlug): FormatValue | null {
-  if (tool === "pdf-to-word") return "docx";
-  if (
-    tool === "pdf-merge" ||
-    tool === "pdf-compress" ||
-    tool === "pdf-split" ||
-    tool === "image-to-pdf"
-  ) {
-    return "pdf";
+function groupOptions(options: FormatOption[]): FormatOptionGroup[] {
+  const image = options.filter((o) => o.category === "image");
+  const document = options.filter((o) => o.category === "document");
+  const groups: FormatOptionGroup[] = [];
+  if (image.length > 0) {
+    groups.push({ id: "image", label: "Image", options: image });
   }
+  if (document.length > 0) {
+    groups.push({ id: "document", label: "Document", options: document });
+  }
+  return groups;
+}
+
+/** Selectable source formats only — Image + Document. No "Any". */
+export function getSourceFormatGroups(): FormatOptionGroup[] {
+  return groupOptions(SOURCE_FORMATS.map((value) => toFormatOption(value)));
+}
+
+/** Flat selectable source formats (no "Any", no PDF Tools / AI). */
+export function getSourceFormatOptions(): FormatOption[] {
+  return getSourceFormatGroups().flatMap((group) => group.options);
+}
+
+function toolToTargetFormat(tool: ToolSlug): Exclude<FormatValue, "any"> | null {
+  if (!CONVERTER_TOOLS.includes(tool)) return null;
+  if (tool === "pdf-to-word") return "docx";
+  if (tool === "image-to-pdf" || OFFICE_TO_PDF_TOOLS.includes(tool)) return "pdf";
 
   const ext = TOOL_CONFIG[tool].outputExt.replace(".", "").toLowerCase();
   if (ext === "jpeg") return "jpg";
   if (ext === "tiff") return "tiff";
-  if (ext in FORMAT_LABELS) return ext as Exclude<FormatValue, "any" | "docx">;
+  if (ext in FORMAT_LABELS) return ext as Exclude<FormatValue, "any">;
   return null;
 }
 
-function collectTargetFormats(source: FormatValue): FormatValue[] {
-  const targets = new Set<FormatValue>();
+function collectTargetFormats(
+  source: FormatValue,
+): Exclude<FormatValue, "any">[] {
+  const targets = new Set<Exclude<FormatValue, "any">>();
 
   if (source === "any") {
     for (const mime of Object.keys(FORMAT_OUTPUT_MAP)) {
@@ -135,7 +219,7 @@ function collectTargetFormats(source: FormatValue): FormatValue[] {
     return Array.from(targets);
   }
 
-  const mime = FORMAT_TO_MIME[source as Exclude<FormatValue, "any" | "docx">];
+  const mime = FORMAT_TO_MIME[source];
   if (!mime) return [];
 
   for (const tool of FORMAT_OUTPUT_MAP[mime] ?? []) {
@@ -146,14 +230,20 @@ function collectTargetFormats(source: FormatValue): FormatValue[] {
   return Array.from(targets);
 }
 
-export function getTargetFormatOptions(source: FormatValue): FormatOption[] {
-  return [
-    { value: "any", label: "Any" },
-    ...collectTargetFormats(source).map((value) => toFormatOption(value)),
-  ];
+/** Selectable target formats only — Image + Document. No "Any". */
+export function getTargetFormatGroups(
+  source: FormatValue,
+): FormatOptionGroup[] {
+  return groupOptions(
+    collectTargetFormats(source).map((value) => toFormatOption(value)),
+  );
 }
 
-/** @deprecated Use getSourceFormatOptions / getTargetFormatOptions */
+export function getTargetFormatOptions(source: FormatValue): FormatOption[] {
+  return getTargetFormatGroups(source).flatMap((group) => group.options);
+}
+
+/** @deprecated Prefer getSourceFormatGroups — excludes placeholder "Any". */
 export const FORMAT_OPTIONS: FormatOption[] = getSourceFormatOptions();
 
 export const HERO_ROTATING_PAIRS: ConverterPair[] = [
@@ -168,8 +258,8 @@ export function isValidConverterSelection(
   source: FormatValue,
   target: FormatValue,
 ): boolean {
-  if (source === "any" || target === "any") return false;
-  return source !== target;
+  if (source === "any" || target === "any" || source === target) return false;
+  return resolveToolFromFormats(source, target) !== null;
 }
 
 function formatLabel(value: FormatValue): string {
@@ -241,56 +331,25 @@ const PAIR_TOOL_MAP: Partial<
   "avif-pdf": "image-to-pdf",
   "pdf-jpg": "pdf-to-jpg",
   "pdf-docx": "pdf-to-word",
+  "docx-pdf": "docx-to-pdf",
+  "doc-pdf": "doc-to-pdf",
+  "odt-pdf": "odt-to-pdf",
+  "rtf-pdf": "rtf-to-pdf",
+  "txt-pdf": "txt-to-pdf",
+  "html-pdf": "html-to-pdf",
+  "md-pdf": "md-to-pdf",
 };
 
-const SOURCE_TOOL_MAP: Partial<
-  Record<Exclude<FormatValue, "any" | "docx">, ToolSlug>
-> = {
-  jpg: "image-to-jpg",
-  png: "image-to-png",
-  webp: "image-to-webp",
-  gif: "image-to-gif",
-  avif: "image-to-avif",
-  bmp: "image-to-bmp",
-  tiff: "image-to-tiff",
-  heic: "heic-to-jpg",
-  pdf: "pdf-to-jpg",
-};
-
-const TARGET_TOOL_MAP: Partial<
-  Record<Exclude<FormatValue, "any">, ToolSlug>
-> = {
-  webp: "image-to-webp",
-  jpg: "image-to-jpg",
-  png: "image-to-png",
-  avif: "image-to-avif",
-  gif: "image-to-gif",
-  bmp: "image-to-bmp",
-  tiff: "image-to-tiff",
-  heic: "heic-to-jpg",
-  pdf: "image-to-pdf",
-  docx: "pdf-to-word",
-};
-
+/** Resolves a concrete conversion tool only when both sides are real formats. */
 export function resolveToolFromFormats(
   source: FormatValue,
   target: FormatValue,
 ): ToolSlug | null {
-  if (source !== "any" && target !== "any" && source !== target) {
-    const key =
-      `${source}-${target}` as `${Exclude<FormatValue, "any">}-${Exclude<FormatValue, "any">}`;
-    return PAIR_TOOL_MAP[key] ?? null;
-  }
+  if (source === "any" || target === "any" || source === target) return null;
 
-  if (source !== "any" && target === "any") {
-    return SOURCE_TOOL_MAP[source as Exclude<FormatValue, "any" | "docx">] ?? null;
-  }
-
-  if (target !== "any" && source === "any") {
-    return TARGET_TOOL_MAP[target as Exclude<FormatValue, "any">] ?? null;
-  }
-
-  return null;
+  const key =
+    `${source}-${target}` as `${Exclude<FormatValue, "any">}-${Exclude<FormatValue, "any">}`;
+  return PAIR_TOOL_MAP[key] ?? null;
 }
 
 export function getToolsForMime(mime: string): ToolSlug[] {

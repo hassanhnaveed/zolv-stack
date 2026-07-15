@@ -71,6 +71,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/convoox",
+        destination: "/fileora",
+        permanent: true,
+      },
+      {
+        source: "/convoox/:path*",
+        destination: "/fileora/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

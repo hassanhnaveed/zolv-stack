@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, Zap } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TOOL_CONFIG } from "@/lib/utils";
+import { FileoraLogo } from "@/components/brand/FileoraLogo";
 
 const tools = Object.values(TOOL_CONFIG);
 
@@ -30,40 +31,7 @@ export function Navbar() {
           }}
         >
           {/* Logo */}
-          <Link
-            href="/"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              textDecoration: "none",
-            }}
-          >
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 9,
-                background: "var(--color-brand)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Zap size={16} color="#0A0F0D" strokeWidth={2.5} />
-            </div>
-            <span
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 800,
-                fontSize: 17,
-                color: "#fff",
-                letterSpacing: "-0.5px",
-              }}
-            >
-              Con<span style={{ color: "var(--color-brand)" }}>voox</span>
-            </span>
-          </Link>
+          <FileoraLogo />
 
           {/* Desktop nav */}
           <nav
@@ -71,7 +39,7 @@ export function Navbar() {
             className="hidden md:flex"
           >
             <Link
-              href="/convoox#tools"
+              href="/fileora#tools"
               style={{
                 fontSize: 14,
                 color: "var(--color-text-2)",
@@ -88,7 +56,7 @@ export function Navbar() {
               Tools
             </Link>
             <Link
-              href="/convoox#how-it-works"
+              href="/fileora#how-it-works"
               style={{
                 fontSize: 14,
                 color: "var(--color-text-2)",
@@ -105,7 +73,7 @@ export function Navbar() {
               How it works
             </Link>
             <Link
-              href="/convoox#faq"
+              href="/fileora#faq"
               style={{
                 fontSize: 14,
                 color: "var(--color-text-2)",

@@ -20,7 +20,7 @@ export function TermsPageContent() {
 
       <CompanyPageSection style={{ paddingTop: 12, paddingBottom: 4 }}>
         <CalloutBanner icon={Scale} emphasized>
-          These terms set the ground rules for using Convoox. By accessing our free conversion tools, you agree to use the service lawfully, respect others&apos; rights, and accept that Convoox is provided as-is without guaranteed uptime or conversion accuracy for every file type.
+          These terms set the ground rules for using Fileora. By accessing our free conversion tools, you agree to use the service lawfully, respect others&apos; rights, and accept that Fileora is provided as-is without guaranteed uptime or conversion accuracy for every file type.
         </CalloutBanner>
       </CompanyPageSection>
 
@@ -29,7 +29,7 @@ export function TermsPageContent() {
           {
             icon: FileCheck,
             title: "Use of Service",
-            body: "Convoox is provided for lawful personal and commercial use. You may convert files you own or have the legal right to process. You may not use this service to convert copyrighted material you do not own or lack permission to use.",
+            body: "Fileora is provided for lawful personal and commercial use. You may convert files you own or have the legal right to process. You may not use this service to convert copyrighted material you do not own or lack permission to use.",
           },
           {
             icon: Ban,
@@ -39,22 +39,22 @@ export function TermsPageContent() {
           {
             icon: ShieldAlert,
             title: "No Warranty",
-            body: "Convoox is provided \"as is\" without warranty of any kind, express or implied. We do not guarantee 100% uptime, uninterrupted access, or conversion accuracy for all file types, sizes, or edge cases.",
+            body: "Fileora is provided \"as is\" without warranty of any kind, express or implied. We do not guarantee 100% uptime, uninterrupted access, or conversion accuracy for all file types, sizes, or edge cases.",
           },
           {
             icon: AlertTriangle,
             title: "Limitation of Liability",
-            body: "Convoox is not liable for any data loss, corruption, or damages arising from use of this service. Always keep backups of your original files. Download and verify results before deleting local copies.",
+            body: "Fileora is not liable for any data loss, corruption, or damages arising from use of this service. Always keep backups of your original files. Download and verify results before deleting local copies.",
           },
           {
             icon: Copyright,
             title: "Intellectual Property",
-            body: "Your files remain yours. Uploading a file for conversion does not transfer ownership to Convoox. The Convoox name, branding, interface, and software remain our intellectual property and may not be copied or redistributed without permission.",
+            body: "Your files remain yours. Uploading a file for conversion does not transfer ownership to Fileora. The Fileora name, branding, interface, and software remain our intellectual property and may not be copied or redistributed without permission.",
           },
           {
             icon: RefreshCw,
             title: "Changes to Terms",
-            body: "We may modify these terms at any time as the service evolves. Updated terms will be posted on this page. Continued use of Convoox after changes constitutes acceptance of the updated terms.",
+            body: "We may modify these terms at any time as the service evolves. Updated terms will be posted on this page. Continued use of Fileora after changes constitutes acceptance of the updated terms.",
           },
         ]}
         variant="alt"
@@ -75,7 +75,7 @@ export function TermsPageContent() {
           Fair Use Commitment
         </h2>
         <CalloutBanner icon={BadgeCheck} delay={0}>
-          These terms exist to keep Convoox free, fast, and fair for everyone. Use the tools responsibly, respect copyright and the law, and we will keep focusing on a reliable conversion experience without unnecessary barriers.
+          These terms exist to keep Fileora free, fast, and fair for everyone. Use the tools responsibly, respect copyright and the law, and we will keep focusing on a reliable conversion experience without unnecessary barriers.
         </CalloutBanner>
       </CompanyPageSection>
     </div>

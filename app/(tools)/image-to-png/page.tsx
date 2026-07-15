@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Convert any image to PNG format free online. JPG, WebP, AVIF, BMP, TIFF, GIF, HEIC to PNG with transparency. No signup, no watermarks.",
   keywords: "image to png, jpg to png, webp to png, convert to png free online",
-  alternates: { canonical: "https://convoox.netlify.app/image-to-png" },
+  alternates: { canonical: "https://fileora.netlify.app/image-to-png" },
 };
 
 export default function Page() {

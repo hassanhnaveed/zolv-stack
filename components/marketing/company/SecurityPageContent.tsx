@@ -19,7 +19,7 @@ export function SecurityPageContent() {
 
       <CompanyPageSection style={{ paddingTop: 12, paddingBottom: 4 }}>
         <CalloutBanner icon={ShieldCheck} emphasized>
-          Your privacy and security are our top priorities. Convoox is built from the ground up to protect your data at every step of the conversion process. We do not store any user files or personal data on our website or backend. Files are processed only for conversion and are automatically discarded after processing.
+          Your privacy and security are our top priorities. Fileora is built from the ground up to protect your data at every step of the conversion process. We do not store any user files or personal data on our website or backend. Files are processed only for conversion and are automatically discarded after processing.
         </CalloutBanner>
       </CompanyPageSection>
       <FeatureCardGrid
@@ -32,12 +32,12 @@ export function SecurityPageContent() {
           {
             icon: UserX,
             title: "No Data Collection",
-            body: "Convoox does not require an account, email address, or any personal information to use our tools. We do not build user profiles, track individual file contents, or sell data to third parties. Your conversion activity stays private.",
+            body: "Fileora does not require an account, email address, or any personal information to use our tools. We do not build user profiles, track individual file contents, or sell data to third parties. Your conversion activity stays private.",
           },
           {
             icon: Lock,
             title: "Encrypted Connections",
-            body: "Every connection to Convoox is served over HTTPS with TLS encryption. This means your files are encrypted in transit between your browser and our servers, protecting them from interception during upload and download.",
+            body: "Every connection to Fileora is served over HTTPS with TLS encryption. This means your files are encrypted in transit between your browser and our servers, protecting them from interception during upload and download.",
           },
           {
             icon: HardDrive,
@@ -52,7 +52,7 @@ export function SecurityPageContent() {
           {
             icon: HeartHandshake,
             title: "Your Trust Matters",
-            body: "Security is not a feature we bolt on — it is foundational to how Convoox works. We believe you should be able to convert files with complete confidence that your data remains yours. If you have questions about our security practices, please reach out through our contact channels.",
+            body: "Security is not a feature we bolt on — it is foundational to how Fileora works. We believe you should be able to convert files with complete confidence that your data remains yours. If you have questions about our security practices, please reach out through our contact channels.",
           },
         ]}
         variant="alt"

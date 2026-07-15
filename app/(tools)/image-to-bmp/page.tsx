@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Convert any image to BMP format free online. JPG, PNG, WebP to BMP. Maximum compatibility with Windows applications. No signup.",
   keywords: "image to bmp, jpg to bmp, png to bmp, convert to bmp free online",
-  alternates: { canonical: "https://convoox.netlify.app/image-to-bmp" },
+  alternates: { canonical: "https://fileora.netlify.app/image-to-bmp" },
 };
 
 export default function Page() {

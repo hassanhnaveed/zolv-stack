@@ -30,7 +30,27 @@ const ALL_ACCEPT = {
   "image/webp": [".webp"],
   "image/heic": [".heic", ".heif"],
   "application/pdf": [".pdf"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+    ".docx",
+  ],
+  "application/msword": [".doc"],
+  "application/vnd.oasis.opendocument.text": [".odt"],
+  "application/rtf": [".rtf"],
+  "text/rtf": [".rtf"],
+  "text/plain": [".txt"],
+  "text/html": [".html", ".htm"],
+  "text/markdown": [".md"],
 };
+
+const OFFICE_TO_PDF_TOOLS: ToolSlug[] = [
+  "docx-to-pdf",
+  "doc-to-pdf",
+  "odt-to-pdf",
+  "rtf-to-pdf",
+  "txt-to-pdf",
+  "html-to-pdf",
+  "md-to-pdf",
+];
 
 type Phase = "idle" | "selected" | "converting" | "done" | "error";
 
@@ -38,17 +58,12 @@ interface SelectedFile {
   file: File;
   preview?: string;
   availableTools: ToolSlug[];
-  /** Sticky baseline set on drop / manual pick — never synced from preferredTool. */
-  fallbackTool: ToolSlug;
-}
-
-/**
- * User pick is only honored while preferredTool is unchanged since that pick.
- * When preferredTool changes, it wins (if available); otherwise we fall back.
- */
-interface ToolOverride {
-  tool: ToolSlug;
-  preferredAtSelection: ToolSlug | undefined;
+  /**
+   * Sticky Convert-to choice for this upload.
+   * Set from a complete hero pair (preferredTool) on drop, or by manual pick.
+   * Null while either hero side is still the Any placeholder — Convert stays disabled.
+   */
+  lockedTool: ToolSlug | null;
 }
 
 interface SmartUploadWidgetProps {
@@ -58,52 +73,33 @@ interface SmartUploadWidgetProps {
 function pickInitialTool(
   availableTools: ToolSlug[],
   preferredTool: ToolSlug | undefined,
-): ToolSlug {
+): ToolSlug | null {
   if (preferredTool && availableTools.includes(preferredTool)) {
     return preferredTool;
   }
-  return availableTools[0];
+  return null;
 }
 
-function resolveActiveTool(
+function resolveLockedTool(
   availableTools: ToolSlug[],
-  preferredTool: ToolSlug | undefined,
-  override: ToolOverride | null,
-  fallbackTool: ToolSlug,
-): ToolSlug {
-  if (
-    override &&
-    override.preferredAtSelection === preferredTool &&
-    availableTools.includes(override.tool)
-  ) {
-    return override.tool;
-  }
-  if (preferredTool && availableTools.includes(preferredTool)) {
-    return preferredTool;
-  }
-  if (availableTools.includes(fallbackTool)) {
-    return fallbackTool;
-  }
-  return availableTools[0];
+  lockedTool: ToolSlug | null,
+): ToolSlug | null {
+  if (!lockedTool) return null;
+  if (availableTools.includes(lockedTool)) return lockedTool;
+  return null;
 }
 
 export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [selected, setSelected] = useState<SelectedFile | null>(null);
-  const [toolOverride, setToolOverride] = useState<ToolOverride | null>(null);
   const [activeTool, setActiveTool] = useState<ToolSlug | null>(null);
   const [outputUrl, setOutputUrl] = useState<string | null>(null);
   const [outputSize, setOutputSize] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Pure derivation from props + local intent — no useEffect / render setState sync.
+  // After upload, Convert-to is frozen to lockedTool until reset.
   const resolvedTool = selected
-    ? resolveActiveTool(
-        selected.availableTools,
-        preferredTool,
-        toolOverride,
-        selected.fallbackTool,
-      )
+    ? resolveLockedTool(selected.availableTools, selected.lockedTool)
     : null;
 
   // Frozen at convert start so UI / download stay consistent through converting + done.
@@ -129,9 +125,9 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
           ? URL.createObjectURL(file)
           : undefined,
         availableTools,
-        fallbackTool: pickInitialTool(availableTools, preferredTool),
+        // Snapshot current showcase target once; hero rotation must not change this.
+        lockedTool: pickInitialTool(availableTools, preferredTool),
       });
-      setToolOverride(null);
       setActiveTool(null);
       setPhase("selected");
       setOutputUrl(null);
@@ -159,8 +155,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
   const selectTool = (tool: ToolSlug, e?: MouseEvent<HTMLButtonElement>) => {
     e?.stopPropagation();
     if (!selected) return;
-    setToolOverride({ tool, preferredAtSelection: preferredTool });
-    setSelected({ ...selected, fallbackTool: tool });
+    setSelected({ ...selected, lockedTool: tool });
   };
 
   const convert = async (e?: MouseEvent<HTMLButtonElement>) => {
@@ -182,9 +177,11 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
       const endpoint =
         selectedTool === "pdf-to-word"
           ? "/api/pdf-to-word"
-          : selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
-            ? "/api/pdf"
-            : "/api/convert";
+          : OFFICE_TO_PDF_TOOLS.includes(selectedTool)
+            ? "/api/docx-to-pdf"
+            : selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
+              ? "/api/pdf"
+              : "/api/convert";
 
       const res = await fetch(endpoint, { method: "POST", body: fd });
       if (!res.ok) {
@@ -224,7 +221,6 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
     e?.stopPropagation();
     setPhase("idle");
     setSelected(null);
-    setToolOverride(null);
     setActiveTool(null);
     setOutputUrl(null);
     setOutputSize(null);
@@ -513,7 +509,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                 <button
                   type="button"
                   onClick={convert}
-                  disabled={phase === "converting"}
+                  disabled={phase === "converting" || !resolvedTool}
                   style={{
                     flex: 1,
                     display: "flex",
@@ -521,7 +517,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                     justifyContent: "center",
                     gap: 8,
                     background:
-                      phase === "converting"
+                      phase === "converting" || !resolvedTool
                         ? "rgba(0,208,132,0.5)"
                         : "var(--color-brand)",
                     color: "#052210",
@@ -531,7 +527,9 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                     borderRadius: 12,
                     border: "none",
                     cursor:
-                      phase === "converting" ? "not-allowed" : "pointer",
+                      phase === "converting" || !resolvedTool
+                        ? "not-allowed"
+                        : "pointer",
                     fontFamily: "var(--font-display)",
                     transition: "all 0.15s",
                   }}
