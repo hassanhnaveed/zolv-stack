@@ -30,7 +30,27 @@ const ALL_ACCEPT = {
   "image/webp": [".webp"],
   "image/heic": [".heic", ".heif"],
   "application/pdf": [".pdf"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+    ".docx",
+  ],
+  "application/msword": [".doc"],
+  "application/vnd.oasis.opendocument.text": [".odt"],
+  "application/rtf": [".rtf"],
+  "text/rtf": [".rtf"],
+  "text/plain": [".txt"],
+  "text/html": [".html", ".htm"],
+  "text/markdown": [".md"],
 };
+
+const OFFICE_TO_PDF_TOOLS: ToolSlug[] = [
+  "docx-to-pdf",
+  "doc-to-pdf",
+  "odt-to-pdf",
+  "rtf-to-pdf",
+  "txt-to-pdf",
+  "html-to-pdf",
+  "md-to-pdf",
+];
 
 type Phase = "idle" | "selected" | "converting" | "done" | "error";
 
@@ -40,10 +60,10 @@ interface SelectedFile {
   availableTools: ToolSlug[];
   /**
    * Sticky Convert-to choice for this upload.
-   * Captured once on drop from preferredTool (hero), then only updated by
-   * manual user picks — never follows later hero auto-rotate changes.
+   * Set from a complete hero pair (preferredTool) on drop, or by manual pick.
+   * Null while either hero side is still the Any placeholder — Convert stays disabled.
    */
-  lockedTool: ToolSlug;
+  lockedTool: ToolSlug | null;
 }
 
 interface SmartUploadWidgetProps {
@@ -53,21 +73,20 @@ interface SmartUploadWidgetProps {
 function pickInitialTool(
   availableTools: ToolSlug[],
   preferredTool: ToolSlug | undefined,
-): ToolSlug {
+): ToolSlug | null {
   if (preferredTool && availableTools.includes(preferredTool)) {
     return preferredTool;
   }
-  return availableTools[0];
+  return null;
 }
 
 function resolveLockedTool(
   availableTools: ToolSlug[],
-  lockedTool: ToolSlug,
-): ToolSlug {
-  if (availableTools.includes(lockedTool)) {
-    return lockedTool;
-  }
-  return availableTools[0];
+  lockedTool: ToolSlug | null,
+): ToolSlug | null {
+  if (!lockedTool) return null;
+  if (availableTools.includes(lockedTool)) return lockedTool;
+  return null;
 }
 
 export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
@@ -158,9 +177,11 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
       const endpoint =
         selectedTool === "pdf-to-word"
           ? "/api/pdf-to-word"
-          : selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
-            ? "/api/pdf"
-            : "/api/convert";
+          : OFFICE_TO_PDF_TOOLS.includes(selectedTool)
+            ? "/api/docx-to-pdf"
+            : selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
+              ? "/api/pdf"
+              : "/api/convert";
 
       const res = await fetch(endpoint, { method: "POST", body: fd });
       if (!res.ok) {
@@ -488,7 +509,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                 <button
                   type="button"
                   onClick={convert}
-                  disabled={phase === "converting"}
+                  disabled={phase === "converting" || !resolvedTool}
                   style={{
                     flex: 1,
                     display: "flex",
@@ -496,7 +517,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                     justifyContent: "center",
                     gap: 8,
                     background:
-                      phase === "converting"
+                      phase === "converting" || !resolvedTool
                         ? "rgba(0,208,132,0.5)"
                         : "var(--color-brand)",
                     color: "#052210",
@@ -506,7 +527,9 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
                     borderRadius: 12,
                     border: "none",
                     cursor:
-                      phase === "converting" ? "not-allowed" : "pointer",
+                      phase === "converting" || !resolvedTool
+                        ? "not-allowed"
+                        : "pointer",
                     fontFamily: "var(--font-display)",
                     transition: "all 0.15s",
                   }}
