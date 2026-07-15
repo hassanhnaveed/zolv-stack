@@ -14,8 +14,10 @@ import {
   Monitor,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useCloudFilePicker } from "@/hooks/useCloudFilePicker";
+import type { AcceptMap } from "@/lib/cloud/types";
 
-type MenuAction = "computer" | "coming-soon";
+type MenuAction = "computer" | "google-drive" | "coming-soon";
 
 const MENU_ITEMS: {
   id: string;
@@ -28,7 +30,7 @@ const MENU_ITEMS: {
     id: "google-drive",
     label: "Google Drive",
     icon: Cloud,
-    action: "coming-soon",
+    action: "google-drive",
   },
   { id: "dropbox", label: "Dropbox", icon: Cloud, action: "coming-soon" },
   { id: "onedrive", label: "OneDrive", icon: Cloud, action: "coming-soon" },
@@ -37,15 +39,25 @@ const MENU_ITEMS: {
 
 interface SelectFileButtonProps {
   onOpenFilePicker: () => void;
+  onFilesSelected: (files: File[]) => void;
+  accept: AcceptMap;
+  maxFiles: number;
+  maxSize: number;
   disabled?: boolean;
 }
 
 export function SelectFileButton({
   onOpenFilePicker,
+  onFilesSelected,
+  accept,
+  maxFiles,
+  maxSize,
   disabled,
 }: SelectFileButtonProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const { pick, isPicking } = useCloudFilePicker();
+  const isDisabled = Boolean(disabled || isPicking);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -70,27 +82,38 @@ export function SelectFileButton({
 
   const handleMainClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    if (disabled) return;
+    if (isDisabled) return;
     setMenuOpen(false);
     onOpenFilePicker();
   };
 
   const handleChevronClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    if (disabled) return;
+    if (isDisabled) return;
     setMenuOpen((open) => !open);
   };
 
-  const handleMenuItem = (
+  const handleMenuItem = async (
     event: ReactMouseEvent<HTMLButtonElement>,
     action: MenuAction,
   ) => {
     event.stopPropagation();
     setMenuOpen(false);
+    if (isDisabled) return;
+
     if (action === "computer") {
       onOpenFilePicker();
       return;
     }
+
+    if (action === "google-drive") {
+      const files = await pick("google-drive", { accept, maxFiles, maxSize });
+      if (files && files.length > 0) {
+        onFilesSelected(files);
+      }
+      return;
+    }
+
     toast.info("Coming soon");
   };
 
@@ -98,23 +121,23 @@ export function SelectFileButton({
     <div className="dropzone__actions" ref={rootRef}>
       <div
         className={`select-file-btn${menuOpen ? " select-file-btn--open" : ""}${
-          disabled ? " select-file-btn--disabled" : ""
+          isDisabled ? " select-file-btn--disabled" : ""
         }`}
       >
         <button
           type="button"
           className="select-file-btn__main"
           onClick={handleMainClick}
-          disabled={disabled}
+          disabled={isDisabled}
         >
           <FilePlus2 size={16} strokeWidth={2.25} aria-hidden />
-          Select File
+          {isPicking ? "Opening…" : "Select File"}
         </button>
         <button
           type="button"
           className="select-file-btn__chevron"
           onClick={handleChevronClick}
-          disabled={disabled}
+          disabled={isDisabled}
           aria-label="More upload options"
           aria-expanded={menuOpen}
           aria-haspopup="menu"
@@ -139,6 +162,7 @@ export function SelectFileButton({
                   role="menuitem"
                   className="select-file-btn__menu-item"
                   onClick={(event) => handleMenuItem(event, item.action)}
+                  disabled={isDisabled}
                 >
                   <Icon size={14} aria-hidden />
                   <span className="select-file-btn__menu-item-label">
