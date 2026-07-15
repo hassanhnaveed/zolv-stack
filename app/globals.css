@@ -435,30 +435,31 @@
   }
   .select-file-btn__menu {
     position: absolute;
-    top: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    min-width: 220px;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    width: 100%;
     background: var(--color-bg-3);
     border: 1px solid var(--color-border);
-    border-radius: 10px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-    padding: 6px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    padding: 4px;
     z-index: 50;
   }
   .select-file-btn__menu-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
-    padding: 10px 12px;
+    max-width: 100%;
+    padding: 7px 9px;
     border: none;
     background: transparent;
     color: var(--color-text-1);
     font-family: var(--font-body);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 500;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     text-align: left;
     transition: background 0.15s ease, color 0.15s ease;
@@ -470,6 +471,12 @@
   .select-file-btn__menu-item svg {
     flex-shrink: 0;
     color: var(--color-text-2);
+  }
+  .select-file-btn__menu-item-label {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   /* ── Progress bar ── */

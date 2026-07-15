@@ -140,8 +140,10 @@ export function SelectFileButton({
                   className="select-file-btn__menu-item"
                   onClick={(event) => handleMenuItem(event, item.action)}
                 >
-                  <Icon size={16} aria-hidden />
-                  {item.label}
+                  <Icon size={14} aria-hidden />
+                  <span className="select-file-btn__menu-item-label">
+                    {item.label}
+                  </span>
                 </button>
               );
             })}
