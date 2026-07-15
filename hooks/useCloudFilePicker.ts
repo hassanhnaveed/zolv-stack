@@ -25,6 +25,15 @@ function toastForCloudError(error: unknown): void {
     toast.error(error.message || "Invalid file selection.");
     return;
   }
+  // Prefer the concrete message for load/config failures so missing env isn't hidden.
+  if (
+    error.code === "scripts_failed" &&
+    error.message &&
+    error.message !== "scripts_failed"
+  ) {
+    toast.error(error.message);
+    return;
+  }
   toast.error(TOAST_BY_CODE[error.code] ?? error.message);
 }
 

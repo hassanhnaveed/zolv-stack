@@ -1,10 +1,12 @@
 import { CloudError } from "@/lib/cloud/errors";
 import type { CloudFileProvider, CloudPickOptions } from "@/lib/cloud/types";
 import { requestDriveAccessToken, revokeDriveAccessToken } from "./auth";
+import { getGoogleDrivePublicConfig } from "./config";
 import { downloadDriveFile } from "./download";
 import { assertValidPickerSelection } from "./early-validate";
 import { loadGoogleDriveScripts } from "./load-scripts";
 import { openGooglePicker } from "./picker";
+import { pinWindowScroll } from "./pin-window-scroll";
 
 async function downloadAll(
   picked: Awaited<ReturnType<typeof openGooglePicker>>,
@@ -22,34 +24,44 @@ export const googleDriveProvider: CloudFileProvider = {
   id: "google-drive",
 
   async pickFiles(options: CloudPickOptions): Promise<File[]> {
-    await loadGoogleDriveScripts();
+    // Fail fast on missing env before loading Google scripts.
+    getGoogleDrivePublicConfig();
 
-    let token = await requestDriveAccessToken();
+    // GIS popup close + Picker focus otherwise scroll the page (amplified by
+    // html { scroll-behavior: smooth }).
+    const releaseScroll = pinWindowScroll();
     try {
-      const picked = await openGooglePicker({
-        accessToken: token,
-        accept: options.accept,
-        maxFiles: options.maxFiles,
-      });
-      assertValidPickerSelection(
-        picked,
-        options.maxFiles,
-        options.accept,
-        options.maxSize,
-      );
+      await loadGoogleDriveScripts();
 
+      let token = await requestDriveAccessToken();
       try {
-        return await downloadAll(picked, token, options.signal);
-      } catch (error) {
-        if (error instanceof CloudError && error.code === "token_expired") {
-          revokeDriveAccessToken(token);
-          token = await requestDriveAccessToken();
+        const picked = await openGooglePicker({
+          accessToken: token,
+          accept: options.accept,
+          maxFiles: options.maxFiles,
+        });
+        assertValidPickerSelection(
+          picked,
+          options.maxFiles,
+          options.accept,
+          options.maxSize,
+        );
+
+        try {
           return await downloadAll(picked, token, options.signal);
+        } catch (error) {
+          if (error instanceof CloudError && error.code === "token_expired") {
+            revokeDriveAccessToken(token);
+            token = await requestDriveAccessToken();
+            return await downloadAll(picked, token, options.signal);
+          }
+          throw error;
         }
-        throw error;
+      } finally {
+        revokeDriveAccessToken(token);
       }
     } finally {
-      revokeDriveAccessToken(token);
+      releaseScroll();
     }
   },
 };

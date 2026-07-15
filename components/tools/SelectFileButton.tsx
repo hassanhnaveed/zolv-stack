@@ -56,6 +56,7 @@ export function SelectFileButton({
 }: SelectFileButtonProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const mainButtonRef = useRef<HTMLButtonElement>(null);
   const { pick, isPicking } = useCloudFilePicker();
   const isDisabled = Boolean(disabled || isPicking);
 
@@ -98,15 +99,19 @@ export function SelectFileButton({
     action: MenuAction,
   ) => {
     event.stopPropagation();
-    setMenuOpen(false);
     if (isDisabled) return;
 
     if (action === "computer") {
+      setMenuOpen(false);
       onOpenFilePicker();
       return;
     }
 
     if (action === "google-drive") {
+      // Move focus off the menu item before unmounting the menu so GIS/Picker
+      // focus restore cannot scroll the destroyed control into view.
+      mainButtonRef.current?.focus({ preventScroll: true });
+      setMenuOpen(false);
       const files = await pick("google-drive", { accept, maxFiles, maxSize });
       if (files && files.length > 0) {
         onFilesSelected(files);
@@ -114,6 +119,7 @@ export function SelectFileButton({
       return;
     }
 
+    setMenuOpen(false);
     toast.info("Coming soon");
   };
 
@@ -125,6 +131,7 @@ export function SelectFileButton({
         }`}
       >
         <button
+          ref={mainButtonRef}
           type="button"
           className="select-file-btn__main"
           onClick={handleMainClick}
