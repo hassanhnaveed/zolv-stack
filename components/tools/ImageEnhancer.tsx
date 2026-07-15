@@ -454,6 +454,14 @@ import { formatBytes, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
 import { DropzoneIdleContent } from "./DropzoneIdleContent";
 
+const ACCEPT = {
+  "image/jpeg": [".jpg", ".jpeg"],
+  "image/png": [".png"],
+  "image/webp": [".webp"],
+};
+const MAX_FILES = 1;
+const MAX_SIZE = 15 * 1024 * 1024;
+
 export function ImageEnhancer() {
   const [original, setOriginal] = useState<string | null>(null);
   const [enhanced, setEnhanced] = useState<string | null>(null);
@@ -476,13 +484,9 @@ export function ImageEnhancer() {
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
-    accept: {
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-      "image/webp": [".webp"],
-    },
-    maxFiles: 1,
-    maxSize: 15 * 1024 * 1024,
+    accept: ACCEPT,
+    maxFiles: MAX_FILES,
+    maxSize: MAX_SIZE,
     noClick: true,
     onDropRejected: () => toast.error("Max 15MB, images only"),
   });
@@ -542,13 +546,9 @@ export function ImageEnhancer() {
             isDragActive={isDragActive}
             onOpenFilePicker={open}
             onFilesSelected={onDrop}
-            accept={{
-              "image/jpeg": [".jpg", ".jpeg"],
-              "image/png": [".png"],
-              "image/webp": [".webp"],
-            }}
-            maxFiles={1}
-            maxSize={15 * 1024 * 1024}
+            accept={ACCEPT}
+            maxFiles={MAX_FILES}
+            maxSize={MAX_SIZE}
             dragTitle="Drop image here"
             meta="JPG, PNG, WebP · Max 15MB · 100% free · Unlimited · AI-powered"
           />

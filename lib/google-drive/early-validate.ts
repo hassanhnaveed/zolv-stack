@@ -1,9 +1,12 @@
 import { CloudError } from "@/lib/cloud/errors";
+import type { AcceptMap } from "@/lib/cloud/types";
 import type { GooglePickedFile } from "./picker";
 
 export function assertValidPickerSelection(
   files: GooglePickedFile[],
   maxFiles: number,
+  accept: AcceptMap,
+  maxSize: number,
 ): void {
   if (files.length === 0) {
     throw new CloudError("cancelled");
@@ -15,6 +18,7 @@ export function assertValidPickerSelection(
     );
   }
 
+  const acceptedMimes = Object.keys(accept);
   const seen = new Set<string>();
   for (const file of files) {
     if (!file.id || seen.has(file.id)) {
@@ -37,5 +41,22 @@ export function assertValidPickerSelection(
         "A selected file is empty.",
       );
     }
+    if (file.sizeBytes !== undefined && file.sizeBytes > maxSize) {
+      throw new CloudError(
+        "invalid_selection",
+        `"${file.name}" is too large. Max size is ${formatMaxSize(maxSize)}.`,
+      );
+    }
+    if (acceptedMimes.length > 0 && !acceptedMimes.includes(file.mimeType)) {
+      throw new CloudError(
+        "invalid_selection",
+        `"${file.name}" isn’t a supported file type.`,
+      );
+    }
   }
+}
+
+function formatMaxSize(maxSize: number): string {
+  const mb = maxSize / (1024 * 1024);
+  return `${Number.isInteger(mb) ? mb : mb.toFixed(1)}MB`;
 }

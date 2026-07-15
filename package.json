@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "precommit": "lint-staged && npm run typecheck",
-    "prepush": "npm run lint && npm run typecheck && npm run build",
+    "prepush": "npm run lint && npm run typecheck && npm test && npm run build",
     "prepare": "husky"
   },
   "lint-staged": {

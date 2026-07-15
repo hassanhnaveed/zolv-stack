@@ -26,8 +26,14 @@ export async function downloadDriveFile(
     );
   }
 
-  if (response.status === 401 || response.status === 403) {
+  if (response.status === 401) {
     throw new CloudError("token_expired");
+  }
+  if (response.status === 403) {
+    throw new CloudError(
+      "permission_denied",
+      "You don’t have permission to access this Google Drive file.",
+    );
   }
   if (!response.ok) {
     throw new CloudError(

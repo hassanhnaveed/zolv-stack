@@ -10,6 +10,10 @@ import { DropzoneIdleContent } from "./DropzoneIdleContent";
 
 type Mode = "all" | "range";
 
+const ACCEPT = { "application/pdf": [".pdf"] };
+const MAX_FILES = 1;
+const MAX_SIZE = 50 * 1024 * 1024;
+
 export function PdfSplitter() {
   const [file, setFile] = useState<File | null>(null);
   const [mode, setMode] = useState<Mode>("all");
@@ -26,9 +30,9 @@ export function PdfSplitter() {
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
-    accept: { "application/pdf": [".pdf"] },
-    maxFiles: 1,
-    maxSize: 50 * 1024 * 1024,
+    accept: ACCEPT,
+    maxFiles: MAX_FILES,
+    maxSize: MAX_SIZE,
     noClick: true,
     onDropRejected: () => toast.error("PDF only, max 50MB"),
   });
@@ -94,9 +98,9 @@ export function PdfSplitter() {
             isDragActive={isDragActive}
             onOpenFilePicker={open}
             onFilesSelected={onDrop}
-            accept={{ "application/pdf": [".pdf"] }}
-            maxFiles={1}
-            maxSize={50 * 1024 * 1024}
+            accept={ACCEPT}
+            maxFiles={MAX_FILES}
+            maxSize={MAX_SIZE}
             dragTitle="Drop PDF here"
             meta="PDF only, max 50MB"
           />

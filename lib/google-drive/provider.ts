@@ -31,7 +31,12 @@ export const googleDriveProvider: CloudFileProvider = {
         accept: options.accept,
         maxFiles: options.maxFiles,
       });
-      assertValidPickerSelection(picked, options.maxFiles);
+      assertValidPickerSelection(
+        picked,
+        options.maxFiles,
+        options.accept,
+        options.maxSize,
+      );
 
       try {
         return await downloadAll(picked, token, options.signal);
