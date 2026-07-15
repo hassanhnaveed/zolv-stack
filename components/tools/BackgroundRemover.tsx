@@ -3,9 +3,10 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Download, Loader2, Wand2 } from "lucide-react";
+import { Download, Loader2, Wand2 } from "lucide-react";
 import { formatBytes, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
+import { DropzoneIdleContent } from "./DropzoneIdleContent";
 
 export function BackgroundRemover() {
   const [original, setOriginal] = useState<string | null>(null);
@@ -23,7 +24,7 @@ export function BackgroundRemover() {
     setResultBlob(null);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: {
       "image/jpeg": [".jpg", ".jpeg"],
@@ -32,6 +33,7 @@ export function BackgroundRemover() {
     },
     maxFiles: 1,
     maxSize: 15 * 1024 * 1024,
+    noClick: true,
     onDropRejected: () => toast.error("Max 15MB, images only"),
   });
 
@@ -75,63 +77,15 @@ export function BackgroundRemover() {
         <div
           {...getRootProps()}
           className={`dropzone${isDragActive ? " active" : ""}`}
-          style={{
-            padding: "56px 32px",
-            textAlign: "center",
-            marginBottom: 16,
-          }}
+          style={{ marginBottom: 16 }}
         >
           <input {...getInputProps()} />
-          <motion.div animate={isDragActive ? { scale: 1.04 } : { scale: 1 }}>
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 16,
-                margin: "0 auto 16px",
-                background: isDragActive
-                  ? "rgba(6,182,212,0.15)"
-                  : "rgba(6,182,212,0.08)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Wand2
-                size={24}
-                color={isDragActive ? "#06B6D4" : "var(--color-text-3)"}
-              />
-            </div>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 700,
-                fontSize: 17,
-                color: "var(--color-text-1)",
-                marginBottom: 6,
-              }}
-            >
-              {isDragActive
-                ? "Drop image here"
-                : "Drop an image to remove background"}
-            </p>
-            <p style={{ fontSize: 13, color: "var(--color-text-3)" }}>
-              or{" "}
-              <span style={{ color: "#06B6D4", cursor: "pointer" }}>
-                browse files
-              </span>{" "}
-              — JPG, PNG, WebP
-            </p>
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--color-text-3)",
-                marginTop: 8,
-              }}
-            >
-              Max 15MB · 100% free · Unlimited · AI-powered
-            </p>
-          </motion.div>
+          <DropzoneIdleContent
+            isDragActive={isDragActive}
+            onOpenFilePicker={open}
+            dragTitle="Drop image here"
+            meta="JPG, PNG, WebP · Max 15MB · 100% free · Unlimited · AI-powered"
+          />
         </div>
       )}
 

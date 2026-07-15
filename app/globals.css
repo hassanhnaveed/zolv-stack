@@ -328,11 +328,148 @@
 
   /* ── Dropzone ── */
   .dropzone {
-    border: 2px dashed var(--color-border);
-    border-radius: 20px;
+    border: 1px dashed var(--color-border);
+    border-radius: 16px;
     background: var(--color-bg-2);
-    cursor: pointer;
+    cursor: default;
     transition: all 0.2s ease;
+  }
+  .dropzone__body {
+    padding: 48px 32px;
+    text-align: center;
+  }
+  .dropzone__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    margin: 0 auto 20px;
+    background: rgba(0, 208, 132, 0.1);
+    border: 1px solid var(--color-border-brand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .dropzone:hover .dropzone__icon,
+  .dropzone.active .dropzone__icon {
+    background: rgba(0, 208, 132, 0.15);
+    border-color: rgba(0, 208, 132, 0.25);
+  }
+  .dropzone__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.0625rem;
+    line-height: 1.35;
+    color: var(--color-text-1);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .dropzone__subtitle {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text-2);
+    font-weight: 400;
+  }
+  .dropzone__meta {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--color-text-3);
+    margin-top: 16px;
+  }
+  .dropzone__actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ── Select File unified button ── */
+  .select-file-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 8px;
+    background: var(--color-brand);
+    color: #0a0f0d;
+    box-shadow: 0 4px 14px rgba(0, 208, 132, 0.2);
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  }
+  .select-file-btn:hover,
+  .select-file-btn--open {
+    background: #00e891;
+    box-shadow: 0 6px 18px rgba(0, 208, 132, 0.28);
+  }
+  .select-file-btn:active {
+    transform: translateY(1px);
+  }
+  .select-file-btn--disabled {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .select-file-btn__main,
+  .select-file-btn__chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.875rem;
+    line-height: 1;
+    padding: 0;
+  }
+  .select-file-btn__main {
+    padding: 11px 10px 11px 16px;
+  }
+  .select-file-btn__chevron {
+    padding: 11px 14px 11px 6px;
+  }
+  .select-file-btn__chevron svg {
+    transition: transform 0.2s ease;
+  }
+  .select-file-btn__chevron-icon--open {
+    transform: rotate(180deg);
+  }
+  .select-file-btn__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 220px;
+    background: var(--color-bg-3);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    padding: 6px;
+    z-index: 50;
+  }
+  .select-file-btn__menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-1);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .select-file-btn__menu-item:hover {
+    background: var(--color-bg-4);
+    color: var(--color-text-1);
+  }
+  .select-file-btn__menu-item svg {
+    flex-shrink: 0;
+    color: var(--color-text-2);
   }
 
   /* ── Progress bar ── */
