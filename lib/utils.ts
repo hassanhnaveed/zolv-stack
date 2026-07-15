@@ -388,7 +388,7 @@ export const TOOL_CONFIG = {
   },
   "docx-to-pdf": {
     slug: "docx-to-pdf",
-    title: "DOCX to PDF",
+    title: "DOCX",
     description: "Convert Word document to PDF",
     longDesc:
       "Convert any Word (.docx) document to PDF format. Preserves formatting, images, and layout. Free, unlimited, no signup required.",
@@ -425,7 +425,7 @@ export const TOOL_CONFIG = {
   },
   "doc-to-pdf": {
     slug: "doc-to-pdf",
-    title: "DOC to PDF",
+    title: "DOC",
     description: "Convert old Word document to PDF",
     longDesc:
       "Convert legacy .doc Word documents to PDF format. Free, unlimited, no signup.",
@@ -438,7 +438,7 @@ export const TOOL_CONFIG = {
   },
   "odt-to-pdf": {
     slug: "odt-to-pdf",
-    title: "ODT to PDF",
+    title: "ODT",
     description: "Convert OpenDocument text to PDF",
     longDesc:
       "Convert ODT (OpenOffice/LibreOffice) documents to PDF format. Free, unlimited, no signup.",
@@ -451,7 +451,7 @@ export const TOOL_CONFIG = {
   },
   "rtf-to-pdf": {
     slug: "rtf-to-pdf",
-    title: "RTF to PDF",
+    title: "RTF",
     description: "Convert Rich Text Format to PDF",
     longDesc: "Convert RTF documents to PDF format. Free, unlimited, no signup.",
     keywords: ["rtf to pdf", "convert rtf to pdf online free"],
@@ -463,7 +463,7 @@ export const TOOL_CONFIG = {
   },
   "txt-to-pdf": {
     slug: "txt-to-pdf",
-    title: "TXT to PDF",
+    title: "TXT",
     description: "Convert plain text file to PDF",
     longDesc:
       "Convert plain .txt text files to PDF format. Free, unlimited, no signup.",
@@ -476,7 +476,7 @@ export const TOOL_CONFIG = {
   },
   "html-to-pdf": {
     slug: "html-to-pdf",
-    title: "HTML to PDF",
+    title: "HTML",
     description: "Convert HTML file to PDF",
     longDesc: "Convert HTML web pages/files to PDF format. Free, unlimited, no signup.",
     keywords: ["html to pdf", "convert html to pdf online free"],
@@ -488,7 +488,7 @@ export const TOOL_CONFIG = {
   },
   "md-to-pdf": {
     slug: "md-to-pdf",
-    title: "Markdown to PDF",
+    title: "MD",
     description: "Convert Markdown file to PDF",
     longDesc: "Convert .md Markdown files to PDF format. Free, unlimited, no signup.",
     keywords: ["markdown to pdf", "md to pdf converter online free"],
