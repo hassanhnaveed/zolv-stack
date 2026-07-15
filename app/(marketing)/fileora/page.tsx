@@ -19,13 +19,14 @@ import {
 const tools = Object.values(TOOL_CONFIG);
 
 // Naye document-conversion tools ki list — ye office format se PDF banate hain
+// Naye document-conversion tools ki list
 const documentToolSlugs: ToolSlug[] = [
-  "docx-to-pdf",
-  "doc-to-pdf",
-  "odt-to-pdf",
-  "rtf-to-pdf",
-  "txt-to-pdf",
-  "html-to-pdf",
+  "document-to-pdf",
+  "document-to-docx",
+  "document-to-odt",
+  "document-to-rtf",
+  "document-to-txt",
+  "document-to-html",
   "md-to-pdf",
 ];
 

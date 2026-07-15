@@ -117,29 +117,33 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
       prev.map((f) => (f.id === item.id ? { ...f, status: "converting" } : f)),
     );
     try {
-      const fd = new FormData();
-      fd.append("file", item.file);
-      fd.append("tool", selectedTool);
-      fd.append("quality", quality.toString());
+      const documentTargetFormats: Record<string, string> = {
+  "document-to-pdf": "pdf",
+  "document-to-docx": "docx",
+  "document-to-odt": "odt",
+  "document-to-rtf": "rtf",
+  "document-to-txt": "txt",
+  "document-to-html": "html",
+  "md-to-pdf": "pdf",
+};
 
-      const officeToPdfTools = [
-  "docx-to-pdf",
-  "doc-to-pdf",
-  "odt-to-pdf",
-  "rtf-to-pdf",
-  "txt-to-pdf",
-  "html-to-pdf",
-  "md-to-pdf",
-];
+const fd = new FormData();
+fd.append("file", item.file);
+fd.append("tool", selectedTool);
+fd.append("quality", quality.toString());
 
-const endpoint = officeToPdfTools.includes(selectedTool)
+if (documentTargetFormats[selectedTool]) {
+  fd.append("targetFormat", documentTargetFormats[selectedTool]);
+}
+
+const endpoint = documentTargetFormats[selectedTool]
   ? "/api/docx-to-pdf"
   : selectedTool === "pdf-to-txt"
   ? "/api/pdf-to-txt"
   : selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
   ? "/api/pdf"
   : "/api/convert";
-      const res = await fetch(endpoint, { method: "POST", body: fd });
+const res = await fetch(endpoint, { method: "POST", body: fd });
 
       if (!res.ok) {
         const err = await res

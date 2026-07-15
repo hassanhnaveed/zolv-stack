@@ -43,12 +43,12 @@ const ALL_ACCEPT = {
 };
 
 const OFFICE_TO_PDF_TOOLS: ToolSlug[] = [
-  "docx-to-pdf",
-  "doc-to-pdf",
-  "odt-to-pdf",
-  "rtf-to-pdf",
-  "txt-to-pdf",
-  "html-to-pdf",
+  "document-to-pdf",
+  "document-to-docx",
+  "document-to-odt",
+  "document-to-rtf",
+  "document-to-txt",
+  "document-to-html",
   "md-to-pdf",
 ];
 
@@ -169,19 +169,30 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
     setErrorMsg("");
 
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("tool", selectedTool);
-      fd.append("quality", "85");
+      const documentTargetFormats: Record<string, string> = {
+  "document-to-pdf": "pdf",
+  "document-to-docx": "docx",
+  "document-to-odt": "odt",
+  "document-to-rtf": "rtf",
+  "document-to-txt": "txt",
+  "document-to-html": "html",
+  "md-to-pdf": "pdf",
+};
 
-      const endpoint =
-        selectedTool === "pdf-to-word"
-          ? "/api/pdf-to-word"
-          : OFFICE_TO_PDF_TOOLS.includes(selectedTool)
-            ? "/api/docx-to-pdf"
-            : selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
-              ? "/api/pdf"
-              : "/api/convert";
+const fd = new FormData();
+fd.append("file", file);
+fd.append("tool", selectedTool);
+fd.append("quality", "85");
+
+if (documentTargetFormats[selectedTool]) {
+  fd.append("targetFormat", documentTargetFormats[selectedTool]);
+}
+
+      const endpoint = OFFICE_TO_PDF_TOOLS.includes(selectedTool)
+  ? "/api/docx-to-pdf"
+  : selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
+  ? "/api/pdf"
+  : "/api/convert";
 
       const res = await fetch(endpoint, { method: "POST", body: fd });
       if (!res.ok) {
