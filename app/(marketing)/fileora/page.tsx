@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { ShieldCheck, Zap, Globe, Lock } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { TOOL_CONFIG, type ToolSlug } from "@/lib/utils";
+import { TOOL_CONFIG, toolHref, type ToolSlug } from "@/lib/utils";
 import { useCallback, useState } from "react";
 import { SmartUploadWidget } from "@/components/tools/SmartUploadWidget";
 import { HeroConversionGraphic } from "@/components/marketing/HeroConversionGraphic";
@@ -453,7 +453,7 @@ export default function HomePage() {
   return (
     <Link
       key={t.slug}
-      href={isComingSoon ? "#" : `/${t.slug}`}
+      href={isComingSoon ? "#" : toolHref(t.slug)}
       onClick={(e) => isComingSoon && e.preventDefault()}
       style={{
         display: "flex",
