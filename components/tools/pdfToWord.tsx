@@ -7,6 +7,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Loader2, Download } from "lucide-react";
 import { formatBytes, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
+import { DropzoneIdleContent } from "./DropzoneIdleContent";
+
+const ACCEPT = { "application/pdf": [".pdf"] };
+const MAX_FILES = 1;
+const MAX_SIZE = 50 * 1024 * 1024;
 
 export function PdfToWord() {
   const [file, setFile] = useState<File | null>(null);
@@ -18,11 +23,12 @@ export function PdfToWord() {
     setFile(f);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
-    accept: { "application/pdf": [".pdf"] },
-    maxFiles: 1,
-    maxSize: 50 * 1024 * 1024,
+    accept: ACCEPT,
+    maxFiles: MAX_FILES,
+    maxSize: MAX_SIZE,
+    noClick: true,
     onDropRejected: () => toast.error("PDF only, max 50MB"),
   });
 
@@ -66,52 +72,19 @@ export function PdfToWord() {
         <div
           {...getRootProps()}
           className={`dropzone${isDragActive ? " active" : ""}`}
-          style={{
-            padding: "56px 32px",
-            textAlign: "center",
-            marginBottom: 16,
-          }}
+          style={{ marginBottom: 16 }}
         >
           <input {...getInputProps()} />
-          <motion.div animate={isDragActive ? { scale: 1.04 } : { scale: 1 }}>
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 16,
-                margin: "0 auto 16px",
-                background: isDragActive
-                  ? "rgba(59,130,246,0.15)"
-                  : "rgba(59,130,246,0.08)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <FileText
-                size={24}
-                color={isDragActive ? "#3B82F6" : "var(--color-text-3)"}
-              />
-            </div>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 700,
-                fontSize: 17,
-                color: "var(--color-text-1)",
-                marginBottom: 6,
-              }}
-            >
-              {isDragActive ? "Drop PDF here" : "Drop a PDF to convert"}
-            </p>
-            <p style={{ fontSize: 13, color: "var(--color-text-3)" }}>
-              or{" "}
-              <span style={{ color: "#3B82F6", cursor: "pointer" }}>
-                browse files
-              </span>{" "}
-               PDF only, max 50MB
-            </p>
-          </motion.div>
+          <DropzoneIdleContent
+            isDragActive={isDragActive}
+            onOpenFilePicker={open}
+            onFilesSelected={onDrop}
+            accept={ACCEPT}
+            maxFiles={MAX_FILES}
+            maxSize={MAX_SIZE}
+            dragTitle="Drop PDF here"
+            meta="PDF only, max 50MB"
+          />
         </div>
       )}
 

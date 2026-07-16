@@ -5,7 +5,6 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Upload,
   X,
   Download,
   CheckCircle,
@@ -24,6 +23,7 @@ import {
   FORMAT_OUTPUT_MAP,
 } from "@/lib/utils";
 import { toast } from "sonner";
+import { DropzoneIdleContent } from "./DropzoneIdleContent";
 
 interface FileItem {
   id: string;
@@ -103,11 +103,12 @@ export function Converter({ tool: initialTool, onToolChange }: ConverterProps) {
     [initialTool, onToolChange],
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: ALL_ACCEPT,
     maxSize: 200 * 1024 * 1024, // ✅ 200MB
     maxFiles: 20,
+    noClick: true,
     onDropRejected: () =>
       toast.error("File rejected — check format or size (max 200MB)"),
   });
@@ -515,55 +516,23 @@ const res = await fetch(endpoint, { method: "POST", body: fd });
       <div
         {...getRootProps()}
         className={`dropzone${isDragActive ? " active" : ""}`}
-        style={{ padding: "56px 32px", textAlign: "center", marginBottom: 16 }}
+        style={{ marginBottom: 16 }}
       >
         <input {...getInputProps()} />
-        <motion.div
-          animate={isDragActive ? { scale: 1.04 } : { scale: 1 }}
-          transition={{ type: "spring", stiffness: 300 }}
+        <DropzoneIdleContent
+          isDragActive={isDragActive}
+          onOpenFilePicker={open}
+          onFilesSelected={onDrop}
+          accept={ALL_ACCEPT}
+          maxFiles={20}
+          maxSize={200 * 1024 * 1024}
+          dragTitle="Drop files here"
+          meta={
+            selectedTool === "image-to-pdf"
+              ? "Up to 20 images, 200MB each · JPG, PNG, WebP, HEIC, GIF, BMP, TIFF, AVIF, PDF, DOCX"
+              : "Up to 20 files, 200MB each · JPG, PNG, WebP, HEIC, GIF, BMP, TIFF, AVIF, PDF, DOCX"
+          }
         >
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 16,
-              margin: "0 auto 16px",
-              background: isDragActive
-                ? "rgba(0,208,132,0.15)"
-                : "rgba(0,208,132,0.08)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "background 0.2s",
-            }}
-          >
-            <Upload
-              size={24}
-              color={
-                isDragActive ? "var(--color-brand)" : "var(--color-text-3)"
-              }
-            />
-          </div>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: 17,
-              color: "var(--color-text-1)",
-              marginBottom: 6,
-            }}
-          >
-            {isDragActive ? "Drop files here" : "Drag & drop files here"}
-          </p>
-          <p style={{ fontSize: 13, color: "var(--color-text-3)" }}>
-            or{" "}
-            <span style={{ color: "var(--color-brand)", cursor: "pointer" }}>
-              browse files
-            </span>
-            {selectedTool === "image-to-pdf"
-              ? " — up to 20 images, 200MB each"
-              : " — up to 20 files, 200MB each"}
-          </p>
           {selectedTool === "image-to-pdf" && (
             <p
               style={{
@@ -576,12 +545,7 @@ const res = await fetch(endpoint, { method: "POST", body: fd });
               All images will be combined into one PDF
             </p>
           )}
-          <p
-            style={{ fontSize: 12, color: "var(--color-text-3)", marginTop: 8 }}
-          >
-            Supports JPG, PNG, WebP, HEIC, GIF, BMP, TIFF, AVIF, PDF, DOCX
-          </p>
-        </motion.div>
+        </DropzoneIdleContent>
       </div>
 
       {/* File list */}

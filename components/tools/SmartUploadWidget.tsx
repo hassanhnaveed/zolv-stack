@@ -4,7 +4,6 @@ import { useCallback, useState, type MouseEvent } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Upload,
   X,
   Download,
   CheckCircle,
@@ -19,6 +18,7 @@ import {
 } from "@/lib/utils";
 import { CONVERTER_TOOLS } from "@/lib/format-catalog";
 import { toast } from "sonner";
+import { DropzoneIdleContent } from "./DropzoneIdleContent";
 
 const ALL_ACCEPT = {
   "image/jpeg": [".jpg", ".jpeg"],
@@ -141,12 +141,12 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
   // format buttons live inside this root — without noClick they reopen the picker.
   const allowClickToOpen = phase === "idle";
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: ALL_ACCEPT,
     maxSize: 200 * 1024 * 1024,
     maxFiles: 1,
-    noClick: !allowClickToOpen,
+    noClick: true,
     noKeyboard: !allowClickToOpen,
     onDropRejected: () =>
       toast.error("File rejected — check format or size (max 200MB)"),
@@ -262,7 +262,7 @@ if (documentTargetFormats[selectedTool]) {
               inset: -2,
               background: "rgba(0,208,132,0.06)",
               border: "2px dashed var(--color-brand)",
-              borderRadius: 20,
+              borderRadius: 16,
               zIndex: 10,
               display: "flex",
               alignItems: "center",
@@ -294,63 +294,17 @@ if (documentTargetFormats[selectedTool]) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className={`dropzone${isDragActive ? " active" : ""}`}
-            style={{ padding: "48px 32px", textAlign: "center" }}
           >
-            <motion.div
-              animate={isDragActive ? { scale: 1.04 } : { scale: 1 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <div
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 16,
-                  margin: "0 auto 16px",
-                  background: isDragActive
-                    ? "rgba(0,208,132,0.15)"
-                    : "rgba(0,208,132,0.08)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "background 0.2s",
-                }}
-              >
-                <Upload
-                  size={24}
-                  color={
-                    isDragActive ? "var(--color-brand)" : "var(--color-text-3)"
-                  }
-                />
-              </div>
-              <p
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 700,
-                  fontSize: 17,
-                  color: "var(--color-text-1)",
-                  marginBottom: 6,
-                }}
-              >
-                {isDragActive ? "Drop to detect format" : "Drag & drop files here"}
-              </p>
-              <p style={{ fontSize: 13, color: "var(--color-text-3)" }}>
-                or{" "}
-                <span style={{ color: "var(--color-brand)", cursor: "pointer" }}>
-                  browse files
-                </span>
-              </p>
-              <p
-                style={{
-                  fontSize: 12,
-                  color: "var(--color-text-3)",
-                  marginTop: 8,
-                  opacity: 0.7,
-                }}
-              >
-                JPG · PNG · WebP · HEIC · GIF · BMP · TIFF · AVIF · PDF — up to
-                200 MB
-              </p>
-            </motion.div>
+            <DropzoneIdleContent
+              isDragActive={isDragActive}
+              onOpenFilePicker={open}
+              onFilesSelected={onDrop}
+              accept={ALL_ACCEPT}
+              maxFiles={1}
+              maxSize={200 * 1024 * 1024}
+              dragTitle="Drop to detect format"
+              meta="JPG · PNG · WebP · HEIC · GIF · BMP · TIFF · AVIF · PDF — up to 200 MB"
+            />
           </motion.div>
         )}
 
