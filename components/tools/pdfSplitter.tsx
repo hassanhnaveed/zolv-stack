@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Loader2, Scissors, FileText } from "lucide-react";
+import { Loader2, Scissors, FileText } from "lucide-react";
 import { formatBytes, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
 import { DropzoneIdleContent } from "./DropzoneIdleContent";
@@ -102,7 +102,17 @@ export function PdfSplitter() {
             maxFiles={MAX_FILES}
             maxSize={MAX_SIZE}
             dragTitle="Drop PDF here"
+            idleTitle="Drop a PDF to split"
+            subtitle="or choose a file source below — PDF only, max 50MB"
             meta="PDF only, max 50MB"
+            icon={
+              <Scissors
+                size={24}
+                color={isDragActive ? "#F59E0B" : "var(--color-text-3)"}
+              />
+            }
+            iconBackground="rgba(245,158,11,0.08)"
+            iconActiveBackground="rgba(245,158,11,0.15)"
           />
         </div>
       )}

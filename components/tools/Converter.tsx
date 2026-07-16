@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  Upload,
   X,
   Download,
   CheckCircle,
@@ -527,11 +528,25 @@ const res = await fetch(endpoint, { method: "POST", body: fd });
           maxFiles={20}
           maxSize={200 * 1024 * 1024}
           dragTitle="Drop files here"
+          idleTitle="Drag & drop files here"
+          subtitle={
+            selectedTool === "image-to-pdf"
+              ? "or choose a file source below — up to 20 images, 200MB each"
+              : "or choose a file source below — up to 20 files, 200MB each"
+          }
           meta={
             selectedTool === "image-to-pdf"
               ? "Up to 20 images, 200MB each · JPG, PNG, WebP, HEIC, GIF, BMP, TIFF, AVIF, PDF, DOCX"
               : "Up to 20 files, 200MB each · JPG, PNG, WebP, HEIC, GIF, BMP, TIFF, AVIF, PDF, DOCX"
           }
+          icon={
+            <Upload
+              size={24}
+              color={isDragActive ? "var(--color-brand)" : "var(--color-text-3)"}
+            />
+          }
+          iconBackground="rgba(0,208,132,0.08)"
+          iconActiveBackground="rgba(0,208,132,0.15)"
         >
           {selectedTool === "image-to-pdf" && (
             <p

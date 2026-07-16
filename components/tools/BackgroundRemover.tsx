@@ -92,7 +92,12 @@ export function BackgroundRemover() {
             maxFiles={MAX_FILES}
             maxSize={MAX_SIZE}
             dragTitle="Drop image here"
+            idleTitle="Drop an image to remove background"
+            subtitle="or choose a file source below — JPG, PNG, WebP"
             meta="JPG, PNG, WebP · Max 15MB · 100% free · Unlimited · AI-powered"
+            icon={<Wand2 size={24} color={isDragActive ? "#06B6D4" : "var(--color-text-3)"} />}
+            iconBackground="rgba(6,182,212,0.08)"
+            iconActiveBackground="rgba(6,182,212,0.15)"
           />
         </div>
       )}

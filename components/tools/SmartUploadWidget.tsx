@@ -4,6 +4,7 @@ import { useCallback, useState, type MouseEvent } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  Upload,
   X,
   Download,
   CheckCircle,
@@ -303,7 +304,17 @@ if (documentTargetFormats[selectedTool]) {
               maxFiles={1}
               maxSize={200 * 1024 * 1024}
               dragTitle="Drop to detect format"
+              idleTitle="Drag & drop files here"
+              subtitle="or choose a file source below"
               meta="JPG · PNG · WebP · HEIC · GIF · BMP · TIFF · AVIF · PDF — up to 200 MB"
+              icon={
+                <Upload
+                  size={24}
+                  color={isDragActive ? "var(--color-brand)" : "var(--color-text-3)"}
+                />
+              }
+              iconBackground="rgba(0,208,132,0.08)"
+              iconActiveBackground="rgba(0,208,132,0.15)"
             />
           </motion.div>
         )}
