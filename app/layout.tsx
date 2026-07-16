@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://fileora.netlify.app";
 
@@ -128,6 +129,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         {children}
+        <MicrosoftClarity />
         <Toaster
           position="bottom-right"
           theme="dark"
