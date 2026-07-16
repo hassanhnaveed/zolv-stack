@@ -83,7 +83,17 @@ export function PdfToWord() {
             maxFiles={MAX_FILES}
             maxSize={MAX_SIZE}
             dragTitle="Drop PDF here"
+            idleTitle="Drop a PDF to convert"
+            subtitle="or choose a file source below — PDF only, max 50MB"
             meta="PDF only, max 50MB"
+            icon={
+              <FileText
+                size={24}
+                color={isDragActive ? "#3B82F6" : "var(--color-text-3)"}
+              />
+            }
+            iconBackground="rgba(59,130,246,0.08)"
+            iconActiveBackground="rgba(59,130,246,0.15)"
           />
         </div>
       )}

@@ -550,7 +550,17 @@ export function ImageEnhancer() {
             maxFiles={MAX_FILES}
             maxSize={MAX_SIZE}
             dragTitle="Drop image here"
+            idleTitle="Drop an image to enhance"
+            subtitle="or choose a file source below — JPG, PNG, WebP"
             meta="JPG, PNG, WebP · Max 15MB · 100% free · Unlimited · AI-powered"
+            icon={
+              <Sparkles
+                size={24}
+                color={isDragActive ? "#8B5CF6" : "var(--color-text-3)"}
+              />
+            }
+            iconBackground="rgba(139,92,246,0.08)"
+            iconActiveBackground="rgba(139,92,246,0.15)"
           />
         </div>
       )}
