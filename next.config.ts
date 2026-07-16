@@ -72,6 +72,32 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
+    const toolSlugs = [
+      "image-to-webp",
+      "image-to-jpg",
+      "image-to-png",
+      "image-to-avif",
+      "image-to-gif",
+      "image-to-bmp",
+      "image-to-tiff",
+      "heic-to-jpg",
+      "image-to-pdf",
+      "pdf-merge",
+      "pdf-compress",
+      "pdf-to-jpg",
+      "pdf-split",
+      "pdf-to-txt",
+      "image-enhance",
+      "remove-bg",
+      "document-to-pdf",
+      "document-to-docx",
+      "document-to-odt",
+      "document-to-rtf",
+      "document-to-txt",
+      "document-to-html",
+      "md-to-pdf",
+    ];
+
     return [
       {
         source: "/convoox",
@@ -83,6 +109,11 @@ const nextConfig: NextConfig = {
         destination: "/fileora/:path*",
         permanent: true,
       },
+      ...toolSlugs.map((slug) => ({
+        source: `/${slug}`,
+        destination: `/fileora/${slug}`,
+        permanent: true,
+      })),
     ];
   },
 };

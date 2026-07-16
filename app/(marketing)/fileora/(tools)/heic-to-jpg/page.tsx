@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { TOOL_CONFIG } from "@/lib/utils";
 import { ToolPage } from "@/components/tools/ToolPage";
 
-const config = TOOL_CONFIG["image-to-webp"];
+const config = TOOL_CONFIG["heic-to-jpg"];
 
 export const metadata: Metadata = {
   title: config.title + " — Free Online Converter",
   description: config.longDesc,
-  alternates: { canonical: "/image-to-webp" },
+  alternates: { canonical: "/fileora/heic-to-jpg" },
 };
 
 export default function Page() {
-  return <ToolPage slug="image-to-webp" />;
+  return <ToolPage slug="heic-to-jpg" />;
 }
