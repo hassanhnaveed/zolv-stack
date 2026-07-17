@@ -4,6 +4,8 @@ import path from "node:path";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { TOOL_CONFIG, type ToolSlug } from "@/lib/utils";
+
 import { buildAuditReport, renderAuditMarkdown, runSeoAudit } from "./audit";
 import { getRedirects } from "./redirects";
 import { ROUTES } from "./routes";
@@ -697,6 +699,48 @@ describe("buildAuditReport", () => {
     expect(report.summary.environment.effectiveIndexingActive).toBe(false);
     expect(report.summary.indexedRoutes).toBe(0);
     expect(report.routes[0]?.effectiveIndex).toBe(false);
+  });
+});
+
+describe("buildAuditReport — real registry, Task 9 initial indexing policy", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("recognized production + indexing enabled: the real registry indexes/sitemaps exactly the already-approved non-tool routes and zero tools", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://example.com");
+    vi.stubEnv("SEO_INDEXING_ENABLED", "true");
+
+    // No routes/redirects override: exercises the real, live `lib/seo/*`
+    // registry end to end, matching the "recognized-production/enabled
+    // audit using the actual config contract" requirement.
+    const report = buildAuditReport();
+
+    const toolSlugs = new Set(Object.keys(TOOL_CONFIG) as ToolSlug[]);
+    const nonToolRouteCount = ROUTES.length - toolSlugs.size;
+
+    expect(report.summary.indexedRoutes).toBe(nonToolRouteCount);
+    expect(report.summary.sitemapRoutes).toBe(nonToolRouteCount);
+    expect(report.summary.environment.effectiveIndexingActive).toBe(true);
+
+    const indexedEntries = report.routes.filter((entry) => entry.effectiveIndex);
+    for (const entry of indexedEntries) {
+      expect(toolSlugs.has(entry.id as ToolSlug)).toBe(false);
+    }
+
+    const homeEntry = report.routes.find((entry) => entry.id === "home");
+    const hubEntry = report.routes.find((entry) => entry.id === "fileora-hub");
+    expect(homeEntry?.effectiveIndex).toBe(true);
+    expect(hubEntry?.effectiveIndex).toBe(true);
+
+    const toolEntries = report.routes.filter((entry) => toolSlugs.has(entry.id as ToolSlug));
+    expect(toolEntries.length).toBeGreaterThan(0);
+    for (const entry of toolEntries) {
+      expect(entry.effectiveIndex).toBe(false);
+      expect(entry.effectiveSitemap).toBe(false);
+      expect(entry.exclusionReason).toMatch(/not opted in/i);
+    }
   });
 });
 

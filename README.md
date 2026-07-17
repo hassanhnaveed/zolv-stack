@@ -50,6 +50,8 @@ Open [http://localhost:3000](http://localhost:3000).
 - `NEXT_PUBLIC_GOOGLE_API_KEY` — required for the Google Drive picker. Restrict it by HTTP referrer in Google Cloud.
 - `NEXT_PUBLIC_GOOGLE_APP_ID` — optional Google Cloud project number; derived from the client ID when omitted.
 - `NEXT_PUBLIC_CLARITY_PROJECT_ID` — optional; enables Microsoft Clarity analytics.
+- `SEO_INDEXING_ENABLED` — server-only; explicit opt-in for search indexing. See [SEO architecture](#seo-architecture) below.
+- `SEO_GOOGLE_SITE_VERIFICATION` / `SEO_BING_SITE_VERIFICATION` — server-only Search Console / Bing Webmaster Tools verification tokens. Optional; leave blank until configured.
 
 Never commit `.env`, `.env.local`, or SSH/private keys. Production secrets (deploy host, keys) belong in GitHub Environment secrets, not the repo.
 
@@ -59,9 +61,39 @@ Never commit `.env`, `.env.local`, or SSH/private keys. Production secrets (depl
 npm run dev        # development
 npm run lint       # ESLint
 npm run typecheck  # TypeScript
+npm run test       # Vitest
+npm run seo:check  # SEO validation + audit report (reports/seo-audit.{md,json})
 npm run build      # production build
 npm run start      # serve production build on port 3000
 ```
+
+## SEO architecture
+
+zolv-stack centralizes all SEO (metadata, Open Graph/Twitter, JSON-LD,
+sitemap, robots, verification) in `lib/seo/*`, driven by a single route
+registry (`lib/seo/routes.ts`). Indexing is fail-closed and explicit
+opt-in per route: outside a recognized production environment with
+`SEO_INDEXING_ENABLED=true`, every route is non-indexable and the sitemap
+is empty, even if a route declares `index: true`. Today, only the home page
+and the Fileora hub are declared indexable; individual Fileora tools stay
+`index: false` until each one passes the index quality gate documented in
+`lib/seo/routes.ts`.
+
+Run `npm run seo:check` to validate the registry and write a human-readable
+audit report to `reports/seo-audit.md`. Set `NEXT_PUBLIC_APP_URL` to a valid
+HTTPS origin first (a placeholder like `https://example.com` is fine before
+a production domain is purchased):
+
+```bash
+NEXT_PUBLIC_APP_URL=https://example.com npm run seo:check
+```
+
+Runbooks:
+
+- [`docs/seo/url-policy.md`](docs/seo/url-policy.md) — canonical URL contract
+- [`docs/seo/search-console.md`](docs/seo/search-console.md) — Google Search Console / Bing Webmaster Tools setup and per-deploy/per-release checklists
+- [`docs/seo/performance-budgets.md`](docs/seo/performance-budgets.md) — Core Web Vitals budgets per route type
+- [`docs/seo/rollback.md`](docs/seo/rollback.md) — safe rollback of indexing, verification, and metadata changes
 
 
 

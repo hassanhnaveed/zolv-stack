@@ -32,14 +32,30 @@
  * `content-resolver.ts` directly so neither depends on the other.
  *
  * Not in scope here (later tasks): `app/layout.tsx` / page migration
- * (Task 6/7), JSON-LD (Task 5), sitemap/robots.txt file builders (Task 8),
- * and `verification` metadata wiring (Task 9).
+ * (Task 6/7), JSON-LD (Task 5), sitemap/robots.txt file builders (Task 8).
+ *
+ * ## Verification metadata (Task 9)
+ *
+ * {@link buildRootMetadata} additionally wires `SEO_GOOGLE_SITE_VERIFICATION`
+ * / `SEO_BING_SITE_VERIFICATION` (`config.ts`) into Next's native
+ * `Metadata.verification` field — Google via the native `google` key, Bing
+ * via the documented `other["msvalidate.01"]` escape hatch (Next has no
+ * native Bing field). This is deliberately root-only: verification meta
+ * tags are site-wide, not per-route. A token is omitted entirely when
+ * unset/blank (never an empty tag) and non-fatally when it looks like an
+ * unfilled placeholder — see `verification.ts`'s
+ * `isPlaceholderVerificationToken` (shared with `validate.ts` so neither
+ * module owns a second copy of the regex list). `validateVerificationTokens`
+ * / `seo:check` still fails the build loudly for that same placeholder
+ * condition; this builder stays non-throwing so a misconfigured token never
+ * crashes metadata generation.
  */
 
 import type { Metadata } from "next";
 
 import { buildAlternates } from "./alternates";
 import { getProductBrand, ZOLVSTACK_BRAND } from "./brands";
+import { getSeoConfig } from "./config";
 import {
   resolveFinalTitleOrBrandFallback,
   resolveRouteDescription,
@@ -50,6 +66,7 @@ import { buildSocialMetadata, toOpenGraph, toTwitter } from "./open-graph";
 import { getRoute, ROUTE_IDS, type RouteId } from "./routes";
 import type { SeoRoute } from "./types";
 import { getSiteOrigin } from "./url";
+import { isPlaceholderVerificationToken } from "./verification";
 
 /** Resolves the brand whose identity a route's OG `siteName` / `locale`
  * should reflect: the owning product's brand for product routes, else the
@@ -70,6 +87,40 @@ function resolveSiteName(route: SeoRoute): string {
 function buildRobotsMetadata(route: SeoRoute): Metadata["robots"] {
   const { index, follow } = getRobotsDirective(route);
   return { index, follow };
+}
+
+/**
+ * Builds the Next.js `verification` metadata field from the configured
+ * GSC/Bing tokens, or `undefined` when neither yields an emittable value.
+ *
+ * - A token that is unset/blank is omitted (spec: "missing tokens optional
+ *   and non-fatal") — never an empty string or an empty nested object.
+ * - A token that looks like an unfilled placeholder is also omitted, not
+ *   thrown (spec: "reject placeholder/example tokens... before emitting
+ *   metadata", while staying non-fatal); `validateVerificationTokens`
+ *   (`seo:check`) is the loud failure path for that same condition.
+ * - Bing has no native `Metadata.verification` field; Next's documented
+ *   escape hatch is `verification.other["msvalidate.01"]`.
+ */
+function buildVerificationMetadata(): Metadata["verification"] | undefined {
+  const config = getSeoConfig();
+  const verification: NonNullable<Metadata["verification"]> = {};
+
+  if (
+    config.googleSiteVerification &&
+    !isPlaceholderVerificationToken(config.googleSiteVerification)
+  ) {
+    verification.google = config.googleSiteVerification;
+  }
+
+  if (
+    config.bingSiteVerification &&
+    !isPlaceholderVerificationToken(config.bingSiteVerification)
+  ) {
+    verification.other = { "msvalidate.01": config.bingSiteVerification };
+  }
+
+  return Object.keys(verification).length > 0 ? verification : undefined;
 }
 
 /**
@@ -131,6 +182,7 @@ export function buildRootMetadata(): Metadata {
   const route = getRoute(ROUTE_IDS.HOME);
   const metadata = buildMetadataForSeoRoute(route);
   const finalTitle = resolveFinalTitleOrBrandFallback(route);
+  const verification = buildVerificationMetadata();
 
   return {
     ...metadata,
@@ -139,6 +191,7 @@ export function buildRootMetadata(): Metadata {
       default: finalTitle,
       template: `%s | ${ZOLVSTACK_BRAND.name}`,
     },
+    ...(verification ? { verification } : {}),
   };
 }
 

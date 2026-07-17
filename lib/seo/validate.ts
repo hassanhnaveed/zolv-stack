@@ -25,6 +25,10 @@
  * unchanged so existing imports (including this file's own tests) keep
  * working — `metadata.ts` consumes the same resolver module directly
  * rather than depending on `validate.ts`.
+ *
+ * `isPlaceholderVerificationToken` (Task 9) similarly lives in
+ * `verification.ts` and is re-exported here unchanged; `metadata.ts`
+ * imports it from `verification.ts` directly for the same reason.
  */
 
 import { getErrorMessage, TOOL_CONFIG } from "../utils";
@@ -39,8 +43,15 @@ import { getSeoConfig } from "./config";
 import { assertValidRedirects, getRedirects, type RedirectRule } from "./redirects";
 import { assertValidRoutes, listRoutes } from "./routes";
 import { getSiteOrigin, absoluteUrl } from "./url";
+import { isPlaceholderVerificationToken } from "./verification";
 import type { SeoRoute } from "./types";
 import type { SeoConfig } from "./config";
+
+/** Re-exported unchanged so existing imports (including this file's own
+ * tests) keep working. The canonical placeholder-detection regex list
+ * lives in `./verification`, shared with `metadata.ts`, so neither module
+ * duplicates it. */
+export { isPlaceholderVerificationToken } from "./verification";
 
 export type { ToolTextConfig } from "./content-resolver";
 export {
@@ -361,26 +372,6 @@ export function validateHardcodedHosts(
   }
 
   return issues;
-}
-
-const PLACEHOLDER_TOKEN_PATTERNS: readonly RegExp[] = [
-  /your[-_ ]?token/i,
-  /replace[-_ ]?me/i,
-  /example/i,
-  /change[-_ ]?me/i,
-  /placeholder/i,
-  /insert[-_ ]?token/i,
-  /sample[-_ ]?token/i,
-  /dummy[-_ ]?token/i,
-  /^x{4,}$/i,
-  /^todo$/i,
-];
-
-/** Whether `token` looks like an unfilled placeholder value (e.g.
- * `"your-token-here"`, `"REPLACE_ME"`) rather than a real verification
- * token (spec: "Reject placeholder/example tokens"). */
-export function isPlaceholderVerificationToken(token: string): boolean {
-  return PLACEHOLDER_TOKEN_PATTERNS.some((pattern) => pattern.test(token));
 }
 
 /** Subset of {@link SeoConfig} needed to validate verification tokens. */

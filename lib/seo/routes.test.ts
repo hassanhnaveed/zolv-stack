@@ -94,6 +94,31 @@ describe("ROUTES registry", () => {
     }
   });
 
+  it("Task 9 initial indexing policy: declares Home and the Fileora hub indexable/sitemap-enabled while every product-tool stays index:false/sitemap:false/follow:true", () => {
+    // Regression guard for the Task 9 approved decision: after a codebase
+    // audit, zero tools had both substantial unique content and
+    // converter smoke-test evidence, so the initial indexable tool
+    // allowlist is empty. Home and the Fileora hub retain their
+    // already-approved (pre-Task-9) index/sitemap declarations.
+    const home = getRoute(ROUTE_IDS.HOME);
+    expect(home.index).toBe(true);
+    expect(home.sitemap).toBe(true);
+
+    const hub = getRoute(ROUTE_IDS.FILEORA_HUB);
+    expect(hub.index).toBe(true);
+    expect(hub.sitemap).toBe(true);
+
+    const toolSlugs = Object.keys(TOOL_CONFIG) as ToolSlug[];
+    expect(toolSlugs.length).toBeGreaterThan(0);
+    for (const slug of toolSlugs) {
+      const route = getRoute(slug);
+      expect(route.pageType).toBe("product-tool");
+      expect(route.index).toBe(false);
+      expect(route.sitemap).toBe(false);
+      expect(route.follow).toBe(true);
+    }
+  });
+
   it("has unique route ids", () => {
     const ids = ROUTES.map((route) => route.id);
     expect(new Set(ids).size).toBe(ids.length);
@@ -566,6 +591,32 @@ describe("indexability helpers", () => {
     const indexable = new Set(listIndexableRoutes().map((route) => route.id));
     for (const route of listSitemapRoutes()) {
       expect(indexable.has(route.id)).toBe(true);
+    }
+  });
+
+  it("Task 9: in a recognized production environment with indexing enabled, effective indexable/sitemap routes from the real registry are exactly the already-approved non-tool routes — zero tools", () => {
+    stubProductionEnabled();
+
+    // All non-tool ids (home, about, contact, security, privacy, terms,
+    // fileora-hub) were already declared index:true/sitemap:true in Task
+    // 2/pre-Task-9 — that "already-approved" set is untouched here. The
+    // Task 9 decision only concerns tools, and it approved zero.
+    const expectedIndexableIds = [...Object.values(ROUTE_IDS)].sort();
+
+    const indexableIds = listIndexableRoutes()
+      .map((route) => route.id)
+      .sort();
+    const sitemapIds = listSitemapRoutes()
+      .map((route) => route.id)
+      .sort();
+
+    expect(indexableIds).toEqual(expectedIndexableIds);
+    expect(sitemapIds).toEqual(expectedIndexableIds);
+
+    // No product-tool route ever appears in either effective list.
+    const toolSlugs = new Set(Object.keys(TOOL_CONFIG) as ToolSlug[]);
+    for (const id of indexableIds) {
+      expect(toolSlugs.has(id as ToolSlug)).toBe(false);
     }
   });
 });

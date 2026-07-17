@@ -150,7 +150,27 @@ export function assertValidRoutes(routes: readonly SeoRoute[]): void {
 /** Default index policy for every tool route until it passes the index
  * quality gate and is explicitly opted in (spec: "Default for tools:
  * `index: false`, `sitemap: false` until quality gate passes"). Fail-closed
- * effective indexing still requires production + `SEO_INDEXING_ENABLED`. */
+ * effective indexing still requires production + `SEO_INDEXING_ENABLED`.
+ *
+ * ## Task 9 initial policy decision
+ *
+ * Task 9's index-quality-gate audit reviewed every current tool and
+ * approved **zero** for indexing: no tool had both substantial unique page
+ * content and converter smoke-test evidence at review time, and some also
+ * carried placeholder, binary-dependency, or functional risk. Per the
+ * gate's rule — "absence of evidence means exclude" — every `ToolSlug`
+ * below keeps {@link TOOL_ROUTE_DEFAULTS} unchanged rather than gaining a
+ * per-route override.
+ *
+ * This is a conservative *initial* decision, not a permanent one. A tool
+ * becomes indexable only by individually satisfying the full index quality
+ * gate above (fully functional, unique substantial content, correct
+ * metadata/schema, crawlable internal links, passing content/converter
+ * smoke tests) and then flipping its own `index`/`sitemap` flags to `true`
+ * — future opt-in is a per-route change here, not a new abstraction. There
+ * is deliberately no separate "allowlist" data structure to keep in sync:
+ * this registry is already the single source of truth for tool indexing
+ * intent. */
 const TOOL_ROUTE_DEFAULTS: IndexFlags = {
   index: false,
   sitemap: false,

@@ -309,6 +309,97 @@ describe("resolveOgImages — immutable, multi-image-ready array", () => {
   });
 });
 
+describe("buildRootMetadata — verification (Task 9)", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("omits verification entirely when neither token is configured", () => {
+    stubOrigin();
+    const metadata = buildRootMetadata();
+    expect(metadata.verification).toBeUndefined();
+  });
+
+  it("omits verification when both tokens are blank/whitespace-only", () => {
+    stubOrigin();
+    vi.stubEnv("SEO_GOOGLE_SITE_VERIFICATION", "   ");
+    vi.stubEnv("SEO_BING_SITE_VERIFICATION", "");
+    const metadata = buildRootMetadata();
+    expect(metadata.verification).toBeUndefined();
+  });
+
+  it("emits only the Google verification field using the native `google` key", () => {
+    stubOrigin();
+    vi.stubEnv("SEO_GOOGLE_SITE_VERIFICATION", "Ab3xQz9-real-looking-token");
+    const metadata = buildRootMetadata();
+    expect(metadata.verification).toEqual({
+      google: "Ab3xQz9-real-looking-token",
+    });
+  });
+
+  it("emits only the Bing verification field under the msvalidate.01 custom key", () => {
+    stubOrigin();
+    vi.stubEnv("SEO_BING_SITE_VERIFICATION", "9F3k2-real-looking-token");
+    const metadata = buildRootMetadata();
+    expect(metadata.verification).toEqual({
+      other: { "msvalidate.01": "9F3k2-real-looking-token" },
+    });
+  });
+
+  it("emits both Google and Bing verification fields together", () => {
+    stubOrigin();
+    vi.stubEnv("SEO_GOOGLE_SITE_VERIFICATION", "Ab3xQz9-real-looking-token");
+    vi.stubEnv("SEO_BING_SITE_VERIFICATION", "9F3k2-real-looking-token");
+    const metadata = buildRootMetadata();
+    expect(metadata.verification).toEqual({
+      google: "Ab3xQz9-real-looking-token",
+      other: { "msvalidate.01": "9F3k2-real-looking-token" },
+    });
+  });
+
+  it("never emits an empty nested `other` object when only Google is set", () => {
+    stubOrigin();
+    vi.stubEnv("SEO_GOOGLE_SITE_VERIFICATION", "Ab3xQz9-real-looking-token");
+    const metadata = buildRootMetadata();
+    expect(metadata.verification).not.toHaveProperty("other");
+  });
+
+  it("omits (never emits) a placeholder-looking Google token in a recognized production environment", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SEO_INDEXING_ENABLED", "true");
+    stubOrigin();
+    vi.stubEnv("SEO_GOOGLE_SITE_VERIFICATION", "your-token-here");
+    const metadata = buildRootMetadata();
+    expect(metadata.verification).toBeUndefined();
+  });
+
+  it("omits (never emits) a placeholder-looking Bing token in a recognized production environment", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SEO_INDEXING_ENABLED", "true");
+    stubOrigin();
+    vi.stubEnv("SEO_BING_SITE_VERIFICATION", "REPLACE_ME");
+    const metadata = buildRootMetadata();
+    expect(metadata.verification).toBeUndefined();
+  });
+
+  it("still emits a real-looking Google token in a recognized production environment", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SEO_INDEXING_ENABLED", "true");
+    stubOrigin();
+    vi.stubEnv("SEO_GOOGLE_SITE_VERIFICATION", "Ab3xQz9-real-looking-token");
+    const metadata = buildRootMetadata();
+    expect(metadata.verification).toEqual({
+      google: "Ab3xQz9-real-looking-token",
+    });
+  });
+
+  it("does not fail the build (throw) for a placeholder token — omission is non-fatal", () => {
+    stubOrigin();
+    vi.stubEnv("SEO_GOOGLE_SITE_VERIFICATION", "example-token");
+    expect(() => buildRootMetadata()).not.toThrow();
+  });
+});
+
 describe("index enabled/disabled safely with env stubs", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
