@@ -331,7 +331,7 @@ describe("assertValidRedirects", () => {
         [makeRedirect({ source: "/old", destination: "/missing" })],
         FIXTURE_ROUTES,
       ),
-    ).toThrow(/destination.*registered|canonical/i);
+    ).toThrow(/destination.*(?:registered|canonical)/i);
   });
 
   it("validates wildcard destinations against their registered static base", () => {
@@ -357,7 +357,7 @@ describe("assertValidRedirects", () => {
         ],
         FIXTURE_ROUTES,
       ),
-    ).toThrow(/destination.*registered|canonical/i);
+    ).toThrow(/destination.*(?:registered|canonical)/i);
   });
 
   it("rejects redirect sources that collide with canonical registry routes", () => {
@@ -366,7 +366,7 @@ describe("assertValidRedirects", () => {
         [makeRedirect({ source: "/about", destination: "/fileora" })],
         FIXTURE_ROUTES,
       ),
-    ).toThrow(/source.*canonical|collide/i);
+    ).toThrow(/source.*(?:canonical|collide)/i);
   });
 
   it("rejects duplicate redirect sources", () => {
@@ -387,7 +387,7 @@ describe("assertValidRedirects", () => {
         [makeRedirect({ source: "/legacy", destination: "/legacy" })],
         FIXTURE_ROUTES,
       ),
-    ).toThrow(/loop|cycle|self/i);
+    ).toThrow(/(?:loop|cycle|self)/i);
   });
 
   it("rejects redirect cycles (A -> B -> A)", () => {
@@ -399,7 +399,43 @@ describe("assertValidRedirects", () => {
         ],
         FIXTURE_ROUTES,
       ),
-    ).toThrow(/loop|cycle/i);
+    ).toThrow(/(?:loop|cycle)/i);
+  });
+
+  it("rejects redirect cycles (A -> B -> C -> A)", () => {
+    expect(() =>
+      assertValidRedirects(
+        [
+          makeRedirect({ source: "/a", destination: "/b" }),
+          makeRedirect({ source: "/b", destination: "/c" }),
+          makeRedirect({ source: "/c", destination: "/a" }),
+        ],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/(?:loop|cycle)/i);
+  });
+
+  it("rejects malformed sources with source-specific errors", () => {
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "old-page", destination: "/fileora" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/malformed.*source.*starting/i);
+
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "/old-page/", destination: "/fileora" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/malformed.*source.*trailing/i);
+
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "", destination: "/fileora" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/malformed.*source.*empty/i);
   });
 
   it("rejects malformed destinations", () => {
@@ -408,21 +444,21 @@ describe("assertValidRedirects", () => {
         [makeRedirect({ source: "/old", destination: "" })],
         FIXTURE_ROUTES,
       ),
-    ).toThrow(/malformed|destination/i);
+    ).toThrow(/malformed.*destination.*empty/i);
 
     expect(() =>
       assertValidRedirects(
         [makeRedirect({ source: "/old", destination: "fileora" })],
         FIXTURE_ROUTES,
       ),
-    ).toThrow(/malformed|destination/i);
+    ).toThrow(/malformed.*destination.*starting/i);
 
     expect(() =>
       assertValidRedirects(
         [makeRedirect({ source: "/old", destination: "/fileora/" })],
         FIXTURE_ROUTES,
       ),
-    ).toThrow(/malformed|destination|trailing/i);
+    ).toThrow(/malformed.*destination.*trailing/i);
   });
 
   it("rejects mixed-case paths without silently normalizing", () => {
@@ -431,14 +467,14 @@ describe("assertValidRedirects", () => {
         [makeRedirect({ source: "/Old-Path", destination: "/fileora" })],
         FIXTURE_ROUTES,
       ),
-    ).toThrow(/lowercase|kebab|case/i);
+    ).toThrow(/(?:lowercase|kebab|case)/i);
 
     expect(() =>
       assertValidRedirects(
         [makeRedirect({ source: "/old-path", destination: "/Fileora" })],
         FIXTURE_ROUTES,
       ),
-    ).toThrow(/lowercase|kebab|case/i);
+    ).toThrow(/(?:lowercase|kebab|case)/i);
   });
 });
 

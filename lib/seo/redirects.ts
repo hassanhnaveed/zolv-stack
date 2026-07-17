@@ -71,7 +71,10 @@ function staticBasePath(path: string): string {
  * must be lowercase kebab-case (or a single `*` catch-all token is not
  * used here — Next uses `:path*`).
  */
-function assertLowercasePathPattern(kind: "source" | "destination", path: string): void {
+function assertLowercasePathPattern(
+  kind: "source" | "destination",
+  path: string,
+): void {
   const value = pathOnly(path);
   if (value !== value.toLowerCase()) {
     throw new Error(
@@ -81,25 +84,28 @@ function assertLowercasePathPattern(kind: "source" | "destination", path: string
   }
 }
 
-/** Structural checks for a destination path (leading slash, no trailing
- * slash except `/`, non-empty). Dynamic destinations like `/fileora/:path*`
- * are allowed when otherwise well-formed. */
-function assertWellFormedDestination(destination: string): void {
-  const value = pathOnly(destination);
+/** Shared structural checks for a source or destination path pattern:
+ * non-empty, leading slash, and no trailing slash except `/`. Next.js
+ * dynamic patterns such as `/convoox/:path*` remain valid. */
+function assertWellFormedPathPattern(
+  kind: "source" | "destination",
+  path: string,
+): void {
+  const value = pathOnly(path);
   if (!value) {
     throw new Error(
-      'lib/seo/redirects: malformed destination "" (empty).',
+      `lib/seo/redirects: malformed redirect ${kind} "" (empty).`,
     );
   }
   if (!value.startsWith("/")) {
     throw new Error(
-      `lib/seo/redirects: malformed destination "${destination}" ` +
+      `lib/seo/redirects: malformed redirect ${kind} "${path}" ` +
         "(must be a site-relative path starting with `/`).",
     );
   }
   if (value !== "/" && value.endsWith("/")) {
     throw new Error(
-      `lib/seo/redirects: malformed destination "${destination}" ` +
+      `lib/seo/redirects: malformed redirect ${kind} "${path}" ` +
         "(trailing slash is not allowed except for `/`).",
     );
   }
@@ -132,7 +138,8 @@ export function assertValidRedirects(
 
     assertLowercasePathPattern("source", redirect.source);
     assertLowercasePathPattern("destination", redirect.destination);
-    assertWellFormedDestination(redirect.destination);
+    assertWellFormedPathPattern("source", redirect.source);
+    assertWellFormedPathPattern("destination", redirect.destination);
 
     if (seenSources.has(source)) {
       throw new Error(
