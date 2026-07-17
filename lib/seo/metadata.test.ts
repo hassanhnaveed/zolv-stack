@@ -14,11 +14,25 @@ describe("buildRootMetadata", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns the ZolvStack brand-home title", () => {
+  it("sets metadataBase from getSiteOrigin and a Next title default + template for layout inheritance", () => {
     stubOrigin();
     const metadata = buildRootMetadata();
-    expect(typeof metadata.title).toBe("string");
-    expect(metadata.title as string).toContain("ZolvStack");
+    expect(metadata.metadataBase).toEqual(new URL("https://example.com"));
+    expect(metadata.title).toEqual({
+      default: "ZolvStack — Fast, Private Tools for Everyday Work",
+      template: "%s | ZolvStack",
+    });
+  });
+
+  it("keeps OG/Twitter titles as the plain final home title string", () => {
+    stubOrigin();
+    const metadata = buildRootMetadata();
+    expect(metadata.openGraph?.title).toBe(
+      "ZolvStack — Fast, Private Tools for Everyday Work",
+    );
+    expect(metadata.twitter?.title).toBe(
+      "ZolvStack — Fast, Private Tools for Everyday Work",
+    );
   });
 
   it("sets the canonical to the home route's absolute URL, never a request URL", () => {
@@ -49,19 +63,38 @@ describe("buildMetadataForRoute — tool title pattern", () => {
     vi.unstubAllEnvs();
   });
 
+  it("returns an absolute title so the root template cannot double-suffix the composed brand title", () => {
+    stubOrigin();
+    const metadata = buildMetadataForRoute("image-to-webp");
+    expect(metadata.title).toEqual({
+      absolute: "Image to WebP Converter | Fileora by ZolvStack",
+    });
+    expect(metadata.openGraph?.title).toBe(
+      "Image to WebP Converter | Fileora by ZolvStack",
+    );
+    expect(metadata.twitter?.title).toBe(
+      "Image to WebP Converter | Fileora by ZolvStack",
+    );
+  });
+
   it("matches '{intent} | Fileora by ZolvStack' and never the bare TOOL_CONFIG label", () => {
     stubOrigin();
     const metadata = buildMetadataForRoute("image-to-webp");
-    const title = metadata.title as string;
-    expect(title).toBe("Image to WebP Converter | Fileora by ZolvStack");
-    expect(title).not.toBe("WebP");
-    expect(title.endsWith("| Fileora by ZolvStack")).toBe(true);
+    const absolute =
+      typeof metadata.title === "object" && metadata.title !== null
+        ? (metadata.title as { absolute?: string }).absolute
+        : undefined;
+    expect(absolute).toBe("Image to WebP Converter | Fileora by ZolvStack");
+    expect(absolute).not.toBe("WebP");
+    expect(absolute?.endsWith("| Fileora by ZolvStack")).toBe(true);
   });
 
   it("still produces a real intent phrase for tool slugs whose TOOL_CONFIG title is already multi-word", () => {
     stubOrigin();
     const metadata = buildMetadataForRoute("pdf-merge");
-    expect(metadata.title).toBe("PDF Merge | Fileora by ZolvStack");
+    expect(metadata.title).toEqual({
+      absolute: "PDF Merge | Fileora by ZolvStack",
+    });
   });
 });
 
@@ -270,6 +303,9 @@ describe("resolveOgImages — immutable, multi-image-ready array", () => {
     };
     const images = resolveOgImages(makeRoute({ ogImage: override }));
     expect(images).toEqual([override]);
+    // Deep-freeze the returned image object without mutating route config.
+    expect(Object.isFrozen(images[0])).toBe(true);
+    expect(Object.isFrozen(override)).toBe(false);
   });
 });
 
@@ -278,7 +314,7 @@ describe("index enabled/disabled safely with env stubs", () => {
     vi.unstubAllEnvs();
   });
 
-  it("stays noindex when NEXT_PUBLIC_APP_URL is unset even in production (fail-closed on unresolved origin)", () => {
+  it("throws / fails fast when NEXT_PUBLIC_APP_URL is unset (builders require a resolvable origin)", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("SEO_INDEXING_ENABLED", "true");
     vi.stubEnv("NEXT_PUBLIC_APP_URL", "");

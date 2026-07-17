@@ -30,6 +30,7 @@
 import { getErrorMessage, TOOL_CONFIG } from "../utils";
 
 import {
+  resolveFinalTitle,
   resolveRouteDescription,
   resolveRouteTitle,
   type ToolTextConfig,
@@ -42,7 +43,11 @@ import type { SeoRoute } from "./types";
 import type { SeoConfig } from "./config";
 
 export type { ToolTextConfig } from "./content-resolver";
-export { resolveRouteDescription, resolveRouteTitle } from "./content-resolver";
+export {
+  resolveFinalTitle,
+  resolveRouteDescription,
+  resolveRouteTitle,
+} from "./content-resolver";
 
 /** Severity of a single validation finding. Errors fail `seo:check`;
  * warnings are advisory only. */
@@ -220,8 +225,10 @@ export function validateRequiredFields(
 
 /**
  * Validates that no two **declared-indexable** routes (`route.index ===
- * true`) resolve to the same title (spec: "No duplicate ... titles among
- * indexable routes"). Uses declared intent rather than the fail-closed
+ * true`) resolve to the same **final rendered** title (spec: "No duplicate
+ * ... titles among indexable routes"). Uses {@link resolveFinalTitle} so
+ * product-tool brand composition is included — matching what metadata
+ * actually emits. Uses declared intent rather than the fail-closed
  * *effective* index state so this check stays meaningful in every
  * environment, including local dev and CI, where effective indexing is
  * always inactive outside production.
@@ -234,7 +241,7 @@ export function validateDuplicateTitles(
 
   for (const route of routes) {
     if (!route.index) continue;
-    const title = resolveRouteTitle(route, toolConfig);
+    const title = resolveFinalTitle(route, toolConfig);
     if (!title) continue;
 
     const key = title.trim().toLowerCase();
@@ -302,9 +309,9 @@ function collectRouteStrings(
   toolConfig: ToolTextConfig = DEFAULT_TOOL_CONFIG,
 ): string[] {
   const values: string[] = [];
-  // Prefer resolved title/description so product-tool routes that fall back
-  // to TOOL_CONFIG are scanned the same way as required-field validators.
-  const title = resolveRouteTitle(route, toolConfig);
+  // Prefer the final rendered title (and resolved description) so audits
+  // match metadata output, including product-tool brand composition.
+  const title = resolveFinalTitle(route, toolConfig);
   const description = resolveRouteDescription(route, toolConfig);
   if (title) values.push(title);
   if (description) values.push(description);
@@ -418,7 +425,10 @@ const DESCRIPTION_LENGTH_RANGE = { min: 140, max: 160 } as const;
 /**
  * Advisory (warning-only) check for title/description length against the
  * spec's recommended SERP ranges (Metadata Strategy: "Title length warn:
- * 50–60; description warn: 140–160"). Never fails `seo:check`.
+ * 50–60; description warn: 140–160"). Measures the **final rendered**
+ * title via {@link resolveFinalTitle} (not raw TOOL_CONFIG labels) so
+ * advisories match what search engines and social cards actually see.
+ * Never fails `seo:check`.
  */
 export function validateTitleAndDescriptionLength(
   routes: readonly SeoRoute[],
@@ -427,7 +437,7 @@ export function validateTitleAndDescriptionLength(
   const issues: ValidationIssue[] = [];
 
   for (const route of routes) {
-    const title = resolveRouteTitle(route, toolConfig);
+    const title = resolveFinalTitle(route, toolConfig);
     if (title && (title.length < TITLE_LENGTH_RANGE.min || title.length > TITLE_LENGTH_RANGE.max)) {
       issues.push({
         severity: "warning",

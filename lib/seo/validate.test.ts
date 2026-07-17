@@ -21,6 +21,7 @@ import {
   validateRequiredFields,
   validateRouteRegistryInvariants,
   validateSeo,
+  validateTitleAndDescriptionLength,
   validateVerificationTokens,
 } from "./validate";
 
@@ -426,6 +427,64 @@ describe("resolveRouteTitle / resolveRouteDescription", () => {
   it("does not fall back to TOOL_CONFIG for non-tool page types", () => {
     const route = makeRoute({ id: "image-to-webp", pageType: "brand-static" });
     expect(resolveRouteTitle(route, toolConfig)).toBeUndefined();
+  });
+});
+
+describe("validateTitleAndDescriptionLength (final rendered titles)", () => {
+  it("measures the final composed tool title, not the raw TOOL_CONFIG label", () => {
+    const issues = validateTitleAndDescriptionLength(
+      [
+        makeRoute({
+          id: "image-to-webp",
+          path: "/fileora/image-to-webp",
+          pageType: "product-tool",
+        }),
+      ],
+      {
+        "image-to-webp": {
+          title: "WebP",
+          description: "x".repeat(150),
+          longDesc: "x".repeat(150),
+        },
+      },
+    );
+    const titleIssue = issues.find((issue) => issue.code === "seo/title-length");
+    expect(titleIssue).toBeDefined();
+    // Final title is longer than the 4-char "WebP" label and includes the brand suffix.
+    expect(titleIssue?.message).toMatch(/Fileora by ZolvStack/);
+    expect(titleIssue?.message).not.toMatch(/title is 4 characters/);
+  });
+});
+
+describe("validateDuplicateTitles (final rendered titles)", () => {
+  it("detects duplicates using the final composed title for product-tool routes", () => {
+    const toolConfig = {
+      "image-to-webp": { title: "WebP" },
+      "image-to-png": { title: "PNG" },
+    };
+    // Force both tools to share the same authored INTENT so the final titles collide.
+    const issues = validateDuplicateTitles(
+      [
+        makeRoute({
+          id: "a",
+          path: "/fileora/a",
+          pageType: "product-tool",
+          index: true,
+          title: "Same Intent",
+        }),
+        makeRoute({
+          id: "b",
+          path: "/fileora/b",
+          pageType: "product-tool",
+          index: true,
+          title: "Same Intent",
+        }),
+      ],
+      toolConfig,
+    );
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.code).toBe("seo/duplicate-title");
+    expect(issues[0]?.message).toMatch(/same intent \| fileora by zolvstack/i);
   });
 });
 

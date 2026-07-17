@@ -125,3 +125,12 @@ export { OG_ASSET_VERSION, resolveOgImages } from "./og";
 
 // Metadata builder
 export { buildMetadataForRoute, buildRootMetadata } from "./metadata";
+
+// Content resolver (final title shared by metadata + validation)
+export {
+  resolveFinalTitle,
+  resolveRouteDescription,
+  resolveRouteTitle,
+  resolveToolIntentTitle,
+} from "./content-resolver";
+export type { ToolTextConfig } from "./content-resolver";

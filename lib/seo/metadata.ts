@@ -5,68 +5,51 @@
  * public entry points. Both are plain, synchronous, server-only functions
  * returning a complete Next.js `Metadata` object.
  *
+ * ## Title / metadataBase contract (layout-safe)
+ *
+ * - {@link buildRootMetadata} is intended for `app/layout.tsx`. It sets
+ *   `metadataBase` from `getSiteOrigin()` so relative asset URLs resolve,
+ *   and `title: { default, template: "%s | ZolvStack" }` so child segments
+ *   that export a short title inherit the brand suffix.
+ * - {@link buildMetadataForRoute} always returns
+ *   `title: { absolute: finalTitle }` because route titles are already
+ *   fully brand-composed (via {@link resolveFinalTitle}). Without
+ *   `absolute`, Next would apply the root template and produce
+ *   `… | ZolvStack | ZolvStack`.
+ * - Open Graph / Twitter titles stay plain final strings from the same
+ *   normalized social object — they do not use Next's title template API.
+ *
  * Inheritance (spec: "root defaults -> product defaults -> route overrides"):
  *
- * - Title/description resolve via `resolveRouteTitle` / `resolveRouteDescription`
- *   from `content-resolver.ts` (route override, else `TOOL_CONFIG` fallback for
- *   tools). The final tool title additionally wraps a derived intent phrase in
- *   the `productToolTitle` brand pattern via `resolveToolIntentTitle`.
- * - Open Graph image resolves via `resolveOgImages` (route `ogImage` override,
- *   else product default, else root ZolvStack default).
- * - `siteName` / OG `locale` use the root brand for non-product routes and the
- *   product brand (e.g. Fileora) for product routes.
+ * - Title/description resolve via `content-resolver.ts` (final title from
+ *   {@link resolveFinalTitle}; description from
+ *   {@link resolveRouteDescription}).
+ * - Open Graph image resolves via `resolveOgImages`.
+ * - `siteName` / OG `locale` use the root brand for non-product routes and
+ *   the product brand for product routes.
  *
  * This module never imports from `validate.ts` — both consume
  * `content-resolver.ts` directly so neither depends on the other.
  *
  * Not in scope here (later tasks): `app/layout.tsx` / page migration
  * (Task 6/7), JSON-LD (Task 5), sitemap/robots.txt file builders (Task 8),
- * and `verification` metadata wiring (Task 9) — the env vars it will read
- * already exist (`SEO_GOOGLE_SITE_VERIFICATION`, `SEO_BING_SITE_VERIFICATION`),
- * but this module does not emit `metadata.verification` yet.
+ * and `verification` metadata wiring (Task 9).
  */
 
 import type { Metadata } from "next";
 
 import { buildAlternates } from "./alternates";
-import { getProductBrand, productToolTitle, ZOLVSTACK_BRAND } from "./brands";
+import { getProductBrand, ZOLVSTACK_BRAND } from "./brands";
 import {
+  resolveFinalTitleOrBrandFallback,
   resolveRouteDescription,
-  resolveRouteTitle,
-  resolveToolIntentTitle,
 } from "./content-resolver";
 import { getRobotsDirective } from "./indexability";
 import { resolveOgImages } from "./og";
 import { buildSocialMetadata, toOpenGraph, toTwitter } from "./open-graph";
 import { getRoute, ROUTE_IDS, type RouteId } from "./routes";
 import type { SeoRoute } from "./types";
-
-/**
- * Resolves the final, brand-composed page title for `route`.
- *
- * Product-tool routes always wrap a resolved intent phrase in the
- * "{Intent} | Fileora by ZolvStack" pattern (spec: "tool final title matches
- * ... {intent} | Fileora by ZolvStack"). Every other page type uses its own
- * resolved title as-is, since those routes already author their full final
- * title directly (see the `brandHomeTitle` / `brandStaticTitle` /
- * `productHubTitle` callers in `routes.ts`).
- */
-function resolveFinalTitle(route: SeoRoute): string {
-  if (route.pageType === "product-tool") {
-    const intent = resolveToolIntentTitle(route);
-    if (intent) {
-      return productToolTitle(intent, route.product ?? "fileora");
-    }
-  }
-
-  const title = resolveRouteTitle(route);
-  if (title) return title;
-
-  // No route ever reaches this without a resolved title in the real registry
-  // (validated by Task 3's validateRequiredFields); this is a last-resort
-  // safety net for a malformed/fixture route, not a designed fallback path.
-  return ZOLVSTACK_BRAND.name;
-}
+import { getSiteOrigin } from "./url";
 
 /** Resolves the brand whose identity a route's OG `siteName` / `locale`
  * should reflect: the owning product's brand for product routes, else the
@@ -93,16 +76,20 @@ function buildRobotsMetadata(route: SeoRoute): Metadata["robots"] {
  * Builds the complete Next.js `Metadata` object for `route`. Internal —
  * `buildRootMetadata` / `buildMetadataForRoute` are the public surface so
  * every caller goes through the route registry, never a raw path.
+ *
+ * Always emits `title: { absolute }` so callers cannot accidentally inherit
+ * the root layout title template. {@link buildRootMetadata} replaces this
+ * with `{ default, template }` for the layout segment only.
  */
 function buildMetadataForSeoRoute(route: SeoRoute): Metadata {
-  const title = resolveFinalTitle(route);
+  const finalTitle = resolveFinalTitleOrBrandFallback(route);
   const description = resolveRouteDescription(route);
   const alternates = buildAlternates(route.path);
   const images = resolveOgImages(route);
   const brand = resolveBrandForRoute(route);
 
   const social = buildSocialMetadata({
-    title,
+    title: finalTitle,
     description,
     canonicalUrl: alternates.canonical,
     siteName: resolveSiteName(route),
@@ -111,7 +98,8 @@ function buildMetadataForSeoRoute(route: SeoRoute): Metadata {
   });
 
   const metadata: Metadata = {
-    title,
+    // Absolute prevents double brand suffixes under a root title template.
+    title: { absolute: finalTitle },
     alternates,
     robots: buildRobotsMetadata(route),
     openGraph: toOpenGraph(social),
@@ -133,17 +121,33 @@ function buildMetadataForSeoRoute(route: SeoRoute): Metadata {
 }
 
 /**
- * Builds the root ("/", ZolvStack home) page metadata. Equivalent to
- * `buildMetadataForRoute(ROUTE_IDS.HOME)`, exposed as its own named entry
- * point since the root layout is the most common caller.
+ * Builds root layout metadata for `app/layout.tsx`.
+ *
+ * Sets `metadataBase` and a Next title `{ default, template }` so child
+ * segments can inherit `"%s | ZolvStack"`. Fully composed brand/product/tool
+ * pages must still use {@link buildMetadataForRoute}'s `absolute` titles.
  */
 export function buildRootMetadata(): Metadata {
-  return buildMetadataForSeoRoute(getRoute(ROUTE_IDS.HOME));
+  const route = getRoute(ROUTE_IDS.HOME);
+  const metadata = buildMetadataForSeoRoute(route);
+  const finalTitle = resolveFinalTitleOrBrandFallback(route);
+
+  return {
+    ...metadata,
+    metadataBase: new URL(getSiteOrigin().origin),
+    title: {
+      default: finalTitle,
+      template: `%s | ${ZOLVSTACK_BRAND.name}`,
+    },
+  };
 }
 
 /**
  * Builds the complete Next.js `Metadata` object for the registered route
  * `routeId` (any `RouteId`: a non-tool id or a `ToolSlug`).
+ *
+ * Title is always `{ absolute: finalTitle }` so already-composed titles do
+ * not inherit the root layout template.
  *
  * @throws {Error} When `routeId` has no registered route (via `getRoute`),
  * or when the site origin cannot be resolved for the canonical URL (via

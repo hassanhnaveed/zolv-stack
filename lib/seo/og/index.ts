@@ -36,21 +36,24 @@ export { buildToolOgImage } from "./tool";
  * deliberate so a future multi-image gallery or dynamic `ImageResponse`
  * resolver can add more without changing this function's signature
  * (spec: "multi-image resolver API returns readonly image array; emit
- * primary now"). The returned array is frozen so callers cannot mutate a
- * shared resolver result.
+ * primary now"). The returned array **and** each image object are frozen
+ * (shallow copies for route overrides) so callers cannot mutate shared
+ * resolver results or the route registry's `ogImage` config.
  */
 export function resolveOgImages(route: SeoRoute): readonly SocialImage[] {
   if (route.ogImage) {
-    return Object.freeze([route.ogImage]);
+    return Object.freeze([Object.freeze({ ...route.ogImage })]);
   }
 
   if (route.pageType === "product-tool") {
-    return Object.freeze([buildToolOgImage(route)]);
+    return Object.freeze([Object.freeze(buildToolOgImage(route))]);
   }
 
   if (route.product) {
-    return Object.freeze([buildProductDefaultOgImage(route.product)]);
+    return Object.freeze([
+      Object.freeze(buildProductDefaultOgImage(route.product)),
+    ]);
   }
 
-  return Object.freeze([buildZolvstackDefaultOgImage()]);
+  return Object.freeze([Object.freeze(buildZolvstackDefaultOgImage())]);
 }

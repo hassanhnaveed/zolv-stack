@@ -92,7 +92,19 @@ export interface SeoRoute extends IndexFlags {
   product?: ProductId;
   /** Page archetype driving metadata/schema selection. */
   pageType: PageType;
-  /** SEO title. May be omitted for tools that fall back to `TOOL_CONFIG`. */
+  /**
+   * SEO title override.
+   *
+   * - For non-tool page types (`brand-home`, `brand-static`, `legal`,
+   *   `product-hub`): the **final** document title as authored (already
+   *   brand-composed, e.g. `"About | ZolvStack"`).
+   * - For `product-tool`: the **intent** title only (e.g.
+   *   `"Convert Images to WebP Free"`). Brand composition
+   *   (`"{intent} | Fileora by ZolvStack"`) happens exactly once in
+   *   `resolveFinalTitle` — do not store an already-suffixed final string
+   *   here. May be omitted to fall back to `TOOL_CONFIG` / slug-derived
+   *   intent via the content resolver.
+   */
   title?: string;
   /** SEO description. May be omitted for tools that fall back to
    * `TOOL_CONFIG`. */

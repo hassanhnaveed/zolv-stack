@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   deriveIntentTitleFromSlug,
+  resolveFinalTitle,
   resolveRouteDescription,
   resolveRouteTitle,
   resolveToolIntentTitle,
@@ -77,7 +78,7 @@ describe("resolveToolIntentTitle", () => {
   });
 });
 
-describe("resolveRouteTitle (unchanged raw resolution, still used by validators)", () => {
+describe("resolveRouteTitle (raw source text for required-field checks)", () => {
   const toolConfig: ToolTextConfig = {
     "image-to-webp": { title: "WebP", description: "Convert to WebP." },
   };
@@ -85,6 +86,55 @@ describe("resolveRouteTitle (unchanged raw resolution, still used by validators)
   it("still returns the raw TOOL_CONFIG label, not a derived intent phrase", () => {
     const route = makeRoute({ id: "image-to-webp", pageType: "product-tool" });
     expect(resolveRouteTitle(route, toolConfig)).toBe("WebP");
+  });
+});
+
+describe("resolveFinalTitle (single composition path for metadata + audit)", () => {
+  const toolConfig: ToolTextConfig = {
+    "image-to-webp": { title: "WebP", description: "Convert to WebP." },
+    "pdf-merge": { title: "PDF Merge", description: "Combine PDFs." },
+  };
+
+  it("composes '{intent} | Fileora by ZolvStack' exactly once for product-tool routes", () => {
+    const route = makeRoute({ id: "image-to-webp", pageType: "product-tool" });
+    expect(resolveFinalTitle(route, toolConfig)).toBe(
+      "Image to WebP Converter | Fileora by ZolvStack",
+    );
+  });
+
+  it("treats a product-tool route.title override as the INTENT title and still composes the brand suffix once", () => {
+    const route = makeRoute({
+      id: "image-to-webp",
+      pageType: "product-tool",
+      title: "Convert Images to WebP Free",
+    });
+    // route.title is the intent phrase, NOT an already-branded final string.
+    expect(resolveFinalTitle(route, toolConfig)).toBe(
+      "Convert Images to WebP Free | Fileora by ZolvStack",
+    );
+    expect(resolveFinalTitle(route, toolConfig)).not.toMatch(
+      /ZolvStack \| Fileora by ZolvStack|Fileora by ZolvStack \| Fileora/,
+    );
+  });
+
+  it("returns already-authored brand titles as-is for non-tool page types", () => {
+    const route = makeRoute({
+      id: "about",
+      pageType: "brand-static",
+      title: "About | ZolvStack",
+    });
+    expect(resolveFinalTitle(route, toolConfig)).toBe("About | ZolvStack");
+  });
+
+  it("returns undefined when a product-tool has no route title and no TOOL_CONFIG fallback", () => {
+    const route = makeRoute({
+      id: "unknown-tool",
+      pageType: "product-tool",
+    });
+    // Final title must not invent a title from the slug alone when there is
+    // no authored source — required-field validation stays authoritative.
+    expect(resolveRouteTitle(route, toolConfig)).toBeUndefined();
+    expect(resolveFinalTitle(route, toolConfig)).toBeUndefined();
   });
 });
 
