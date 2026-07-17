@@ -13,13 +13,15 @@ Convert images and documents in the browser — no account required for core too
 
 ## Stack
 
-| Tool | Version |
-|------|---------|
-| Next.js | 16 |
-| React | 19 |
-| Sharp | 0.34 |
-| Tailwind CSS | v4 |
-| pdf-lib | 1.17 |
+
+| Tool         | Version |
+| ------------ | ------- |
+| Next.js      | 16      |
+| React        | 19      |
+| Sharp        | 0.34    |
+| Tailwind CSS | v4      |
+| pdf-lib      | 1.17    |
+
 
 ## Requirements
 
@@ -43,9 +45,11 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### Environment variables
 
-| Name | Required | Description |
-|------|----------|-------------|
-| `NEXT_PUBLIC_APP_URL` | Recommended | Public site URL used for metadata, sitemap, and robots (e.g. `https://yourdomain.com`) |
+- `NEXT_PUBLIC_APP_URL` — recommended; public URL used for metadata, sitemap, and robots.
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` — required for the Google Drive picker.
+- `NEXT_PUBLIC_GOOGLE_API_KEY` — required for the Google Drive picker. Restrict it by HTTP referrer in Google Cloud.
+- `NEXT_PUBLIC_GOOGLE_APP_ID` — optional Google Cloud project number; derived from the client ID when omitted.
+- `NEXT_PUBLIC_CLARITY_PROJECT_ID` — optional; enables Microsoft Clarity analytics.
 
 Never commit `.env`, `.env.local`, or SSH/private keys. Production secrets (deploy host, keys) belong in GitHub Environment secrets, not the repo.
 
@@ -59,14 +63,72 @@ npm run build      # production build
 npm run start      # serve production build on port 3000
 ```
 
+
+
 ## Contributing
 
-1. Create a branch: `feature/...`, `fix/...`, or `chore/...`
-2. Make your changes
-3. Open a pull request into `main`
-4. Ensure CI passes (lint, typecheck, build)
+Contributions are welcome, including bug fixes, documentation improvements, new converters, accessibility improvements, and performance work.
 
-Husky runs lint + typecheck locally on commit/push to catch issues early.
+### Contribution workflow
+
+1. Fork the repository on GitHub.
+2. Clone your fork and install dependencies:
+  ```bash
+   git clone https://github.com/<your-username>/zolv-stack.git
+   cd zolv-stack
+   npm install
+   cp .env.example .env.local
+  ```
+3. Create a focused branch from the latest `main`:
+  ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/short-description
+  ```
+   Use `feature/` for functionality, `fix/` for bug fixes, `docs/` for documentation, and `chore/` for tooling or maintenance.
+4. Make and test your changes. Keep pull requests focused on one concern and follow the existing TypeScript, React, and Next.js patterns.
+5. Run the local quality checks:
+  ```bash
+   npm run lint
+   npm run typecheck
+   npm run build
+  ```
+6. Commit, push to your fork, and open a pull request into `main`:
+  ```bash
+   git add .
+   git commit -m "Add a concise description of the change"
+   git push -u origin feature/short-description
+  ```
+
+
+
+### Pull request expectations
+
+- Explain what changed and why.
+- Include clear testing steps.
+- Link the related issue when one exists.
+- Add screenshots for visible UI changes.
+- Update documentation and `.env.example` when configuration changes.
+- Ensure the PR CI checks pass: lint, typecheck, and production build.
+- Do not include generated build output, credentials, private keys, or real environment values.
+
+Husky installs with `npm install`. It runs staged-file linting and TypeScript checks before commits, then lint and typecheck before pushes.
+
+### Adding or changing tools
+
+- Keep tool metadata and format support aligned with the existing catalogs in `lib/`.
+- Put server conversion behavior in the appropriate `app/api/` route.
+- Add or update the corresponding page under `app/`.
+- Validate input types and file-size limits at the API boundary.
+- Update the README when the supported feature list changes.
+
+
+
+### Issues and security
+
+Search existing issues before opening a new one. For bugs, include reproduction steps, expected behavior, actual behavior, and relevant environment details.
+
+Do not publish exploitable security vulnerabilities in a public issue. Contact the repository maintainer privately instead.
 
 ## Production notes
 
@@ -79,7 +141,3 @@ Example health check:
 ```bash
 curl http://127.0.0.1:3000/api/health
 ```
-
-## License
-
-[MIT](./LICENSE)
