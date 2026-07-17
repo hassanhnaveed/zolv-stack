@@ -2,10 +2,13 @@
  * `Organization` + canonical logo `ImageObject` builders (SEO
  * Architecture v1.0, Task 5).
  *
- * The logo `ImageObject` is defined in full exactly once (the brand-home
- * graph); every other page's `Organization` node references it by
- * `@id` only (spec: "shared logo entity referenced consistently — no
- * duplicated inline logo definitions").
+ * The logo keeps one stable `@id` (`logoImageId`) and is always a full
+ * `ImageObject` node in any page graph that includes Organization —
+ * Organization.logo references it by `@id` rather than inlining a
+ * duplicate logo object (spec: "shared logo entity referenced
+ * consistently"). Because Google does not merge graphs across URLs,
+ * every page that emits Organization also emits the logo node via
+ * `buildSharedSiteEntityNodes` (see `shared-entities.ts`).
  */
 
 import { ZOLVSTACK_BRAND } from "../brands";
@@ -45,9 +48,10 @@ export function buildOrganizationRef(): JsonLdRef {
 }
 
 /**
- * Builds the one canonical logo `ImageObject` node. Only ever included
- * in the brand-home graph — every other page references it by `@id`
- * via {@link buildOrganizationNode}'s `logo` field.
+ * Builds the canonical logo `ImageObject` node (stable {@link logoImageId}).
+ * Included alongside {@link buildOrganizationNode} on every self-contained
+ * page graph so `Organization.logo` never dangling-references a node
+ * defined only on another URL.
  */
 export function buildLogoImageNode(): JsonLdNode {
   return {

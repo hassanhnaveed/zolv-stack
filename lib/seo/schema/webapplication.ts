@@ -2,12 +2,11 @@
  * Fileora product `WebApplication` builder (SEO Architecture v1.0,
  * Task 5).
  *
- * Fully defined once, on the Fileora hub (`CollectionPage`) graph;
- * referenced by `@id` from every tool page's
- * `SoftwareApplication.isPartOf`. Only accurate, currently-true fields
- * are emitted: a genuinely free `Offer`, `Web` operating system, and a
- * `provider` relationship back to the ZolvStack `Organization` — no
- * `aggregateRating`, reviews, or invented features.
+ * Fully defined on every product-hub and product-tool page graph (same
+ * stable `@id`); other pages do not reference it. Only accurate,
+ * currently-true fields are emitted: a genuinely free `Offer`, `Web`
+ * operating system, and a `provider` relationship back to the ZolvStack
+ * `Organization` — no `aggregateRating`, reviews, or invented features.
  */
 
 import { FILEORA_BRAND } from "../brands";

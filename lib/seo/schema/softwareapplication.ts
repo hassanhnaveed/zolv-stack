@@ -9,10 +9,9 @@
  * points back to WebPage").
  */
 
-import { FILEORA_BRAND } from "../brands";
 import {
+  resolveFinalTitleOrBrandFallback,
   resolveRouteDescription,
-  resolveToolIntentTitle,
 } from "../content-resolver";
 import type { SeoRoute } from "../types";
 import { absoluteUrl } from "../url";
@@ -34,25 +33,21 @@ export interface BuildToolSoftwareApplicationOptions {
 
 /**
  * Builds the `SoftwareApplication` node for a `product-tool` route. Name
- * and description resolve through the same intent-title / Task 4
- * content-resolver helpers `buildMetadataForRoute` uses, so schema never
- * invents copy the page itself doesn't show. Only currently-accurate
- * fields are emitted — a genuinely free `Offer`, `Web` operating system,
- * and `provider`/`isPartOf` relationships; never `aggregateRating`,
- * reviews, or invented features.
+ * and description resolve through the same Task 4 content-resolver
+ * helpers metadata uses (`resolveFinalTitleOrBrandFallback` /
+ * `resolveRouteDescription`), so schema never invents a parallel title
+ * pattern. Only currently-accurate fields are emitted — a genuinely free
+ * `Offer`, `Web` operating system, and `provider`/`isPartOf`
+ * relationships; never `aggregateRating`, reviews, or invented features.
  */
 export function buildToolSoftwareApplicationNode(
   route: SeoRoute,
   options: BuildToolSoftwareApplicationOptions,
 ): JsonLdNode {
-  const intentTitle = resolveToolIntentTitle(route);
-
   return {
     "@type": "SoftwareApplication",
     "@id": softwareApplicationId(route.path),
-    name: intentTitle
-      ? `${FILEORA_BRAND.name} ${intentTitle}`
-      : FILEORA_BRAND.name,
+    name: resolveFinalTitleOrBrandFallback(route),
     url: absoluteUrl(route.path),
     description: resolveRouteDescription(route),
     applicationCategory: FILE_TOOL_APPLICATION_CATEGORY,

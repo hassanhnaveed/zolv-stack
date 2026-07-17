@@ -150,11 +150,34 @@ describe("buildJsonLdForRoute — brand-static / legal", () => {
     expect(items[0].name).toBe("Home");
   });
 
-  it("does not redefine the shared logo ImageObject or WebSite node on static pages", () => {
+  it("is self-contained: full Organization + logo ImageObject + WebSite (same shared @ids) on /about", () => {
+    stubOrigin();
+    const graph = buildJsonLdForRoute(ROUTE_IDS.ABOUT);
+
+    const organization = findNode(graph, "Organization");
+    const logo = findNode(graph, "ImageObject");
+    const website = findNode(graph, "WebSite");
+
+    expect(organization?.["@id"]).toBe(organizationId());
+    expect(organization?.name).toBeTruthy();
+    expect(organization?.url).toBeTruthy();
+    expect(asRef(organization?.logo)).toBe(logoImageId());
+
+    expect(logo?.["@id"]).toBe(logoImageId());
+    expect(logo?.url).toBeTruthy();
+    expect(logo?.["@type"]).toBe("ImageObject");
+
+    expect(website?.["@id"]).toBe(websiteId());
+    expect(website?.name).toBeTruthy();
+    expect(website?.url).toBeTruthy();
+  });
+
+  it("defines logo + WebSite with the same shared @ids on legal pages (e.g. /privacy)", () => {
     stubOrigin();
     const graph = buildJsonLdForRoute(ROUTE_IDS.PRIVACY);
-    expect(nodesOfType(graph, "ImageObject")).toHaveLength(0);
-    expect(nodesOfType(graph, "WebSite")).toHaveLength(0);
+    expect(findNode(graph, "ImageObject")?.["@id"]).toBe(logoImageId());
+    expect(findNode(graph, "WebSite")?.["@id"]).toBe(websiteId());
+    expect(findNode(graph, "Organization")?.["@id"]).toBe(organizationId());
   });
 });
 
@@ -175,11 +198,13 @@ describe("buildJsonLdForRoute — Fileora hub (product-hub -> CollectionPage)", 
     expect(asRef(collectionPage?.mainEntity)).toBe(fileoraWebApplicationId());
   });
 
-  it("includes Organization + WebSite full nodes and a 2-item breadcrumb (Home -> Fileora)", () => {
+  it("includes Organization + logo ImageObject + WebSite full nodes and a 2-item breadcrumb (Home -> Fileora)", () => {
     stubOrigin();
     const graph = buildJsonLdForRoute(ROUTE_IDS.FILEORA_HUB);
 
     expect(findNode(graph, "Organization")?.["@id"]).toBe(organizationId());
+    expect(findNode(graph, "ImageObject")?.["@id"]).toBe(logoImageId());
+    expect(asRef(findNode(graph, "Organization")?.logo)).toBe(logoImageId());
     expect(findNode(graph, "WebSite")?.["@id"]).toBe(websiteId());
 
     const breadcrumb = findNode(graph, "BreadcrumbList");
@@ -232,16 +257,29 @@ describe("buildJsonLdForRoute — product tool", () => {
     expect(asRef(softwareApp?.mainEntityOfPage)).toBe(webPage?.["@id"]);
   });
 
-  it("references (not redefines) Organization / WebSite / Fileora WebApplication on tool pages", () => {
+  it("is self-contained: full Organization + logo + WebSite + Fileora WebApplication (same shared @ids)", () => {
     stubOrigin();
     const graph = buildJsonLdForRoute("image-to-webp");
 
-    expect(nodesOfType(graph, "Organization")).toHaveLength(0);
-    expect(nodesOfType(graph, "WebSite")).toHaveLength(0);
-    expect(nodesOfType(graph, "WebApplication")).toHaveLength(0);
-
+    const organization = findNode(graph, "Organization");
+    const logo = findNode(graph, "ImageObject");
+    const website = findNode(graph, "WebSite");
+    const webApp = findNode(graph, "WebApplication");
     const webPage = findNode(graph, "WebPage");
     const softwareApp = findNode(graph, "SoftwareApplication");
+
+    expect(organization?.["@id"]).toBe(organizationId());
+    expect(organization?.name).toBeTruthy();
+    expect(asRef(organization?.logo)).toBe(logoImageId());
+
+    expect(logo?.["@id"]).toBe(logoImageId());
+    expect(logo?.url).toBeTruthy();
+
+    expect(website?.["@id"]).toBe(websiteId());
+    expect(website?.name).toBeTruthy();
+
+    expect(webApp?.["@id"]).toBe(fileoraWebApplicationId());
+    expect(webApp?.name).toBeTruthy();
 
     expect(asRef(webPage?.publisher)).toBe(organizationId());
     expect(asRef(webPage?.isPartOf)).toBe(websiteId());
@@ -285,6 +323,15 @@ describe("buildJsonLdForRoute — product tool", () => {
     expect(softwareApp).not.toHaveProperty("review");
   });
 
+  it("aligns SoftwareApplication.name with the Task 4 final document title", () => {
+    stubOrigin();
+    const graph = buildJsonLdForRoute("image-to-webp");
+    const softwareApp = findNode(graph, "SoftwareApplication");
+    expect(softwareApp?.name).toBe(
+      "Image to WebP Converter | Fileora by ZolvStack",
+    );
+  });
+
   it("still returns full, accurate schema for a route that is currently noindex", () => {
     stubOrigin();
     const route = ROUTES.find((r) => r.id === "image-to-webp");
@@ -316,9 +363,22 @@ describe("shared entity ids — reused exactly, never rebuilt", () => {
     const toolGraph = buildJsonLdForRoute("image-to-webp");
 
     const homeOrg = findNode(homeGraph, "Organization");
+    const toolOrg = findNode(toolGraph, "Organization");
     const toolWebPage = findNode(toolGraph, "WebPage");
 
+    expect(homeOrg?.["@id"]).toBe(toolOrg?.["@id"]);
     expect(homeOrg?.["@id"]).toBe(asRef(toolWebPage?.publisher));
+  });
+
+  it("keeps one full node per @id within each page graph (no duplicate definitions)", () => {
+    stubOrigin();
+    for (const route of ROUTES) {
+      const graph = buildJsonLdForRoute(route.id as never);
+      const ids = graph["@graph"]
+        .map((node) => node["@id"])
+        .filter((id): id is string => typeof id === "string");
+      expect(new Set(ids).size).toBe(ids.length);
+    }
   });
 
   it("derives every id from the configured origin via absoluteUrl, never a hard-coded host", () => {

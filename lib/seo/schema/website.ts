@@ -1,11 +1,11 @@
 /**
  * `WebSite` builder (SEO Architecture v1.0, Task 5).
  *
- * Fully defined once (brand-home and Fileora-hub graphs, per the design
- * spec's page-type table); referenced by `@id` from every other page's
- * `WebPage.isPartOf`. No `potentialAction` (`SearchAction`) is emitted —
- * there is no real site search to describe (spec: "do not invent
- * social/search actions").
+ * Fully defined on every page that needs site context (via
+ * `buildSharedSiteEntityNodes`); referenced by `@id` from
+ * `WebPage.isPartOf` within the same graph. No `potentialAction`
+ * (`SearchAction`) is emitted — there is no real site search to describe
+ * (spec: "do not invent social/search actions").
  */
 
 import { ZOLVSTACK_BRAND } from "../brands";
