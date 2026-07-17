@@ -148,8 +148,8 @@ Contributions are welcome, including bug fixes, documentation improvements, new 
 
 Husky installs with `npm install`. It runs staged-file linting and TypeScript
 checks before commits, then lint, typecheck, tests, SEO validation, and a
-production build before pushes. The pre-push SEO validation requires a valid
-`NEXT_PUBLIC_APP_URL` in the local environment.
+production build before pushes. The pre-push SEO/`build` steps default
+`NEXT_PUBLIC_APP_URL` to `https://example.com` when unset.
 
 ### Adding or changing tools
 

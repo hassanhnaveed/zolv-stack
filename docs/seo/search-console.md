@@ -68,9 +68,11 @@ NEXT_PUBLIC_APP_URL=https://<production-origin> npm run seo:check
 NEXT_PUBLIC_APP_URL=https://<production-origin> npm run build
 ```
 
-- The local pre-push hook runs `npm run seo:check`; ensure
-  `NEXT_PUBLIC_APP_URL` is set to a valid HTTPS origin in the developer
-  environment (for example via `.env.local`).
+- The local pre-push hook runs `npm run seo:check` and `npm run build` with
+  `NEXT_PUBLIC_APP_URL` defaulting to `https://example.com` when unset, so a
+  missing local origin does not block the push gate. Prefer setting the real
+  (or intended) origin via `.env.local` when reviewing production-shaped
+  output locally.
 - Confirm `reports/seo-audit.md` shows `0` errors. Warnings (title/description
   length) are advisory and never block a deploy.
 - Confirm `summary.environment.origin` in the audit matches the real

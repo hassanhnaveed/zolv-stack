@@ -60,7 +60,9 @@ Server-only: never import `lib/seo/*` from client components.
 - Runbooks: `docs/seo/search-console.md`, `performance-budgets.md`, `rollback.md`, `url-policy.md`
 - README SEO section + `.env.example` indexing/verification docs
 - Deploy CI runs `seo:check` before build and injects verification/indexing env for artifact bake
-- Local `prepush` includes `seo:check`
+- Local `prepush` includes `seo:check` and `build`, defaulting
+`NEXT_PUBLIC_APP_URL` to `https://example.com` when unset so the gate is
+usable without a purchased domain.
 
 ### Assets / tooling
 
