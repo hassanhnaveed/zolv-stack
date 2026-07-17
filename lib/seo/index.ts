@@ -6,8 +6,9 @@
  * framework grows — keep this list as the curated public API surface so
  * internal helpers stay unexported.
  *
- * Task 1 surface: types, config, brands, and URL helpers. Later tasks
- * extend this list deliberately when new public APIs land.
+ * Task 1 surface: types, config, brands, and URL helpers. Task 2 adds the
+ * route registry, redirect manifest, and indexability helpers. Later
+ * tasks extend this list deliberately when new public APIs land.
  */
 
 // Types
@@ -46,3 +47,30 @@ export {
 
 // URL helpers
 export { absoluteUrl, getSiteOrigin } from "./url";
+
+// Route registry
+export type { RouteId } from "./routes";
+export {
+  PATHS,
+  RESERVED_PATHS,
+  ROUTE_IDS,
+  ROUTES,
+  getRoute,
+  isReservedPath,
+  listRoutes,
+} from "./routes";
+
+// Redirect manifest
+export type { RedirectRule } from "./redirects";
+export { getNextRedirects, getRedirects } from "./redirects";
+
+// Indexability helpers
+export {
+  getRobotsDirective,
+  isRouteIndexable,
+  isRouteInSitemap,
+  isSeoIndexingEnabled,
+  listIndexableRoutes,
+  listSitemapRoutes,
+  resolveIndexFlags,
+} from "./indexability";
