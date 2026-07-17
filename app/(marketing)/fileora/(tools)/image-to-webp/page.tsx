@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
-import { TOOL_CONFIG } from "@/lib/utils";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolPage } from "@/components/tools/ToolPage";
+import { buildJsonLdForRoute, buildMetadataForRoute } from "@/lib/seo";
 
-const config = TOOL_CONFIG["image-to-webp"];
+const routeId = "image-to-webp";
 
-export const metadata: Metadata = {
-  title: config.title + " — Free Online Converter",
-  description: config.longDesc,
-  alternates: { canonical: "/fileora/image-to-webp" },
-};
+export const metadata = buildMetadataForRoute(routeId);
 
 export default function Page() {
-  return <ToolPage slug="image-to-webp" />;
+  return (
+    <>
+      <JsonLd data={buildJsonLdForRoute(routeId)} />
+      <ToolPage slug="image-to-webp" />
+    </>
+  );
 }

@@ -1,14 +1,16 @@
-import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolPage } from "@/components/tools/ToolPage";
+import { buildJsonLdForRoute, buildMetadataForRoute } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Image to BMP Converter — Free Online | JPG, PNG, WebP to BMP",
-  description:
-    "Convert any image to BMP format free online. JPG, PNG, WebP to BMP. Maximum compatibility with Windows applications. No signup.",
-  keywords: "image to bmp, jpg to bmp, png to bmp, convert to bmp free online",
-  alternates: { canonical: "https://fileora.netlify.app/fileora/image-to-bmp" },
-};
+const routeId = "image-to-bmp";
+
+export const metadata = buildMetadataForRoute(routeId);
 
 export default function Page() {
-  return <ToolPage slug="image-to-bmp" />;
+  return (
+    <>
+      <JsonLd data={buildJsonLdForRoute(routeId)} />
+      <ToolPage slug="image-to-bmp" />
+    </>
+  );
 }

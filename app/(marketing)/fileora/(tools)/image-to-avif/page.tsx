@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolPage } from "@/components/tools/ToolPage";
+import { buildJsonLdForRoute, buildMetadataForRoute } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Image to AVIF Converter — Free Online | Next-Gen Format",
-  description:
-    "Convert any image to AVIF format free online. Better compression than WebP. JPG, PNG, WebP, GIF to AVIF. No signup, no watermarks.",
-  keywords:
-    "image to avif, jpg to avif, png to avif, convert to avif free online",
-  alternates: { canonical: "https://fileora.netlify.app/fileora/image-to-avif" },
-};
+const routeId = "image-to-avif";
+
+export const metadata = buildMetadataForRoute(routeId);
 
 export default function Page() {
-  return <ToolPage slug="image-to-avif" />;
+  return (
+    <>
+      <JsonLd data={buildJsonLdForRoute(routeId)} />
+      <ToolPage slug="image-to-avif" />
+    </>
+  );
 }
