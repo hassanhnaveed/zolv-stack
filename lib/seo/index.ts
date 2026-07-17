@@ -7,12 +7,15 @@
  * internal helpers stay unexported.
  *
  * Task 1 surface: types, config, brands, and URL helpers. Task 2 adds the
- * route registry, redirect manifest, and indexability helpers. Later
- * tasks extend this list deliberately when new public APIs land.
+ * route registry, redirect manifest, and indexability helpers. Task 3
+ * adds the aggregate validator and audit report builder. Later tasks
+ * extend this list deliberately when new public APIs land.
  *
- * Internal validators (`assertValidRoutes`, `assertValidRedirects`) are
+ * Internal validators (`assertValidRoutes`, `assertValidRedirects`, and
+ * the individual per-concern validators in `validate.ts`) are
  * intentionally omitted — import them from their modules only when needed
- * (e.g. unit tests).
+ * (e.g. unit tests). Only the aggregate `validateSeo` and the audit report
+ * builders are part of the public surface.
  */
 
 // Types
@@ -78,3 +81,30 @@ export {
   listSitemapRoutes,
   resolveIndexFlags,
 } from "./indexability";
+
+// Validation
+export type { ValidateSeoOptions, ValidationIssue, ValidationSeverity } from "./validate";
+export { partitionValidationIssues, validateSeo } from "./validate";
+
+// Audit report
+export type {
+  BuildAuditReportOptions,
+  RunSeoAuditOptions,
+  RunSeoAuditResult,
+  SeoAuditEnvironmentSummary,
+  SeoAuditReport,
+  SeoAuditRouteEntry,
+  SeoAuditSummary,
+  SeoAuditVerificationSummary,
+  VerificationHealth,
+  WriteAuditReportOptions,
+  WrittenAuditReportPaths,
+} from "./audit";
+export {
+  DEFAULT_AUDIT_JSON_PATH,
+  DEFAULT_AUDIT_MARKDOWN_PATH,
+  buildAuditReport,
+  renderAuditMarkdown,
+  runSeoAudit,
+  writeAuditReport,
+} from "./audit";
