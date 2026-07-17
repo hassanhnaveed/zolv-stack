@@ -35,9 +35,14 @@ function readOptionalEnv(value: string | undefined): string | undefined {
 /**
  * Reads SEO configuration from environment variables. Performs no
  * caching, so tests can stub env vars per-case with `vi.stubEnv`.
+ *
+ * The returned object is frozen to prevent accidental mutation of process
+ * configuration by callers.
+ *
+ * @returns Frozen {@link SeoConfig} snapshot for the current process env
  */
-export function getSeoConfig(): SeoConfig {
-  return {
+export function getSeoConfig(): Readonly<SeoConfig> {
+  return Object.freeze({
     siteUrl: process.env.NEXT_PUBLIC_APP_URL?.trim() ?? "",
     indexingEnabled: readBooleanEnv(process.env.SEO_INDEXING_ENABLED),
     googleSiteVerification: readOptionalEnv(
@@ -47,22 +52,24 @@ export function getSeoConfig(): SeoConfig {
       process.env.SEO_BING_SITE_VERIFICATION,
     ),
     nodeEnv: process.env.NODE_ENV ?? "development",
-  };
+  });
 }
 
 /**
  * Fail-closed recognition of a genuine production SEO environment.
  *
- * Returns `true` only when `NODE_ENV === "production"` *and* the site
- * origin resolves to a valid absolute URL from `NEXT_PUBLIC_APP_URL`.
- * Every other state — non-production `NODE_ENV`, or a missing/invalid
- * origin — returns `false`.
+ * Returns `true` only when `NODE_ENV === "production"` *and*
+ * {@link getSiteOrigin} resolves successfully (valid HTTPS origin from
+ * `NEXT_PUBLIC_APP_URL`). Every other state — non-production `NODE_ENV`,
+ * or a missing/invalid origin — returns `false`.
  *
  * Downstream indexing/sitemap helpers (Task 2+) must treat `false` as
  * "noindex + empty sitemap", per the spec's fail-closed policy, even when
  * `SEO_INDEXING_ENABLED` is accidentally `true`. This function
  * intentionally does not read `SEO_INDEXING_ENABLED` itself — that flag is
  * a separate, explicit opt-in layered on top by indexability helpers.
+ *
+ * @returns Whether SEO indexing may consider this a production deployment
  */
 export function isProductionSeoEnvironment(): boolean {
   if (process.env.NODE_ENV !== "production") return false;
