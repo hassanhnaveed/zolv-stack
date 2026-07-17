@@ -20,6 +20,7 @@ import {
   RESERVED_PATHS,
   ROUTE_IDS,
   ROUTES,
+  type RouteId,
 } from "./routes";
 import type { SeoRoute } from "./types";
 
@@ -98,8 +99,18 @@ describe("ROUTES registry", () => {
     }
   });
 
-  it("throws a descriptive error when getRoute is called with an unregistered id", () => {
-    expect(() => getRoute("does-not-exist")).toThrow(/does-not-exist/);
+  it("accepts typed RouteIds at compile time and throws for unknown ids at runtime", () => {
+    // Compile-time proof: brand ids and ToolSlugs are valid RouteIds.
+    const homeId: RouteId = ROUTE_IDS.HOME;
+    const toolId: RouteId = "image-to-webp";
+    expect(getRoute(homeId).path).toBe("/");
+    expect(getRoute(toolId).path).toBe(toolHref("image-to-webp"));
+
+    // Runtime defensive guard for values that escape the type system
+    // (e.g. dynamic strings cast to RouteId).
+    expect(() => getRoute("does-not-exist" as RouteId)).toThrow(
+      /does-not-exist/,
+    );
   });
 
   it("listRoutes returns the full registry", () => {

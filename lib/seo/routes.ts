@@ -275,11 +275,15 @@ const ROUTES_BY_ID: ReadonlyMap<string, SeoRoute> = new Map(
 /**
  * Looks up a registered route by id.
  *
- * @param id - Registered route id (a {@link RouteId}, e.g. `"home"` or a
- * `ToolSlug` like `"image-to-webp"`)
+ * The public signature accepts only {@link RouteId} so callers get
+ * compile-time exhaustiveness. A runtime guard remains for values that
+ * escape the type system (e.g. dynamic strings cast to `RouteId`).
+ *
+ * @param id - Registered route id (e.g. `"home"` or a `ToolSlug` like
+ * `"image-to-webp"`)
  * @throws {Error} When no route is registered under `id`
  */
-export function getRoute(id: string): SeoRoute {
+export function getRoute(id: RouteId): SeoRoute {
   const route = ROUTES_BY_ID.get(id);
   if (!route) {
     throw new Error(`lib/seo/routes: no registered route with id "${id}".`);
