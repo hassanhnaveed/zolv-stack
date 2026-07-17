@@ -91,6 +91,7 @@ NEXT_PUBLIC_APP_URL=https://example.com npm run seo:check
 
 Runbooks:
 
+- [`docs/seo/architecture-v1-branch-summary.md`](docs/seo/architecture-v1-branch-summary.md) — SEO Architecture v1.0 branch overview (Tasks 1–9)
 - [`docs/seo/url-policy.md`](docs/seo/url-policy.md) — canonical URL contract
 - [`docs/seo/search-console.md`](docs/seo/search-console.md) — Google Search Console / Bing Webmaster Tools setup and per-deploy/per-release checklists
 - [`docs/seo/performance-budgets.md`](docs/seo/performance-budgets.md) — Core Web Vitals budgets per route type
