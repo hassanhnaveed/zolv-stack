@@ -54,8 +54,8 @@ export function buildFileoraWebApplicationNode(): JsonLdNode {
   };
 }
 
-/** `{ "@id" }` reference to the Fileora `WebApplication` node, for tool
- * pages that don't redefine the full node. */
+/** In-graph `{ "@id" }` pointer to the Fileora `WebApplication` node.
+ * Callers must also emit the full node via `buildSharedProductEntityNodes`. */
 export function buildFileoraWebApplicationRef(): JsonLdRef {
   return ref(fileoraWebApplicationId());
 }

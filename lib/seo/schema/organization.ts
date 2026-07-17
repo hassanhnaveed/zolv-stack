@@ -41,8 +41,8 @@ export function buildOrganizationNode(): JsonLdNode {
   };
 }
 
-/** `{ "@id" }` reference to the shared `Organization` node, for pages
- * that don't redefine the full node (e.g. product-tool pages). */
+/** In-graph `{ "@id" }` pointer to the shared `Organization` node.
+ * Callers must also emit the full node via `buildShared*EntityNodes`. */
 export function buildOrganizationRef(): JsonLdRef {
   return ref(organizationId());
 }
@@ -64,7 +64,3 @@ export function buildLogoImageNode(): JsonLdNode {
   };
 }
 
-/** `{ "@id" }` reference to the canonical logo `ImageObject`. */
-export function buildLogoRef(): JsonLdRef {
-  return ref(logoImageId());
-}

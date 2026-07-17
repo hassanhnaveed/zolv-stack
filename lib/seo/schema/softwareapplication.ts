@@ -3,10 +3,10 @@
  * Task 5).
  *
  * One stable `SoftwareApplication` per tool route, `isPartOf` the
- * Fileora `WebApplication` (referenced by `@id`, not redefined — see
- * `webapplication.ts`) and reciprocally linked to its `WebPage` via
- * `mainEntityOfPage` (spec: "SoftwareApplication `mainEntityOfPage`
- * points back to WebPage").
+ * Fileora `WebApplication` (same-page `@id` pointer; the full product
+ * node is emitted via `buildSharedProductEntityNodes`) and reciprocally
+ * linked to its `WebPage` via `mainEntityOfPage` (spec:
+ * "SoftwareApplication `mainEntityOfPage` points back to WebPage").
  */
 
 import {

@@ -6,10 +6,11 @@
  * here, from the configured site origin (`absoluteUrl` /
  * `getSiteOrigin`) — no builder file may hand-roll or re-derive an id.
  * This is what lets the same `Organization`, `WebSite`, canonical logo
- * `ImageObject`, and Fileora `WebApplication` be referenced consistently
- * (by `@id`) across every page's graph without duplicating their full
- * definitions everywhere (spec: "globally consistent entity IDs ...
- * shared entity helpers/constants").
+ * `ImageObject`, and Fileora `WebApplication` keep identical stable
+ * `@id`s on every page. Full definitions are still emitted in each
+ * page's `@graph` (via `shared-entities.ts`) because Google does not
+ * merge JSON-LD across URLs by `@id` (spec: "globally consistent
+ * entity IDs ... shared entity helpers/constants").
  *
  * ## Fragment convention
  *

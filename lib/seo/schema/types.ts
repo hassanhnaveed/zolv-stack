@@ -13,8 +13,9 @@
  * `undefined` values that {@link import("./prune").prune} removes). */
 export type JsonLdNode = Record<string, unknown>;
 
-/** An `{ "@id": ... }` reference to a node defined elsewhere in the same
- * (or another page's) graph — never a re-declared/rebuilt node. */
+/** An `{ "@id": ... }` pointer to a full node that must also appear in
+ * the *same* page `@graph` (via shared entity helpers). Never a
+ * cross-page-only reference — Google does not merge graphs by `@id`. */
 export interface JsonLdRef {
   "@id": string;
 }

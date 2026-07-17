@@ -37,6 +37,51 @@ function asRef(value: unknown): string | undefined {
   return undefined;
 }
 
+/**
+ * Collects `{ "@id" }` pointers nested under `@graph` nodes that do not
+ * resolve to a full top-level node in the same graph. Google does not
+ * merge JSON-LD across URLs by `@id`, so every page graph must be
+ * self-contained.
+ */
+function collectDanglingIdRefs(graph: JsonLdGraph): string[] {
+  const defined = new Set(
+    graph["@graph"]
+      .map((node) => node["@id"])
+      .filter((id): id is string => typeof id === "string"),
+  );
+  const dangling: string[] = [];
+
+  function walk(value: unknown, isTopLevelNode: boolean): void {
+    if (!value || typeof value !== "object") return;
+    if (Array.isArray(value)) {
+      for (const item of value) walk(item, false);
+      return;
+    }
+
+    const obj = value as Record<string, unknown>;
+    const id = obj["@id"];
+    if (
+      !isTopLevelNode &&
+      typeof id === "string" &&
+      !("@type" in obj) &&
+      !defined.has(id)
+    ) {
+      dangling.push(id);
+    }
+
+    for (const [key, child] of Object.entries(obj)) {
+      if (isTopLevelNode && key === "@id") continue;
+      walk(child, false);
+    }
+  }
+
+  for (const node of graph["@graph"]) {
+    walk(node, true);
+  }
+
+  return dangling;
+}
+
 /** Recursively collects every path in `value` whose leaf is empty
  * (undefined/null/""/[]/{}). Used to assert a built graph never emits an
  * empty property (prune must have removed it upstream). */
@@ -378,6 +423,14 @@ describe("shared entity ids — reused exactly, never rebuilt", () => {
         .map((node) => node["@id"])
         .filter((id): id is string => typeof id === "string");
       expect(new Set(ids).size).toBe(ids.length);
+    }
+  });
+
+  it("resolves every in-graph {@id} reference to a full node in the same @graph", () => {
+    stubOrigin();
+    for (const route of ROUTES) {
+      const graph = buildJsonLdForRoute(route.id as never);
+      expect(collectDanglingIdRefs(graph)).toEqual([]);
     }
   });
 

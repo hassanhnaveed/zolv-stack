@@ -28,8 +28,8 @@ export function buildWebsiteNode(): JsonLdNode {
   };
 }
 
-/** `{ "@id" }` reference to the shared `WebSite` node, for pages that
- * don't redefine the full node (e.g. static/legal, product-tool pages). */
+/** In-graph `{ "@id" }` pointer to the shared `WebSite` node.
+ * Callers must also emit the full node via `buildShared*EntityNodes`. */
 export function buildWebsiteRef(): JsonLdRef {
   return ref(websiteId());
 }
