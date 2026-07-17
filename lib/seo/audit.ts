@@ -100,11 +100,14 @@ export interface SeoAuditReport {
 }
 
 /** Options accepted by {@link buildAuditReport}. Every field defaults to
- * the real, live `lib/seo/*` data. */
+ * the real, live `lib/seo/*` data. Indexing / `NODE_ENV` are always read
+ * from the live process env (same source as {@link resolveIndexFlags}) so
+ * summary and per-route effective flags cannot disagree. Only verification
+ * tokens may be overridden for fixtures. */
 export interface BuildAuditReportOptions {
   routes?: readonly SeoRoute[];
   redirects?: readonly RedirectRule[];
-  config?: VerificationConfig & { nodeEnv?: string; indexingEnabled?: boolean };
+  config?: VerificationConfig;
 }
 
 interface OriginResolution {
@@ -184,23 +187,26 @@ export function buildAuditReport(
   const routes = options.routes ?? listRoutes();
   const redirects = options.redirects ?? getRedirects();
   const liveConfig = getSeoConfig();
-  const config = {
+  // Verification tokens may be overridden for fixtures; indexing / NODE_ENV
+  // always come from live process env so summary.environment and per-route
+  // resolveIndexFlags() stay consistent.
+  const verification: VerificationConfig = {
     googleSiteVerification:
       options.config?.googleSiteVerification ?? liveConfig.googleSiteVerification,
     bingSiteVerification:
       options.config?.bingSiteVerification ?? liveConfig.bingSiteVerification,
-    nodeEnv: options.config?.nodeEnv ?? liveConfig.nodeEnv,
-    indexingEnabled: options.config?.indexingEnabled ?? liveConfig.indexingEnabled,
   };
+  const nodeEnv = liveConfig.nodeEnv;
+  const indexingEnabled = liveConfig.indexingEnabled;
 
-  const issues = validateSeo({ routes, redirects, config });
+  const issues = validateSeo({ routes, redirects, config: verification });
   const { errors, warnings } = partitionValidationIssues(issues);
 
   const { origin, originError } = resolveOrigin();
   const isRecognizedProduction = isProductionSeoEnvironment();
   const exclusionContext: ExclusionContext = {
     isRecognizedProduction,
-    indexingEnabledFlag: config.indexingEnabled,
+    indexingEnabledFlag: indexingEnabled,
   };
 
   const routeEntries = routes
@@ -222,14 +228,14 @@ export function buildAuditReport(
     errorCount: errors.length,
     warningCount: warnings.length,
     verification: {
-      google: describeVerificationHealth(config.googleSiteVerification),
-      bing: describeVerificationHealth(config.bingSiteVerification),
+      google: describeVerificationHealth(verification.googleSiteVerification),
+      bing: describeVerificationHealth(verification.bingSiteVerification),
     },
     environment: {
-      nodeEnv: config.nodeEnv,
+      nodeEnv,
       isRecognizedProduction,
-      indexingEnabledFlag: config.indexingEnabled,
-      effectiveIndexingActive: isRecognizedProduction && config.indexingEnabled,
+      indexingEnabledFlag: indexingEnabled,
+      effectiveIndexingActive: isRecognizedProduction && indexingEnabled,
       origin,
       originError,
     },

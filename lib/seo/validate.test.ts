@@ -306,6 +306,56 @@ describe("validateHardcodedHosts", () => {
     ]);
     expect(issues).toEqual([]);
   });
+
+  it("flags a legacy host that only appears in TOOL_CONFIG-backed product-tool text", () => {
+    const toolConfig = {
+      "image-to-webp": {
+        title: "WebP",
+        description: "Convert images at https://fileora.netlify.app/webp.",
+      },
+    };
+    const issues = validateHardcodedHosts(
+      [
+        makeRoute({
+          id: "image-to-webp",
+          path: "/fileora/image-to-webp",
+          pageType: "product-tool",
+          // Intentionally omit route.title / route.description so the
+          // resolver falls through to TOOL_CONFIG (the production path).
+        }),
+      ],
+      undefined,
+      toolConfig,
+    );
+    expect(issues).toHaveLength(1);
+    expect(issues[0]).toMatchObject({
+      severity: "error",
+      code: "seo/hardcoded-legacy-host",
+      routeId: "image-to-webp",
+    });
+    expect(issues[0]?.message).toMatch(/fileora\.netlify\.app/);
+  });
+
+  it("does not flag TOOL_CONFIG tool text when no legacy host is present", () => {
+    const toolConfig = {
+      "image-to-webp": {
+        title: "WebP",
+        description: "Convert images to WebP in the browser.",
+      },
+    };
+    const issues = validateHardcodedHosts(
+      [
+        makeRoute({
+          id: "image-to-webp",
+          path: "/fileora/image-to-webp",
+          pageType: "product-tool",
+        }),
+      ],
+      undefined,
+      toolConfig,
+    );
+    expect(issues).toEqual([]);
+  });
 });
 
 describe("isPlaceholderVerificationToken / validateVerificationTokens", () => {
@@ -314,6 +364,8 @@ describe("isPlaceholderVerificationToken / validateVerificationTokens", () => {
     expect(isPlaceholderVerificationToken("REPLACE_ME")).toBe(true);
     expect(isPlaceholderVerificationToken("example-token")).toBe(true);
     expect(isPlaceholderVerificationToken("PLACEHOLDER")).toBe(true);
+    expect(isPlaceholderVerificationToken("sample-token")).toBe(true);
+    expect(isPlaceholderVerificationToken("dummy-token")).toBe(true);
   });
 
   it("does not flag a real-looking opaque token", () => {
@@ -509,6 +561,83 @@ describe("buildAuditReport", () => {
 
     expect(reportAsc.routes.map((r) => r.id)).toEqual(["a", "b"]);
     expect(reportDesc.routes.map((r) => r.id)).toEqual(["a", "b"]);
+  });
+
+  it("keeps summary environment and per-route effective flags consistent with live env (no contradictory overrides)", () => {
+    // Live gate: recognized production origin, but indexing opt-in is OFF.
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://example.com");
+    vi.stubEnv("SEO_INDEXING_ENABLED", "false");
+
+    const routes: SeoRoute[] = [
+      makeRoute({
+        id: "wants-index",
+        path: "/wants-index",
+        index: true,
+        sitemap: true,
+        title: "Wants Index",
+        description: "Declared indexable, but fail-closed gate is inactive.",
+      }),
+    ];
+
+    // Regression guard: previously `config.indexingEnabled` / `config.nodeEnv`
+    // could override the summary while per-route flags still came from live
+    // `isSeoIndexingEnabled()`, producing contradictory reports (e.g. summary
+    // claimed effectiveIndexingActive=true while every route was excluded).
+    // Indexing/env now always come from live process env.
+    const report = buildAuditReport({ routes, redirects: [] });
+
+    expect(report.summary.environment.isRecognizedProduction).toBe(true);
+    expect(report.summary.environment.indexingEnabledFlag).toBe(false);
+    expect(report.summary.environment.effectiveIndexingActive).toBe(false);
+    expect(report.summary.indexedRoutes).toBe(0);
+    expect(report.summary.sitemapRoutes).toBe(0);
+
+    const entry = report.routes.find((r) => r.id === "wants-index");
+    expect(entry?.effectiveIndex).toBe(false);
+    expect(entry?.effectiveSitemap).toBe(false);
+    expect(entry?.exclusionReason).toMatch(/SEO_INDEXING_ENABLED/i);
+
+    expect(report.summary.indexedRoutes).toBe(
+      report.routes.filter((r) => r.effectiveIndex).length,
+    );
+    expect(report.summary.sitemapRoutes).toBe(
+      report.routes.filter((r) => r.effectiveSitemap).length,
+    );
+  });
+
+  it("rejects stale indexing overrides that would disagree with live per-route flags", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://example.com");
+    vi.stubEnv("SEO_INDEXING_ENABLED", "false");
+
+    const routes: SeoRoute[] = [
+      makeRoute({
+        id: "wants-index",
+        path: "/wants-index",
+        index: true,
+        sitemap: true,
+        title: "Wants Index",
+        description: "Should stay fail-closed under live env.",
+      }),
+    ];
+
+    // Casting through a loose bag simulates a caller that still tries to
+    // override indexingEnabled. Summary + routes must both reflect live env
+    // (indexing off), never a contradictory "active" summary.
+    const report = buildAuditReport({
+      routes,
+      redirects: [],
+      config: {
+        indexingEnabled: true,
+        nodeEnv: "production",
+      } as unknown as { googleSiteVerification?: string },
+    });
+
+    expect(report.summary.environment.indexingEnabledFlag).toBe(false);
+    expect(report.summary.environment.effectiveIndexingActive).toBe(false);
+    expect(report.summary.indexedRoutes).toBe(0);
+    expect(report.routes[0]?.effectiveIndex).toBe(false);
   });
 });
 

@@ -325,10 +325,17 @@ export const LEGACY_HOST_PATTERNS: readonly string[] = Object.freeze([
   "netlify.app",
 ]);
 
-function collectRouteStrings(route: SeoRoute): string[] {
+function collectRouteStrings(
+  route: SeoRoute,
+  toolConfig: ToolTextConfig = DEFAULT_TOOL_CONFIG,
+): string[] {
   const values: string[] = [];
-  if (route.title) values.push(route.title);
-  if (route.description) values.push(route.description);
+  // Prefer resolved title/description so product-tool routes that fall back
+  // to TOOL_CONFIG are scanned the same way as required-field validators.
+  const title = resolveRouteTitle(route, toolConfig);
+  const description = resolveRouteDescription(route, toolConfig);
+  if (title) values.push(title);
+  if (description) values.push(description);
   if (route.ogImage?.url) values.push(route.ogImage.url);
   if (route.ogImage?.alt) values.push(route.ogImage.alt);
   if (route.keywords) values.push(...route.keywords);
@@ -341,22 +348,26 @@ function collectRouteStrings(route: SeoRoute): string[] {
 }
 
 /**
- * Scans every serialized SEO field on each route (`title`, `description`,
- * `ogImage`, `keywords`, `faq`) for hard-coded legacy/production host
- * substrings from {@link LEGACY_HOST_PATTERNS}. Callers may pass an
- * explicit `patterns` override in tests/fixtures without affecting the
- * default scan of the real registry.
+ * Scans every serialized SEO field on each route (resolved `title` /
+ * `description`, plus `ogImage`, `keywords`, `faq`) for hard-coded
+ * legacy/production host substrings from {@link LEGACY_HOST_PATTERNS}.
+ * Resolved text uses the same `product-tool` → `TOOL_CONFIG` fallback as
+ * {@link validateRequiredFields}. Callers may pass an explicit `patterns`
+ * override in tests/fixtures without affecting the default scan of the
+ * real registry.
  */
 export function validateHardcodedHosts(
   routes: readonly SeoRoute[],
   patterns: readonly string[] = LEGACY_HOST_PATTERNS,
+  toolConfig: ToolTextConfig = DEFAULT_TOOL_CONFIG,
 ): ValidationIssue[] {
+  const resolvedPatterns = patterns ?? LEGACY_HOST_PATTERNS;
   const issues: ValidationIssue[] = [];
 
   for (const route of routes) {
-    for (const value of collectRouteStrings(route)) {
+    for (const value of collectRouteStrings(route, toolConfig)) {
       const lowerValue = value.toLowerCase();
-      const matched = patterns.find((pattern) =>
+      const matched = resolvedPatterns.find((pattern) =>
         lowerValue.includes(pattern.toLowerCase()),
       );
       if (matched) {
@@ -380,6 +391,8 @@ const PLACEHOLDER_TOKEN_PATTERNS: readonly RegExp[] = [
   /change[-_ ]?me/i,
   /placeholder/i,
   /insert[-_ ]?token/i,
+  /sample[-_ ]?token/i,
+  /dummy[-_ ]?token/i,
   /^x{4,}$/i,
   /^todo$/i,
 ];
@@ -520,7 +533,7 @@ export function validateSeo(options: ValidateSeoOptions = {}): ValidationIssue[]
     ...validateRequiredFields(routes, toolConfig),
     ...validateDuplicateTitles(routes, toolConfig),
     ...validateIndexSitemapConsistency(routes),
-    ...validateHardcodedHosts(routes),
+    ...validateHardcodedHosts(routes, LEGACY_HOST_PATTERNS, toolConfig),
     ...validateVerificationTokens(config),
     ...validateTitleAndDescriptionLength(routes, toolConfig),
   ];
