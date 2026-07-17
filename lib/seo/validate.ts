@@ -19,16 +19,30 @@
  * and `scripts/seo-check.ts`. Individual validators are exported for
  * direct unit testing but are intentionally **not** re-exported from the
  * `lib/seo` public barrel — only `validateSeo` and its types are.
+ *
+ * `resolveRouteTitle` / `resolveRouteDescription` / `ToolTextConfig` now
+ * live in `content-resolver.ts` (Task 4) and are re-exported here
+ * unchanged so existing imports (including this file's own tests) keep
+ * working — `metadata.ts` consumes the same resolver module directly
+ * rather than depending on `validate.ts`.
  */
 
 import { getErrorMessage, TOOL_CONFIG } from "../utils";
 
+import {
+  resolveRouteDescription,
+  resolveRouteTitle,
+  type ToolTextConfig,
+} from "./content-resolver";
 import { getSeoConfig } from "./config";
 import { assertValidRedirects, getRedirects, type RedirectRule } from "./redirects";
 import { assertValidRoutes, listRoutes } from "./routes";
 import { getSiteOrigin, absoluteUrl } from "./url";
 import type { SeoRoute } from "./types";
 import type { SeoConfig } from "./config";
+
+export type { ToolTextConfig } from "./content-resolver";
+export { resolveRouteDescription, resolveRouteTitle } from "./content-resolver";
 
 /** Severity of a single validation finding. Errors fail `seo:check`;
  * warnings are advisory only. */
@@ -46,52 +60,10 @@ export interface ValidationIssue {
   routeId?: string;
 }
 
-/** Minimal shape validators need from `TOOL_CONFIG` entries: just the
- * SEO-relevant fields, not the full converter config (accept map, icon,
- * etc.). Kept loose (`Record<string, ...>`) so fixtures in tests don't
- * need to satisfy the full `TOOL_CONFIG` shape. */
-export type ToolTextConfig = Readonly<
-  Record<string, { title?: string; description?: string } | undefined>
->;
-
+/** Same cast `content-resolver.ts` uses internally; kept here too so this
+ * file's own default parameters don't need every caller to pass a
+ * `toolConfig` explicitly. */
 const DEFAULT_TOOL_CONFIG = TOOL_CONFIG as ToolTextConfig;
-
-function isNonEmpty(value: string | undefined): value is string {
-  return typeof value === "string" && value.trim().length > 0;
-}
-
-/**
- * Resolves the effective SEO title for `route`: the route's own `title`
- * override when set, else the `TOOL_CONFIG` fallback for `product-tool`
- * routes (spec: "may fall back to `TOOL_CONFIG` for tools"). Non-tool
- * page types never fall back — an SEO title must be authored directly on
- * the route.
- */
-export function resolveRouteTitle(
-  route: SeoRoute,
-  toolConfig: ToolTextConfig = DEFAULT_TOOL_CONFIG,
-): string | undefined {
-  if (isNonEmpty(route.title)) return route.title;
-  if (route.pageType === "product-tool") {
-    const fallback = toolConfig[route.id]?.title;
-    if (isNonEmpty(fallback)) return fallback;
-  }
-  return undefined;
-}
-
-/** Resolves the effective SEO description for `route`. See
- * {@link resolveRouteTitle} for the fallback rule. */
-export function resolveRouteDescription(
-  route: SeoRoute,
-  toolConfig: ToolTextConfig = DEFAULT_TOOL_CONFIG,
-): string | undefined {
-  if (isNonEmpty(route.description)) return route.description;
-  if (route.pageType === "product-tool") {
-    const fallback = toolConfig[route.id]?.description;
-    if (isNonEmpty(fallback)) return fallback;
-  }
-  return undefined;
-}
 
 /**
  * Wraps {@link assertValidRoutes} (Task 2) and converts a thrown

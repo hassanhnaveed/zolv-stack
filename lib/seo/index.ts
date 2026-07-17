@@ -8,8 +8,11 @@
  *
  * Task 1 surface: types, config, brands, and URL helpers. Task 2 adds the
  * route registry, redirect manifest, and indexability helpers. Task 3
- * adds the aggregate validator and audit report builder. Later tasks
- * extend this list deliberately when new public APIs land.
+ * adds the aggregate validator and audit report builder. Task 4 adds the
+ * metadata + Open Graph/Twitter builders (`buildRootMetadata`,
+ * `buildMetadataForRoute`, `resolveOgImages`, and the normalized social
+ * metadata helpers). Later tasks extend this list deliberately when new
+ * public APIs land.
  *
  * Internal validators (`assertValidRoutes`, `assertValidRedirects`, and
  * the individual per-concern validators in `validate.ts`) are
@@ -108,3 +111,17 @@ export {
   runSeoAudit,
   writeAuditReport,
 } from "./audit";
+
+// Alternates (canonical + language self-references)
+export type { RouteAlternates } from "./alternates";
+export { buildAlternates } from "./alternates";
+
+// Open Graph / Twitter normalized social metadata
+export type { SocialMetadata, BuildSocialMetadataInput } from "./open-graph";
+export { buildSocialMetadata, toOpenGraph, toTwitter } from "./open-graph";
+
+// Static OG/Twitter social-card resolvers
+export { OG_ASSET_VERSION, resolveOgImages } from "./og";
+
+// Metadata builder
+export { buildMetadataForRoute, buildRootMetadata } from "./metadata";
