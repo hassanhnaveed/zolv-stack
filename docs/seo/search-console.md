@@ -42,10 +42,13 @@ this repository — every value below is illustrative.
     `<meta name="google-site-verification" content="...">`.
   - Bing → the `verification.other["msvalidate.01"]` key (Next has no native
     Bing field) → renders `<meta name="msvalidate.01" content="...">`.
-- Because these are read at request/build time from `process.env`, a new or
-  changed token requires a **new deploy** (a redeploy re-reads env) — editing
-  the value in your host's env store alone does not update already-served
-  HTML until the app restarts/rebuilds.
+- In this project's Lightsail artifact flow, root verification metadata and
+  sitemap/indexing decisions are evaluated during the GitHub Actions
+  production build. Configure both verification tokens as GitHub Environment
+  secrets and `SEO_INDEXING_ENABLED` as a GitHub Environment variable for the
+  `production` environment used by the build job, then redeploy through CI.
+  Setting these values only on the Lightsail host after the artifact was built
+  cannot update already-baked static HTML or build-time indexing output.
 - A token left blank is omitted entirely — no empty `<meta>` tag is ever
   emitted. Missing verification is never a build failure.
 - A token that still looks like an unfilled placeholder (e.g.
@@ -65,6 +68,9 @@ NEXT_PUBLIC_APP_URL=https://<production-origin> npm run seo:check
 NEXT_PUBLIC_APP_URL=https://<production-origin> npm run build
 ```
 
+- The local pre-push hook runs `npm run seo:check`; ensure
+  `NEXT_PUBLIC_APP_URL` is set to a valid HTTPS origin in the developer
+  environment (for example via `.env.local`).
 - Confirm `reports/seo-audit.md` shows `0` errors. Warnings (title/description
   length) are advisory and never block a deploy.
 - Confirm `summary.environment.origin` in the audit matches the real
@@ -93,13 +99,13 @@ NEXT_PUBLIC_APP_URL=https://<production-origin> npm run build
 
 ## Current indexing scope (see `lib/seo/routes.ts` for the live source of truth)
 
-As of this runbook, the Home page and the Fileora hub keep their
-already-approved `index: true` / `sitemap: true` declarations; every
-Fileora tool route stays `index: false` / `sitemap: false` (Task 9's index
-quality gate approved zero tools initially — see the comment above
-`TOOL_ROUTE_DEFAULTS` in `lib/seo/routes.ts`). Do not submit an individual
-tool URL for indexing in GSC/Bing until its route is flipped to
-`index: true` in the registry and redeployed.
+As of this runbook, the non-tool routes with already-approved `index: true` /
+`sitemap: true` declarations are Home, the Fileora hub, About, Contact,
+Security, Privacy, and Terms. Every Fileora tool route stays `index: false` /
+`sitemap: false` (Task 9's index quality gate approved zero tools initially —
+see the comment above `TOOL_ROUTE_DEFAULTS` in `lib/seo/routes.ts`). Do not
+submit an individual tool URL for indexing in GSC/Bing until its route is
+flipped to `index: true` in the registry and redeployed.
 
 ## Related
 

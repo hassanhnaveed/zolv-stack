@@ -61,7 +61,7 @@ Never commit `.env`, `.env.local`, or SSH/private keys. Production secrets (depl
 npm run dev        # development
 npm run lint       # ESLint
 npm run typecheck  # TypeScript
-npm run test       # Vitest
+npm test           # Vitest
 npm run seo:check  # SEO validation + audit report (reports/seo-audit.{md,json})
 npm run build      # production build
 npm run start      # serve production build on port 3000
@@ -75,8 +75,9 @@ registry (`lib/seo/routes.ts`). Indexing is fail-closed and explicit
 opt-in per route: outside a recognized production environment with
 `SEO_INDEXING_ENABLED=true`, every route is non-indexable and the sitemap
 is empty, even if a route declares `index: true`. Today, only the home page
-and the Fileora hub are declared indexable; individual Fileora tools stay
-`index: false` until each one passes the index quality gate documented in
+and the Fileora hub plus the About, Contact, Security, Privacy, and Terms
+pages are declared indexable; individual Fileora tools stay `index: false`
+until each one passes the index quality gate documented in
 `lib/seo/routes.ts`.
 
 Run `npm run seo:check` to validate the registry and write a human-readable
@@ -144,7 +145,10 @@ Contributions are welcome, including bug fixes, documentation improvements, new 
 - Ensure the PR CI checks pass: lint, typecheck, and production build.
 - Do not include generated build output, credentials, private keys, or real environment values.
 
-Husky installs with `npm install`. It runs staged-file linting and TypeScript checks before commits, then lint and typecheck before pushes.
+Husky installs with `npm install`. It runs staged-file linting and TypeScript
+checks before commits, then lint, typecheck, tests, SEO validation, and a
+production build before pushes. The pre-push SEO validation requires a valid
+`NEXT_PUBLIC_APP_URL` in the local environment.
 
 ### Adding or changing tools
 
