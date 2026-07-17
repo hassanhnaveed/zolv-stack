@@ -643,6 +643,14 @@ export function getSavingsPct(original: number, converted: number): string {
   return ((1 - converted / original) * 100).toFixed(1);
 }
 
+/** Base path for all Fileora tool routes (`/fileora/{slug}`). */
+export const FILEORA_BASE = "/fileora";
+
+/** Absolute app path for a Fileora tool page. */
+export function toolHref(slug: string): string {
+  return `${FILEORA_BASE}/${slug}`;
+}
+
 export const TOOL_CONFIG = {
   "image-to-webp": {
     slug: "image-to-webp",

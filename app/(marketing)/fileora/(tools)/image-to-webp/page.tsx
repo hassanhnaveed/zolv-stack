@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { TOOL_CONFIG } from "@/lib/utils";
 import { ToolPage } from "@/components/tools/ToolPage";
 
-const config = TOOL_CONFIG["pdf-merge"];
+const config = TOOL_CONFIG["image-to-webp"];
 
 export const metadata: Metadata = {
   title: config.title + " — Free Online Converter",
   description: config.longDesc,
-  alternates: { canonical: "/pdf-merge" },
+  alternates: { canonical: "/fileora/image-to-webp" },
 };
 
 export default function Page() {
-  return <ToolPage slug="pdf-merge" />;
+  return <ToolPage slug="image-to-webp" />;
 }

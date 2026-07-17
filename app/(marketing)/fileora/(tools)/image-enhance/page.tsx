@@ -1,7 +1,7 @@
 // import type { Metadata } from "next";
 // import { Navbar } from "@/components/layout/Navbar";
 // import { BackButton, OtherTools } from "@/components/tools/ToolNav";
-import { ImageEnhancer } from "../../../components/tools/ImageEnhancer";
+import { ImageEnhancer } from "@/components/tools/ImageEnhancer";
 
 // export const metadata: Metadata = {
 //   title: "Enhance Image — Free Online | Improve Image Quality | Fileora",
@@ -9,7 +9,7 @@ import { ImageEnhancer } from "../../../components/tools/ImageEnhancer";
 //     "Enhance image quality with AI. Sharpen blurry images, upscale resolution 2x, boost clarity. Free online tool with before/after comparison. No signup required.",
 //   keywords:
 //     "ai image enhancer, sharpen image online free, upscale image, improve image quality, hd image enhancer online",
-//   alternates: { canonical: "https://fileora.netlify.app/image-enhance" },
+//   alternates: { canonical: "https://fileora.netlify.app/fileora/image-enhance" },
 // };
 
 // export default function Page() {

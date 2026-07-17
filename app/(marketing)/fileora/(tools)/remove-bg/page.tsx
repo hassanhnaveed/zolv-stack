@@ -10,7 +10,7 @@ import { BackgroundRemover } from "@/components/tools/BackgroundRemover";
 //     "Remove background from any image instantly with AI. Free, unlimited, no signup. Perfect for product photos, portraits, and graphics.",
 //   keywords:
 //     "remove background online free, background remover ai, transparent background image, remove bg unlimited",
-//   alternates: { canonical: "https://fileora.netlify.app/remove-bg" },
+//   alternates: { canonical: "https://fileora.netlify.app/fileora/remove-bg" },
 // };
 
 // export default function Page() {

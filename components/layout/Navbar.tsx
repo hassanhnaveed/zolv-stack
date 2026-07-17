@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TOOL_CONFIG } from "@/lib/utils";
+import { TOOL_CONFIG, toolHref } from "@/lib/utils";
 import { FileoraLogo } from "@/components/brand/FileoraLogo";
 
 const tools = Object.values(TOOL_CONFIG);
@@ -126,7 +126,7 @@ export function Navbar() {
           >
             {/* <div style={{ padding: "16px 24px", display: "flex", flexDirection: "column", gap: 4 }}>
               {tools.map(t => (
-                <Link key={t.slug} href={`/${t.slug}`} onClick={() => setOpen(false)}
+                <Link key={t.slug} href={toolHref(t.slug)} onClick={() => setOpen(false)}
                   style={{ fontSize: 14, color: "var(--color-text-2)", padding: "10px 0", textDecoration: "none", borderBottom: "1px solid rgba(255,255,255,0.04)", display: "flex", alignItems: "center", gap: 10 }}>
                   <span>{t.icon}</span>
                   {t.title}
@@ -158,7 +158,7 @@ export function Navbar() {
                 .map((t) => (
                   <Link
                     key={t.slug}
-                    href={`/${t.slug}`}
+                    href={toolHref(t.slug)}
                     onClick={() => setOpen(false)}
                     style={{
                       fontSize: 14,
@@ -192,7 +192,7 @@ export function Navbar() {
                 .map((t) => (
                   <Link
                     key={t.slug}
-                    href={`/${t.slug}`}
+                    href={toolHref(t.slug)}
                     onClick={() => setOpen(false)}
                     style={{
                       fontSize: 14,

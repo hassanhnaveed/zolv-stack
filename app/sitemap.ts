@@ -1,12 +1,12 @@
 import { MetadataRoute } from "next";
-import { TOOL_CONFIG } from "@/lib/utils";
+import { TOOL_CONFIG, toolHref } from "@/lib/utils";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = process.env.NEXT_PUBLIC_APP_URL || "https://fileora.netlify.app";
   const now = new Date();
 
   const toolPages = Object.keys(TOOL_CONFIG).map(slug => ({
-    url: `${base}/${slug}`,
+    url: `${base}${toolHref(slug)}`,
     lastModified: now,
     changeFrequency: "monthly" as const,
     priority: 0.9,

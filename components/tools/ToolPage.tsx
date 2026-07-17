@@ -1,7 +1,7 @@
 "use client";
 
 import { Converter } from "@/components/tools/Converter";
-import { TOOL_CONFIG, TOOL_CATEGORIES, type ToolSlug } from "@/lib/utils";
+import { TOOL_CONFIG, TOOL_CATEGORIES, toolHref, type ToolSlug } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -45,7 +45,7 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
         "@type": "ListItem",
         position: 2,
         name: config.title,
-        item: `https://fileora.com/${slug}`,
+        item: `https://fileora.com${toolHref(slug)}`,
       },
     ],
   };
@@ -58,7 +58,7 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
     operatingSystem: "Web",
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description: config.longDesc,
-    url: `https://fileora.com/${slug}`,
+    url: `https://fileora.com${toolHref(slug)}`,
   };
 
   return (
@@ -261,7 +261,7 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
   return (
     <Link
       key={t.slug}
-      href={isComingSoon ? "#" : `/${t.slug}`}
+      href={isComingSoon ? "#" : toolHref(t.slug)}
       onClick={(e) => isComingSoon && e.preventDefault()}
       style={{
         display: "flex",
