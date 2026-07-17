@@ -71,15 +71,24 @@ describe("canonical consistency across migrated route modules", () => {
 
       const graphStrings = collectStrings(graph);
       expect(graphStrings).toContain(canonical);
-      expect(
-        graph["@graph"]
-          .filter((node) => node["@type"] === "BreadcrumbList")
-          .flatMap((node) =>
-            (node.itemListElement as Array<{ item?: string }> | undefined) ??
-            [],
-          )
-          .every((item) => item.item?.startsWith("https://example.com")),
-      ).toBe(true);
+      const breadcrumbs = graph["@graph"].filter(
+        (node) => node["@type"] === "BreadcrumbList",
+      );
+
+      if (id === ROUTE_IDS.HOME) {
+        expect(breadcrumbs).toHaveLength(0);
+      } else {
+        expect(breadcrumbs).toHaveLength(1);
+        const items = breadcrumbs[0].itemListElement as Array<{
+          item?: string;
+        }>;
+        expect(items.length).toBeGreaterThan(0);
+        expect(
+          items.every((item) =>
+            item.item?.startsWith("https://example.com"),
+          ),
+        ).toBe(true);
+      }
     },
   );
 });

@@ -13,6 +13,7 @@ import {
   resolveToolFromFormats,
   type HeroCopy,
 } from "@/lib/format-catalog";
+import { FILEORA_FAQS } from "@/lib/fileora-faq";
 
 const tools = Object.values(TOOL_CONFIG);
 
@@ -67,41 +68,6 @@ const whyItems = [
     icon: ShieldCheck,
     title: "Always free",
     desc: "All current tools are free forever. No credit card, no hidden fees.",
-  },
-];
-
-const faqs = [
-  {
-    q: "Is Fileora really free to use?",
-    a: "Yes — all tools on Fileora are completely free. No hidden fees, no credit card, no account required. Convert unlimited files.",
-  },
-  {
-    q: "Are my files stored on your servers?",
-    a: "No. Files are processed in memory and deleted immediately after conversion. We never store, share, or access your files.",
-  },
-  {
-    q: "What is WebP and why should I use it?",
-    a: "WebP is a modern image format by Google that provides 25-80% smaller files vs JPG/PNG at equivalent quality — making websites load faster and improving SEO.",
-  },
-  {
-    q: "Do all browsers support WebP?",
-    a: "Yes. Chrome, Firefox, Safari 14+, Edge, and Opera all support WebP. It has 97%+ global browser support as of 2024.",
-  },
-  {
-    q: "What is the maximum file size?",
-    a: "50MB per file. You can convert up to 20 files at once and download them all as a ZIP archive.",
-  },
-  {
-    q: "What image formats can I convert?",
-    a: "Fileora supports JPG, JPEG, PNG, GIF, BMP, TIFF, AVIF, HEIC, HEIF, and WebP as input formats depending on the tool.",
-  },
-  {
-    q: "Can I convert multiple files at once?",
-    a: "Yes! Upload up to 20 files, convert them all with one click, and download as a single ZIP file.",
-  },
-  {
-    q: "How do I compress a PDF?",
-    a: "Go to our PDF Compress tool, upload your PDF, click Convert, and download the compressed version. No quality loss on text and vector content.",
   },
 ];
 
@@ -706,8 +672,8 @@ export function FileoraHubClient() {
             </h2>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {faqs.map(({ q, a }) => (
-              <div key={q} className="feature-card glow-hover" style={{ padding: "20px 24px" }}>
+            {FILEORA_FAQS.map(({ question, answer }) => (
+              <div key={question} className="feature-card glow-hover" style={{ padding: "20px 24px" }}>
                 <p
                   style={{
                     fontFamily: "var(--font-display)",
@@ -718,7 +684,7 @@ export function FileoraHubClient() {
                     letterSpacing: "-0.2px",
                   }}
                 >
-                  {q}
+                  {question}
                 </p>
                 <p
                   style={{
@@ -728,7 +694,7 @@ export function FileoraHubClient() {
                     margin: 0,
                   }}
                 >
-                  {a}
+                  {answer}
                 </p>
               </div>
             ))}

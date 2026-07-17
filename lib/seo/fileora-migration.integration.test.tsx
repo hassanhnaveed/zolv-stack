@@ -93,6 +93,17 @@ describe("Fileora centralized SEO route migration", () => {
     expect(source).not.toContain('"use client"');
     expect(source).not.toContain("application/ld+json");
 
+    const hubClientSource = await readFile(
+      path.join(projectRoot, "components/marketing/FileoraHubClient.tsx"),
+      "utf8",
+    );
+    expect(hubClientSource).toContain(
+      'import { FILEORA_FAQS } from "@/lib/fileora-faq"',
+    );
+    expect(hubClientSource).toContain(
+      "FILEORA_FAQS.map(({ question, answer }) =>",
+    );
+
     const pageModule = (await import(
       "../../app/(marketing)/fileora/page"
     )) as PageModule;

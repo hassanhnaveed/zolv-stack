@@ -34,6 +34,7 @@
  * even though this file is otherwise a normal part of the app.
  */
 
+import { FILEORA_FAQS } from "../fileora-faq";
 import { FILEORA_BASE, TOOL_CONFIG, toolHref, type ToolSlug } from "../utils";
 
 import { brandHomeTitle, brandStaticTitle, productHubTitle } from "./brands";
@@ -243,6 +244,7 @@ const FILEORA_HUB_ROUTE: SeoRoute = {
   title: productHubTitle(),
   description:
     "Fileora by ZolvStack — free, unlimited file conversion tools for images, PDFs, and documents. No signup required.",
+  faq: [...FILEORA_FAQS],
   index: true,
   sitemap: true,
   follow: true,

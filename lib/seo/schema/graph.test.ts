@@ -279,6 +279,23 @@ describe("buildJsonLdForRoute — Fileora hub (product-hub -> CollectionPage)", 
     expect(webApp).not.toHaveProperty("aggregateRating");
     expect(webApp).not.toHaveProperty("review");
   });
+
+  it("emits the hub's eight route-authored FAQs in the centralized graph", () => {
+    stubOrigin();
+    const route = ROUTES.find((entry) => entry.id === ROUTE_IDS.FILEORA_HUB);
+    const graph = buildJsonLdForRoute(ROUTE_IDS.FILEORA_HUB);
+    const faqPage = findNode(graph, "FAQPage");
+
+    expect(route?.faq).toHaveLength(8);
+    expect(faqPage).toBeDefined();
+    expect(faqPage?.mainEntity).toEqual(
+      route?.faq?.map(({ question, answer }) => ({
+        "@type": "Question",
+        name: question,
+        acceptedAnswer: { "@type": "Answer", text: answer },
+      })),
+    );
+  });
 });
 
 describe("buildJsonLdForRoute — product tool", () => {

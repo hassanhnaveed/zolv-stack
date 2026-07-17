@@ -61,7 +61,7 @@ function composeBrandStatic(route: SeoRoute): JsonLdNode[] {
 function composeProductHub(route: SeoRoute): JsonLdNode[] {
   const breadcrumbRef = ref(breadcrumbListId(route.path));
 
-  return [
+  const nodes: JsonLdNode[] = [
     ...buildSharedProductEntityNodes(),
     buildCollectionPageNode(route, {
       mainEntity: buildFileoraWebApplicationRef(),
@@ -69,6 +69,13 @@ function composeProductHub(route: SeoRoute): JsonLdNode[] {
     }),
     buildBreadcrumbListNode(route),
   ];
+
+  const faqNode = buildFaqPageNode(route);
+  if (faqNode) {
+    nodes.push(faqNode);
+  }
+
+  return nodes;
 }
 
 /** Product tool: shared product entities + WebPage (mainEntity ->
