@@ -11,8 +11,11 @@
  * adds the aggregate validator and audit report builder. Task 4 adds the
  * metadata + Open Graph/Twitter builders (`buildRootMetadata`,
  * `buildMetadataForRoute`, `resolveOgImages`, and the normalized social
- * metadata helpers). Later tasks extend this list deliberately when new
- * public APIs land.
+ * metadata helpers). Task 5 adds the JSON-LD graph builder
+ * (`buildJsonLdForRoute`) from `./schema` — the individual node builders,
+ * `pageType` registry, and `prune` stay internal to `./schema`, imported
+ * directly only when needed (e.g. focused unit tests). Later tasks
+ * extend this list deliberately when new public APIs land.
  *
  * Internal validators (`assertValidRoutes`, `assertValidRedirects`, and
  * the individual per-concern validators in `validate.ts`) are
@@ -134,3 +137,7 @@ export {
   resolveToolIntentTitle,
 } from "./content-resolver";
 export type { ToolTextConfig } from "./content-resolver";
+
+// JSON-LD structured data graph
+export type { JsonLdGraph, JsonLdNode } from "./schema";
+export { buildJsonLdForRoute } from "./schema";
