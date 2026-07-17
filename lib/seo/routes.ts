@@ -7,16 +7,22 @@
  * sitemap, robots) read from {@link ROUTES} / {@link getRoute} — they must
  * never invent paths themselves.
  *
- * Tool routes are derived directly from `TOOL_CONFIG` (`lib/utils.ts`) so
- * this registry can never drift out of sync with the actual set of
- * converters. Every tool defaults to `index: false`, `sitemap: false`,
- * `follow: true` until it passes the index quality gate described in the
- * spec ("Index quality gate (tools)") — that opt-in is a future change to
- * a route's flags here, not a change to this file's structure.
+ * ## Index defaults and fail-closed policy
  *
- * Effective (fail-closed) indexability is computed by `indexability.ts`,
- * not by this file — the `index`/`sitemap` values declared here are
- * *intent*, gated later by environment/config.
+ * - **Declared intent** lives on each route (`index` / `sitemap` / `follow`).
+ *   These flags are independent: a page may be `follow: true` while
+ *   `index: false`, and `sitemap` must never outrun effective `index`
+ *   (enforced by `indexability.ts`).
+ * - **Tool routes default to non-indexable:** `index: false`,
+ *   `sitemap: false`, `follow: true`. A tool becomes indexable only via
+ *   **explicit opt-in** in this registry after it passes the index quality
+ *   gate (fully functional, unique substantial content, correct
+ *   metadata/schema, crawlable links, smoke tests).
+ * - **Effective indexability is fail-closed:** `indexability.ts` ANDs
+ *   declared intent with a recognized production environment *and*
+ *   `SEO_INDEXING_ENABLED=true`. Outside that gate, every route is
+ *   treated as noindex / omitted from the sitemap — even if declared
+ *   `index: true`.
  *
  * ## Import note
  *
@@ -34,8 +40,8 @@ import { brandHomeTitle, brandStaticTitle, productHubTitle } from "./brands";
 import type { IndexFlags, SeoRoute } from "./types";
 
 /** Stable ids for non-tool routes. Tool routes use their `ToolSlug` as the
- * id directly (already unique, kebab-case, and stable). */
-export const ROUTE_IDS = {
+ * id directly (already unique, kebab-case, and stable). Frozen. */
+export const ROUTE_IDS = Object.freeze({
   HOME: "home",
   ABOUT: "about",
   CONTACT: "contact",
@@ -43,14 +49,14 @@ export const ROUTE_IDS = {
   PRIVACY: "privacy",
   TERMS: "terms",
   FILEORA_HUB: "fileora-hub",
-} as const;
+} as const);
 
 /** Union of every registrable route id: non-tool ids plus every `ToolSlug`. */
 export type RouteId = (typeof ROUTE_IDS)[keyof typeof ROUTE_IDS] | ToolSlug;
 
 /** Site-relative path constants used by nav/metadata/redirects so no
- * caller ever hand-writes a route path. */
-export const PATHS = {
+ * caller ever hand-writes a route path. Frozen. */
+export const PATHS = Object.freeze({
   HOME: "/",
   ABOUT: "/about",
   CONTACT: "/contact",
@@ -58,7 +64,8 @@ export const PATHS = {
   PRIVACY: "/privacy",
   TERMS: "/terms",
   FILEORA: FILEORA_BASE,
-} as const;
+} as const);
+
 
 /** Reserved paths that must never collide with a registered SEO route
  * (spec "URL Strategy": "Reserved paths validated"). Prefix matches (e.g.
@@ -103,6 +110,7 @@ function isKebabCasePath(path: string): boolean {
  *
  * Exported so `routes.test.ts` can exercise it directly with fixtures, in
  * addition to it being run once against {@link ROUTES} at module load.
+ * Intentionally **not** re-exported from the `lib/seo` public barrel.
  *
  * @param routes - Candidate route list to validate
  */
@@ -139,8 +147,9 @@ export function assertValidRoutes(routes: readonly SeoRoute[]): void {
 }
 
 /** Default index policy for every tool route until it passes the index
- * quality gate (spec: "Default for tools: `index: false`, `sitemap:
- * false` until quality gate passes"). */
+ * quality gate and is explicitly opted in (spec: "Default for tools:
+ * `index: false`, `sitemap: false` until quality gate passes"). Fail-closed
+ * effective indexing still requires production + `SEO_INDEXING_ENABLED`. */
 const TOOL_ROUTE_DEFAULTS: IndexFlags = {
   index: false,
   sitemap: false,

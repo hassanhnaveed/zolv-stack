@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TOOL_CONFIG, toolHref, type ToolSlug } from "@/lib/utils";
 
-import { getNextRedirects, getRedirects } from "./redirects";
+import { getNextRedirects, getRedirects, assertValidRedirects } from "./redirects";
+import type { RedirectRule } from "./redirects";
 import {
   isRouteIndexable,
   isRouteInSitemap,
@@ -38,6 +39,22 @@ function makeRoute(overrides: Partial<SeoRoute>): SeoRoute {
     ...overrides,
   };
 }
+
+function makeRedirect(overrides: Partial<RedirectRule>): RedirectRule {
+  return {
+    source: "/legacy",
+    destination: "/fileora",
+    permanent: true,
+    ...overrides,
+  };
+}
+
+const FIXTURE_ROUTES: readonly SeoRoute[] = [
+  makeRoute({ id: "hub", path: "/fileora" }),
+  makeRoute({ id: "tool", path: "/fileora/image-to-webp" }),
+  makeRoute({ id: "about", path: "/about" }),
+];
+
 
 describe("ROUTES registry", () => {
   it("registers the ZolvStack brand routes at their expected paths", () => {
@@ -115,6 +132,15 @@ describe("ROUTES registry", () => {
 
   it("listRoutes returns the full registry", () => {
     expect(listRoutes()).toEqual(ROUTES);
+  });
+
+  it("freezes PATHS, ROUTE_IDS, ROUTES, and each route object", () => {
+    expect(Object.isFrozen(PATHS)).toBe(true);
+    expect(Object.isFrozen(ROUTE_IDS)).toBe(true);
+    expect(Object.isFrozen(ROUTES)).toBe(true);
+    for (const route of ROUTES) {
+      expect(Object.isFrozen(route)).toBe(true);
+    }
   });
 });
 
@@ -247,8 +273,172 @@ describe("getRedirects / getNextRedirects", () => {
     }
   });
 
-  it("getNextRedirects mirrors getRedirects for next.config.ts consumption", () => {
-    expect(getNextRedirects()).toEqual(getRedirects());
+  it("getNextRedirects mirrors getRedirects content for next.config.ts", () => {
+    expect(getNextRedirects()).toEqual([...getRedirects()]);
+  });
+
+  it("getRedirects returns a frozen canonical snapshot callers cannot mutate", () => {
+    const redirects = getRedirects();
+    expect(Object.isFrozen(redirects)).toBe(true);
+    expect(Object.isFrozen(redirects[0])).toBe(true);
+    expect(() => {
+      (redirects as RedirectRule[]).push(
+        makeRedirect({ source: "/hack", destination: "/fileora" }),
+      );
+    }).toThrow();
+  });
+
+  it("getNextRedirects returns a mutable copy that does not mutate the canonical manifest", () => {
+    const nextRedirects = getNextRedirects();
+    expect(Object.isFrozen(nextRedirects)).toBe(false);
+    const before = getRedirects().length;
+    nextRedirects.push(makeRedirect({ source: "/tmp", destination: "/fileora" }));
+    expect(getRedirects()).toHaveLength(before);
+    expect(getNextRedirects()).toHaveLength(before);
+  });
+
+  it("canonical redirect manifest passes assertValidRedirects against ROUTES", () => {
+    expect(() => assertValidRedirects(getRedirects(), ROUTES)).not.toThrow();
+  });
+});
+
+describe("assertValidRedirects", () => {
+  it("accepts a well-formed redirect list targeting registered routes", () => {
+    expect(() =>
+      assertValidRedirects(
+        [
+          makeRedirect({
+            source: "/convoox",
+            destination: "/fileora",
+          }),
+          makeRedirect({
+            source: "/convoox/:path*",
+            destination: "/fileora/:path*",
+          }),
+          makeRedirect({
+            source: "/image-to-webp",
+            destination: "/fileora/image-to-webp",
+          }),
+        ],
+        FIXTURE_ROUTES,
+      ),
+    ).not.toThrow();
+  });
+
+  it("rejects destinations that do not resolve to a registered route", () => {
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "/old", destination: "/missing" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/destination.*registered|canonical/i);
+  });
+
+  it("validates wildcard destinations against their registered static base", () => {
+    expect(() =>
+      assertValidRedirects(
+        [
+          makeRedirect({
+            source: "/legacy/:path*",
+            destination: "/fileora/:path*",
+          }),
+        ],
+        FIXTURE_ROUTES,
+      ),
+    ).not.toThrow();
+
+    expect(() =>
+      assertValidRedirects(
+        [
+          makeRedirect({
+            source: "/legacy/:path*",
+            destination: "/nowhere/:path*",
+          }),
+        ],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/destination.*registered|canonical/i);
+  });
+
+  it("rejects redirect sources that collide with canonical registry routes", () => {
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "/about", destination: "/fileora" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/source.*canonical|collide/i);
+  });
+
+  it("rejects duplicate redirect sources", () => {
+    expect(() =>
+      assertValidRedirects(
+        [
+          makeRedirect({ source: "/old", destination: "/fileora" }),
+          makeRedirect({ source: "/old", destination: "/about" }),
+        ],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/duplicate.*source/i);
+  });
+
+  it("rejects direct self-loops", () => {
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "/legacy", destination: "/legacy" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/loop|cycle|self/i);
+  });
+
+  it("rejects redirect cycles (A -> B -> A)", () => {
+    expect(() =>
+      assertValidRedirects(
+        [
+          makeRedirect({ source: "/a", destination: "/b" }),
+          makeRedirect({ source: "/b", destination: "/a" }),
+        ],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/loop|cycle/i);
+  });
+
+  it("rejects malformed destinations", () => {
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "/old", destination: "" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/malformed|destination/i);
+
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "/old", destination: "fileora" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/malformed|destination/i);
+
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "/old", destination: "/fileora/" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/malformed|destination|trailing/i);
+  });
+
+  it("rejects mixed-case paths without silently normalizing", () => {
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "/Old-Path", destination: "/fileora" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/lowercase|kebab|case/i);
+
+    expect(() =>
+      assertValidRedirects(
+        [makeRedirect({ source: "/old-path", destination: "/Fileora" })],
+        FIXTURE_ROUTES,
+      ),
+    ).toThrow(/lowercase|kebab|case/i);
   });
 });
 

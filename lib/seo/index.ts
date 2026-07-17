@@ -9,6 +9,10 @@
  * Task 1 surface: types, config, brands, and URL helpers. Task 2 adds the
  * route registry, redirect manifest, and indexability helpers. Later
  * tasks extend this list deliberately when new public APIs land.
+ *
+ * Internal validators (`assertValidRoutes`, `assertValidRedirects`) are
+ * intentionally omitted — import them from their modules only when needed
+ * (e.g. unit tests).
  */
 
 // Types
