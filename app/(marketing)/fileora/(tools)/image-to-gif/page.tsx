@@ -1,14 +1,16 @@
-import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolPage } from "@/components/tools/ToolPage";
+import { buildJsonLdForRoute, buildMetadataForRoute } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Image to GIF Converter — Free Online | JPG, PNG, WebP to GIF",
-  description:
-    "Convert any image to GIF format free online. JPG, PNG, WebP to GIF. No signup, no watermarks, instant download.",
-  keywords: "image to gif, jpg to gif, png to gif, convert to gif free online",
-  alternates: { canonical: "https://fileora.netlify.app/fileora/image-to-gif" },
-};
+const routeId = "image-to-gif";
+
+export const metadata = buildMetadataForRoute(routeId);
 
 export default function Page() {
-  return <ToolPage slug="image-to-gif" />;
+  return (
+    <>
+      <JsonLd data={buildJsonLdForRoute(routeId)} />
+      <ToolPage slug="image-to-gif" />
+    </>
+  );
 }

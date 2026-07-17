@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
-import { TOOL_CONFIG } from "@/lib/utils";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolPage } from "@/components/tools/ToolPage";
+import { buildJsonLdForRoute, buildMetadataForRoute } from "@/lib/seo";
 
-const config = TOOL_CONFIG["heic-to-jpg"];
+const routeId = "heic-to-jpg";
 
-export const metadata: Metadata = {
-  title: config.title + " — Free Online Converter",
-  description: config.longDesc,
-  alternates: { canonical: "/fileora/heic-to-jpg" },
-};
+export const metadata = buildMetadataForRoute(routeId);
 
 export default function Page() {
-  return <ToolPage slug="heic-to-jpg" />;
+  return (
+    <>
+      <JsonLd data={buildJsonLdForRoute(routeId)} />
+      <ToolPage slug="heic-to-jpg" />
+    </>
+  );
 }

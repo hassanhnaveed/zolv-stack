@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
-import { TOOL_CONFIG } from "@/lib/utils";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolPage } from "@/components/tools/ToolPage";
+import { buildJsonLdForRoute, buildMetadataForRoute } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Image to PNG Converter — Free Online | JPG, WebP, AVIF to PNG",
-  description:
-    "Convert any image to PNG format free online. JPG, WebP, AVIF, BMP, TIFF, GIF, HEIC to PNG with transparency. No signup, no watermarks.",
-  keywords: "image to png, jpg to png, webp to png, convert to png free online",
-  alternates: { canonical: "https://fileora.netlify.app/fileora/image-to-png" },
-};
+const routeId = "image-to-png";
+
+export const metadata = buildMetadataForRoute(routeId);
 
 export default function Page() {
-  return <ToolPage slug="image-to-png" />;
+  return (
+    <>
+      <JsonLd data={buildJsonLdForRoute(routeId)} />
+      <ToolPage slug="image-to-png" />
+    </>
+  );
 }

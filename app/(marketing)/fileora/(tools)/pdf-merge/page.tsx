@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
-import { TOOL_CONFIG } from "@/lib/utils";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolPage } from "@/components/tools/ToolPage";
+import { buildJsonLdForRoute, buildMetadataForRoute } from "@/lib/seo";
 
-const config = TOOL_CONFIG["pdf-merge"];
+const routeId = "pdf-merge";
 
-export const metadata: Metadata = {
-  title: config.title + " — Free Online Converter",
-  description: config.longDesc,
-  alternates: { canonical: "/fileora/pdf-merge" },
-};
+export const metadata = buildMetadataForRoute(routeId);
 
 export default function Page() {
-  return <ToolPage slug="pdf-merge" />;
+  return (
+    <>
+      <JsonLd data={buildJsonLdForRoute(routeId)} />
+      <ToolPage slug="pdf-merge" />
+    </>
+  );
 }

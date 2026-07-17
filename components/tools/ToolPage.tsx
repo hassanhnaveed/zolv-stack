@@ -31,47 +31,8 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
       .filter((t) => t.slug !== activeTool),
   }));
 
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://fileora.com",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: config.title,
-        item: `https://fileora.com${toolHref(slug)}`,
-      },
-    ],
-  };
-
-  const softwareSchema = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `Fileora ${config.title}`,
-    applicationCategory: "UtilitiesApplication",
-    operatingSystem: "Web",
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    description: config.longDesc,
-    url: `https://fileora.com${toolHref(slug)}`,
-  };
-
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
-      />
-
       {/* Hero */}
       <section
         style={{
