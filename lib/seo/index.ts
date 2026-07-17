@@ -88,6 +88,10 @@ export {
   resolveIndexFlags,
 } from "./indexability";
 
+// Metadata route builders
+export { buildRobots } from "./robots";
+export { buildSitemap } from "./sitemap";
+
 // Validation
 export type { ValidateSeoOptions, ValidationIssue, ValidationSeverity } from "./validate";
 export { partitionValidationIssues, validateSeo } from "./validate";
