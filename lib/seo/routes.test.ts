@@ -60,6 +60,7 @@ describe("ROUTES registry", () => {
   it("registers the ZolvStack brand routes at their expected paths", () => {
     expect(getRoute(ROUTE_IDS.HOME).path).toBe("/");
     expect(getRoute(ROUTE_IDS.ABOUT).path).toBe(PATHS.ABOUT);
+    expect(getRoute(ROUTE_IDS.PRODUCTS).path).toBe(PATHS.PRODUCTS);
     expect(getRoute(ROUTE_IDS.CONTACT).path).toBe(PATHS.CONTACT);
     expect(getRoute(ROUTE_IDS.SECURITY).path).toBe(PATHS.SECURITY);
     expect(getRoute(ROUTE_IDS.PRIVACY).path).toBe(PATHS.PRIVACY);

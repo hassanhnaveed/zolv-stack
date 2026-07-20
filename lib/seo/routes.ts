@@ -45,6 +45,7 @@ import type { IndexFlags, SeoRoute } from "./types";
 export const ROUTE_IDS = Object.freeze({
   HOME: "home",
   ABOUT: "about",
+  PRODUCTS: "products",
   CONTACT: "contact",
   SECURITY: "security",
   PRIVACY: "privacy",
@@ -60,6 +61,7 @@ export type RouteId = (typeof ROUTE_IDS)[keyof typeof ROUTE_IDS] | ToolSlug;
 export const PATHS = Object.freeze({
   HOME: "/",
   ABOUT: "/about",
+  PRODUCTS: "/products",
   CONTACT: "/contact",
   SECURITY: "/security",
   PRIVACY: "/privacy",
@@ -197,11 +199,24 @@ const BRAND_ROUTES: readonly SeoRoute[] = [
     pageType: "brand-static",
     title: brandStaticTitle("About"),
     description:
-      "Learn about ZolvStack and the tools we build, including Fileora.",
+      "Learn about ZolvStack — our mission, vision, and the products we build, including Fileora.",
     index: true,
     sitemap: true,
     follow: true,
     sitemapPriority: 0.5,
+    changeFrequency: "monthly",
+  },
+  {
+    id: ROUTE_IDS.PRODUCTS,
+    path: PATHS.PRODUCTS,
+    pageType: "brand-static",
+    title: brandStaticTitle("Products"),
+    description:
+      "Explore ZolvStack products, including Fileora — free file conversion for images, PDFs, and documents.",
+    index: true,
+    sitemap: true,
+    follow: true,
+    sitemapPriority: 0.7,
     changeFrequency: "monthly",
   },
   {
