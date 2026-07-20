@@ -32,6 +32,7 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
   //     .filter((t) => t.slug !== activeTool),
   // }));
 
+  //new code
   const categories = Object.entries(TOOL_CATEGORIES)
   .filter(([id]) => id === "image")
   .map(([id, slugs]) => ({
