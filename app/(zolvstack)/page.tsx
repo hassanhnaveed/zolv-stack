@@ -4,15 +4,29 @@ import Link from "next/link";
 import { useState } from "react";
 import { FileoraBadge } from "@/components/brand/FileoraBadge";
 
+// old code 
+// const products = [
+//   {
+//     name: "Fileora",
+//     tagline: "Free File Converter",
+//     description:
+//       "Convert any image format, remove backgrounds, enhance photos with AI, merge & compress PDFs. Unlimited, no signup, no watermarks.",
+//     href: "/fileora",
+//     color: "#00D084",
+//     tags: ["Image Converter", "PDF Tools", "AI Enhancer", "Background Remover"],
+//   },
+// ];
+
+//new code 
 const products = [
   {
     name: "Fileora",
-    tagline: "Free File Converter",
+    tagline: "Free Image Converter",
     description:
-      "Convert any image format, remove backgrounds, enhance photos with AI, merge & compress PDFs. Unlimited, no signup, no watermarks.",
+      "Convert any image format instantly — JPG, PNG, WebP, HEIC, GIF, BMP, TIFF, AVIF and more. Unlimited, no signup, no watermarks.",
     href: "/fileora",
     color: "#00D084",
-    tags: ["Image Converter", "PDF Tools", "AI Enhancer", "Background Remover"],
+    tags: ["Image Converter", "JPG to PNG", "WebP Converter", "HEIC to JPG"],
   },
 ];
 
