@@ -19,6 +19,7 @@ import {
 } from "@/lib/utils";
 import { CONVERTER_TOOLS } from "@/lib/format-catalog";
 import { toast } from "sonner";
+import { DropzoneIdleContent } from "./DropzoneIdleContent";
 
 const ALL_ACCEPT = {
   "image/jpeg": [".jpg", ".jpeg"],
@@ -43,12 +44,12 @@ const ALL_ACCEPT = {
 };
 
 const OFFICE_TO_PDF_TOOLS: ToolSlug[] = [
-  "docx-to-pdf",
-  "doc-to-pdf",
-  "odt-to-pdf",
-  "rtf-to-pdf",
-  "txt-to-pdf",
-  "html-to-pdf",
+  "document-to-pdf",
+  "document-to-docx",
+  "document-to-odt",
+  "document-to-rtf",
+  "document-to-txt",
+  "document-to-html",
   "md-to-pdf",
 ];
 
@@ -141,12 +142,12 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
   // format buttons live inside this root — without noClick they reopen the picker.
   const allowClickToOpen = phase === "idle";
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: ALL_ACCEPT,
     maxSize: 200 * 1024 * 1024,
     maxFiles: 1,
-    noClick: !allowClickToOpen,
+    noClick: true,
     noKeyboard: !allowClickToOpen,
     onDropRejected: () =>
       toast.error("File rejected — check format or size (max 200MB)"),
@@ -169,19 +170,30 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
     setErrorMsg("");
 
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("tool", selectedTool);
-      fd.append("quality", "85");
+      const documentTargetFormats: Record<string, string> = {
+  "document-to-pdf": "pdf",
+  "document-to-docx": "docx",
+  "document-to-odt": "odt",
+  "document-to-rtf": "rtf",
+  "document-to-txt": "txt",
+  "document-to-html": "html",
+  "md-to-pdf": "pdf",
+};
 
-      const endpoint =
-        selectedTool === "pdf-to-word"
-          ? "/api/pdf-to-word"
-          : OFFICE_TO_PDF_TOOLS.includes(selectedTool)
-            ? "/api/docx-to-pdf"
-            : selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
-              ? "/api/pdf"
-              : "/api/convert";
+const fd = new FormData();
+fd.append("file", file);
+fd.append("tool", selectedTool);
+fd.append("quality", "85");
+
+if (documentTargetFormats[selectedTool]) {
+  fd.append("targetFormat", documentTargetFormats[selectedTool]);
+}
+
+      const endpoint = OFFICE_TO_PDF_TOOLS.includes(selectedTool)
+  ? "/api/docx-to-pdf"
+  : selectedTool.startsWith("pdf") || selectedTool === "image-to-pdf"
+  ? "/api/pdf"
+  : "/api/convert";
 
       const res = await fetch(endpoint, { method: "POST", body: fd });
       if (!res.ok) {
@@ -251,7 +263,7 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
               inset: -2,
               background: "rgba(0,208,132,0.06)",
               border: "2px dashed var(--color-brand)",
-              borderRadius: 20,
+              borderRadius: 16,
               zIndex: 10,
               display: "flex",
               alignItems: "center",
@@ -283,63 +295,27 @@ export function SmartUploadWidget({ preferredTool }: SmartUploadWidgetProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className={`dropzone${isDragActive ? " active" : ""}`}
-            style={{ padding: "48px 32px", textAlign: "center" }}
           >
-            <motion.div
-              animate={isDragActive ? { scale: 1.04 } : { scale: 1 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <div
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 16,
-                  margin: "0 auto 16px",
-                  background: isDragActive
-                    ? "rgba(0,208,132,0.15)"
-                    : "rgba(0,208,132,0.08)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "background 0.2s",
-                }}
-              >
+            <DropzoneIdleContent
+              isDragActive={isDragActive}
+              onOpenFilePicker={open}
+              onFilesSelected={onDrop}
+              accept={ALL_ACCEPT}
+              maxFiles={1}
+              maxSize={200 * 1024 * 1024}
+              dragTitle="Drop to detect format"
+              idleTitle="Drag & drop files here"
+              subtitle="or choose a file source below"
+              meta="JPG · PNG · WebP · HEIC · GIF · BMP · TIFF · AVIF · PDF — up to 200 MB"
+              icon={
                 <Upload
                   size={24}
-                  color={
-                    isDragActive ? "var(--color-brand)" : "var(--color-text-3)"
-                  }
+                  color={isDragActive ? "var(--color-brand)" : "var(--color-text-3)"}
                 />
-              </div>
-              <p
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 700,
-                  fontSize: 17,
-                  color: "var(--color-text-1)",
-                  marginBottom: 6,
-                }}
-              >
-                {isDragActive ? "Drop to detect format" : "Drag & drop files here"}
-              </p>
-              <p style={{ fontSize: 13, color: "var(--color-text-3)" }}>
-                or{" "}
-                <span style={{ color: "var(--color-brand)", cursor: "pointer" }}>
-                  browse files
-                </span>
-              </p>
-              <p
-                style={{
-                  fontSize: 12,
-                  color: "var(--color-text-3)",
-                  marginTop: 8,
-                  opacity: 0.7,
-                }}
-              >
-                JPG · PNG · WebP · HEIC · GIF · BMP · TIFF · AVIF · PDF — up to
-                200 MB
-              </p>
-            </motion.div>
+              }
+              iconBackground="rgba(0,208,132,0.08)"
+              iconActiveBackground="rgba(0,208,132,0.15)"
+            />
           </motion.div>
         )}
 

@@ -3,11 +3,16 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Download, Loader2, Scissors, FileText } from "lucide-react";
+import { Loader2, Scissors, FileText } from "lucide-react";
 import { formatBytes, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
+import { DropzoneIdleContent } from "./DropzoneIdleContent";
 
 type Mode = "all" | "range";
+
+const ACCEPT = { "application/pdf": [".pdf"] };
+const MAX_FILES = 1;
+const MAX_SIZE = 50 * 1024 * 1024;
 
 export function PdfSplitter() {
   const [file, setFile] = useState<File | null>(null);
@@ -23,11 +28,12 @@ export function PdfSplitter() {
     setTotalPages(null);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
-    accept: { "application/pdf": [".pdf"] },
-    maxFiles: 1,
-    maxSize: 50 * 1024 * 1024,
+    accept: ACCEPT,
+    maxFiles: MAX_FILES,
+    maxSize: MAX_SIZE,
+    noClick: true,
     onDropRejected: () => toast.error("PDF only, max 50MB"),
   });
 
@@ -85,52 +91,29 @@ export function PdfSplitter() {
         <div
           {...getRootProps()}
           className={`dropzone${isDragActive ? " active" : ""}`}
-          style={{
-            padding: "56px 32px",
-            textAlign: "center",
-            marginBottom: 16,
-          }}
+          style={{ marginBottom: 16 }}
         >
           <input {...getInputProps()} />
-          <motion.div animate={isDragActive ? { scale: 1.04 } : { scale: 1 }}>
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 16,
-                margin: "0 auto 16px",
-                background: isDragActive
-                  ? "rgba(245,158,11,0.15)"
-                  : "rgba(245,158,11,0.08)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+          <DropzoneIdleContent
+            isDragActive={isDragActive}
+            onOpenFilePicker={open}
+            onFilesSelected={onDrop}
+            accept={ACCEPT}
+            maxFiles={MAX_FILES}
+            maxSize={MAX_SIZE}
+            dragTitle="Drop PDF here"
+            idleTitle="Drop a PDF to split"
+            subtitle="or choose a file source below — PDF only, max 50MB"
+            meta="PDF only, max 50MB"
+            icon={
               <Scissors
                 size={24}
                 color={isDragActive ? "#F59E0B" : "var(--color-text-3)"}
               />
-            </div>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 700,
-                fontSize: 17,
-                color: "var(--color-text-1)",
-                marginBottom: 6,
-              }}
-            >
-              {isDragActive ? "Drop PDF here" : "Drop a PDF to split"}
-            </p>
-            <p style={{ fontSize: 13, color: "var(--color-text-3)" }}>
-              or{" "}
-              <span style={{ color: "#F59E0B", cursor: "pointer" }}>
-                browse files
-              </span>{" "}
-              — PDF only, max 50MB
-            </p>
-          </motion.div>
+            }
+            iconBackground="rgba(245,158,11,0.08)"
+            iconActiveBackground="rgba(245,158,11,0.15)"
+          />
         </div>
       )}
 

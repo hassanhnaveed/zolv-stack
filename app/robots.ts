@@ -1,9 +1,7 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
+
+import { buildRobots } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
-  const base = process.env.NEXT_PUBLIC_APP_URL || "https://fileora.netlify.app";
-  return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/api/"] }],
-    sitemap: `${base}/sitemap.xml`,
-  };
+  return buildRobots();
 }

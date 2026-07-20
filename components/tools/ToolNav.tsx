@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
-import { TOOL_CONFIG, TOOL_CATEGORIES, type ToolSlug } from "@/lib/utils";
+import { TOOL_CONFIG, TOOL_CATEGORIES, toolHref, type ToolSlug } from "@/lib/utils";
 
 const categoryMeta: Record<string, { label: string; color: string }> = {
   image: { label: "🖼️ Image Tools", color: "#00D084" },
@@ -128,7 +128,7 @@ const categories = Object.entries(TOOL_CATEGORIES)
   return (
     <Link
       key={t.slug}
-      href={isComingSoon ? "#" : `/${t.slug}`}
+      href={isComingSoon ? "#" : toolHref(t.slug)}
       onClick={(e) => isComingSoon && e.preventDefault()}
       style={{
         display: "flex",

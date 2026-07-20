@@ -14,6 +14,16 @@ jobs:
   ci:
     name: Lint and Build
     runs-on: ubuntu-latest
+    environment: production
+    env:
+      NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+      NEXT_PUBLIC_GOOGLE_API_KEY: ${{ vars.NEXT_PUBLIC_GOOGLE_API_KEY }}
+      NEXT_PUBLIC_GOOGLE_APP_ID: ${{ vars.NEXT_PUBLIC_GOOGLE_APP_ID }}
+      NEXT_PUBLIC_CLARITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_CLARITY_PROJECT_ID }}
+      SEO_GOOGLE_SITE_VERIFICATION: ${{ secrets.SEO_GOOGLE_SITE_VERIFICATION }}
+      SEO_BING_SITE_VERIFICATION: ${{ secrets.SEO_BING_SITE_VERIFICATION }}
+      SEO_INDEXING_ENABLED: ${{ vars.SEO_INDEXING_ENABLED }}
 
     steps:
       - name: Checkout
@@ -33,6 +43,9 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: SEO validation
+        run: npm run seo:check
 
       - name: Build
         run: npm run build

@@ -1,16 +1,13 @@
-// new
-
-
 "use client";
 
 import { Converter } from "@/components/tools/Converter";
-import { TOOL_CONFIG, TOOL_CATEGORIES, type ToolSlug } from "@/lib/utils";
+import { TOOL_CONFIG, TOOL_CATEGORIES, toolHref, type ToolSlug } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { PdfSplitter } from "./pdfSplitter";
-import { PdfToWord } from "./pdfToWord";
+
 
 const categoryMeta: Record<string, { label: string; color: string }> = {
   image: { label: "🖼️ Image Tools", color: "#00D084" },
@@ -44,47 +41,8 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
     tools: slugs.map((s) => TOOL_CONFIG[s]).filter((t) => t.slug !== activeTool),
   }));
 
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://fileora.com",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: config.title,
-        item: `https://fileora.com/${slug}`,
-      },
-    ],
-  };
-
-  const softwareSchema = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `Fileora ${config.title}`,
-    applicationCategory: "UtilitiesApplication",
-    operatingSystem: "Web",
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    description: config.longDesc,
-    url: `https://fileora.com/${slug}`,
-  };
-
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
-      />
-
       {/* Hero */}
       <section
         style={{
@@ -185,15 +143,13 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
 
           
           {slug === "pdf-split" ? (
-            <PdfSplitter />
-          ) : slug === "pdf-to-word" ? (
-            <PdfToWord />
-          ) : (
-            <Converter
-              tool={activeTool}
-              onToolChange={(t) => setActiveTool(t)}
-            />
-          )}
+  <PdfSplitter />
+) : (
+  <Converter
+    tool={activeTool}
+    onToolChange={(t) => setActiveTool(t)}
+  />
+)}
         </div>
       </section>
 
@@ -276,7 +232,7 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
   return (
     <Link
       key={t.slug}
-      href={isComingSoon ? "#" : `/${t.slug}`}
+      href={isComingSoon ? "#" : toolHref(t.slug)}
       onClick={(e) => isComingSoon && e.preventDefault()}
       style={{
         display: "flex",

@@ -449,9 +449,18 @@
 import { useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Download, Loader2, Sparkles } from "lucide-react";
+import { Download, Loader2, Sparkles } from "lucide-react";
 import { formatBytes, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
+import { DropzoneIdleContent } from "./DropzoneIdleContent";
+
+const ACCEPT = {
+  "image/jpeg": [".jpg", ".jpeg"],
+  "image/png": [".png"],
+  "image/webp": [".webp"],
+};
+const MAX_FILES = 1;
+const MAX_SIZE = 15 * 1024 * 1024;
 
 export function ImageEnhancer() {
   const [original, setOriginal] = useState<string | null>(null);
@@ -473,15 +482,12 @@ export function ImageEnhancer() {
     setSliderPos(50);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
-    accept: {
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-      "image/webp": [".webp"],
-    },
-    maxFiles: 1,
-    maxSize: 15 * 1024 * 1024,
+    accept: ACCEPT,
+    maxFiles: MAX_FILES,
+    maxSize: MAX_SIZE,
+    noClick: true,
     onDropRejected: () => toast.error("Max 15MB, images only"),
   });
 
@@ -533,61 +539,29 @@ export function ImageEnhancer() {
         <div
           {...getRootProps()}
           className={`dropzone${isDragActive ? " active" : ""}`}
-          style={{
-            padding: "56px 32px",
-            textAlign: "center",
-            marginBottom: 16,
-          }}
+          style={{ marginBottom: 16 }}
         >
           <input {...getInputProps()} />
-          <motion.div animate={isDragActive ? { scale: 1.04 } : { scale: 1 }}>
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 16,
-                margin: "0 auto 16px",
-                background: isDragActive
-                  ? "rgba(139,92,246,0.15)"
-                  : "rgba(139,92,246,0.08)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+          <DropzoneIdleContent
+            isDragActive={isDragActive}
+            onOpenFilePicker={open}
+            onFilesSelected={onDrop}
+            accept={ACCEPT}
+            maxFiles={MAX_FILES}
+            maxSize={MAX_SIZE}
+            dragTitle="Drop image here"
+            idleTitle="Drop an image to enhance"
+            subtitle="or choose a file source below — JPG, PNG, WebP"
+            meta="JPG, PNG, WebP · Max 15MB · 100% free · Unlimited · AI-powered"
+            icon={
               <Sparkles
                 size={24}
                 color={isDragActive ? "#8B5CF6" : "var(--color-text-3)"}
               />
-            </div>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 700,
-                fontSize: 17,
-                color: "var(--color-text-1)",
-                marginBottom: 6,
-              }}
-            >
-              {isDragActive ? "Drop image here" : "Drop an image to enhance"}
-            </p>
-            <p style={{ fontSize: 13, color: "var(--color-text-3)" }}>
-              or{" "}
-              <span style={{ color: "#8B5CF6", cursor: "pointer" }}>
-                browse files
-              </span>{" "}
-              — JPG, PNG, WebP
-            </p>
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--color-text-3)",
-                marginTop: 8,
-              }}
-            >
-              Max 15MB · 100% free · Unlimited · AI-powered
-            </p>
-          </motion.div>
+            }
+            iconBackground="rgba(139,92,246,0.08)"
+            iconActiveBackground="rgba(139,92,246,0.15)"
+          />
         </div>
       )}
 
