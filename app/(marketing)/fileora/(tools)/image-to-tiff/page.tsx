@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolPage } from "@/components/tools/ToolPage";
+import { buildJsonLdForRoute, buildMetadataForRoute } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Image to TIFF Converter — Free Online | JPG, PNG, WebP to TIFF",
-  description:
-    "Convert any image to TIFF format free online. High quality lossless format for professional photography. No signup, no watermarks.",
-  keywords:
-    "image to tiff, jpg to tiff, png to tiff, convert to tiff free online",
-  alternates: { canonical: "https://fileora.netlify.app/fileora/image-to-tiff" },
-};
+const routeId = "image-to-tiff";
+
+export const metadata = buildMetadataForRoute(routeId);
 
 export default function Page() {
-  return <ToolPage slug="image-to-tiff" />;
+  return (
+    <>
+      <JsonLd data={buildJsonLdForRoute(routeId)} />
+      <ToolPage slug="image-to-tiff" />
+    </>
+  );
 }

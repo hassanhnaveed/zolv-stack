@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolPage } from "@/components/tools/ToolPage";
+import { buildJsonLdForRoute, buildMetadataForRoute } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "PDF Split  Free Online | Extract & Separate PDF Pages",
-  description:
-    "Split any PDF into separate pages or custom page ranges. Free, unlimited, no signup required. Download individual pages or as ZIP.",
-  keywords:
-    "split pdf online free, pdf splitter, extract pdf pages, separate pdf pages",
-  alternates: { canonical: "https://fileora.netlify.app/fileora/pdf-split" },
-};
+const routeId = "pdf-split";
+
+export const metadata = buildMetadataForRoute(routeId);
 
 export default function Page() {
-  return <ToolPage slug="pdf-split" />;
+  return (
+    <>
+      <JsonLd data={buildJsonLdForRoute(routeId)} />
+      <ToolPage slug="pdf-split" />
+    </>
+  );
 }

@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { TermsPageContent } from "@/components/marketing/company/TermsPageContent";
+import { buildMetadataForRoute, ROUTE_IDS } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Terms of Service", alternates: { canonical: "/terms" } };
+export const metadata = buildMetadataForRoute(ROUTE_IDS.TERMS);
 
 export default function TermsPage() {
   return (

@@ -35,6 +35,13 @@
 
 import type { NextConfig } from "next";
 
+// `next.config.ts` is loaded by Next.js outside the normal app module
+// graph (before the `@/*` tsconfig path alias / webpack resolver is set
+// up), so it cannot safely resolve `@/lib/seo/redirects`. Use a type-safe
+// relative import instead; this does not change `lib/seo`'s architecture
+// or its public surface — every other consumer still imports via `@/lib/seo`.
+import { getNextRedirects } from "./lib/seo/redirects";
+
 const nextConfig: NextConfig = {
   serverExternalPackages: ["pdf-parse", "pdfjs-dist"],
   experimental: {
@@ -72,49 +79,7 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    const toolSlugs = [
-      "image-to-webp",
-      "image-to-jpg",
-      "image-to-png",
-      "image-to-avif",
-      "image-to-gif",
-      "image-to-bmp",
-      "image-to-tiff",
-      "heic-to-jpg",
-      "image-to-pdf",
-      "pdf-merge",
-      "pdf-compress",
-      "pdf-to-jpg",
-      "pdf-split",
-      "pdf-to-txt",
-      "image-enhance",
-      "remove-bg",
-      "document-to-pdf",
-      "document-to-docx",
-      "document-to-odt",
-      "document-to-rtf",
-      "document-to-txt",
-      "document-to-html",
-      "md-to-pdf",
-    ];
-
-    return [
-      {
-        source: "/convoox",
-        destination: "/fileora",
-        permanent: true,
-      },
-      {
-        source: "/convoox/:path*",
-        destination: "/fileora/:path*",
-        permanent: true,
-      },
-      ...toolSlugs.map((slug) => ({
-        source: `/${slug}`,
-        destination: `/fileora/${slug}`,
-        permanent: true,
-      })),
-    ];
+    return getNextRedirects();
   },
 };
 
