@@ -40,12 +40,17 @@ const imageTools = tools.filter(
 const pdfTools = tools.filter((t) => t.slug.startsWith("pdf"));
 const documentTools = tools.filter((t) => documentToolSlugs.includes(t.slug));
 const aiTools = tools.filter((t) => aiToolSlugs.includes(t.slug));
+//old
+// const categories = [
+//   { id: "image", label: "🖼️ Image Tools", tools: imageTools, color: "#00D084" },
+//   { id: "pdf", label: "📄 PDF Tools", tools: pdfTools, color: "#6366F1" },
+//   { id: "document", label: "📝 Document Tools", tools: documentTools, color: "#F59E0B" },
+//   { id: "ai", label: "✨ AI Tools", tools: aiTools, color: "#8B5CF6" },
+// ];
 
+//new
 const categories = [
   { id: "image", label: "🖼️ Image Tools", tools: imageTools, color: "#00D084" },
-  { id: "pdf", label: "📄 PDF Tools", tools: pdfTools, color: "#6366F1" },
-  { id: "document", label: "📝 Document Tools", tools: documentTools, color: "#F59E0B" },
-  { id: "ai", label: "✨ AI Tools", tools: aiTools, color: "#8B5CF6" },
 ];
 
 const whyItems = [

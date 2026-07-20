@@ -169,15 +169,26 @@ function toFormatOption(value: Exclude<FormatValue, "any">): FormatOption {
   };
 }
 
+// old code
+// function groupOptions(options: FormatOption[]): FormatOptionGroup[] {
+//   const image = options.filter((o) => o.category === "image");
+//   const document = options.filter((o) => o.category === "document");
+//   const groups: FormatOptionGroup[] = [];
+//   if (image.length > 0) {
+//     groups.push({ id: "image", label: "Image", options: image });
+//   }
+//   if (document.length > 0) {
+//     groups.push({ id: "document", label: "Document", options: document });
+//   }
+//   return groups;
+// }
+
+//new code 
 function groupOptions(options: FormatOption[]): FormatOptionGroup[] {
   const image = options.filter((o) => o.category === "image");
-  const document = options.filter((o) => o.category === "document");
   const groups: FormatOptionGroup[] = [];
   if (image.length > 0) {
     groups.push({ id: "image", label: "Image", options: image });
-  }
-  if (document.length > 0) {
-    groups.push({ id: "document", label: "Document", options: document });
   }
   return groups;
 }
