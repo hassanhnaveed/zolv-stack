@@ -21,25 +21,14 @@ export function ToolPage({ slug }: { slug: ToolSlug }) {
   const [activeTool, setActiveTool] = useState<ToolSlug>(slug);
   const [openCategory, setOpenCategory] = useState<string>("image");
   const config = TOOL_CONFIG[activeTool];
-   
-  // old code
-  // const categories = Object.entries(TOOL_CATEGORIES).map(([id, slugs]) => ({
-  //   id,
-  //   label: categoryMeta[id]?.label ?? id,
-  //   color: categoryMeta[id]?.color ?? "#666",
-  //   tools: slugs
-  //     .map((s) => TOOL_CONFIG[s])
-  //     .filter((t) => t.slug !== activeTool),
-  // }));
 
-  //new code
-  const categories = Object.entries(TOOL_CATEGORIES)
-  .filter(([id]) => id === "image")
-  .map(([id, slugs]) => ({
+  const categories = Object.entries(TOOL_CATEGORIES).map(([id, slugs]) => ({
     id,
     label: categoryMeta[id]?.label ?? id,
     color: categoryMeta[id]?.color ?? "#666",
-    tools: slugs.map((s) => TOOL_CONFIG[s]).filter((t) => t.slug !== activeTool),
+    tools: slugs
+      .map((s) => TOOL_CONFIG[s])
+      .filter((t) => t.slug !== activeTool),
   }));
 
   return (
