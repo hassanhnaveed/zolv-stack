@@ -4,7 +4,7 @@ export const ZOLVSTACK_COMPANY = Object.freeze({
   name: "ZolvStack",
   tagline: "Fast, private tools for everyday work.",
   description:
-    "ZolvStack builds free, browser-based tools that help people get things done — without subscriptions, watermarks, or unnecessary friction.",
+    "ZolvStack builds free, browser-based tools that help people get things done.",
   mission:
     "We build practical web tools that respect your time and privacy. Every product in the ZolvStack portfolio is designed to be fast, accessible, and free to use.",
   vision:

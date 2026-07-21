@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TOOL_CONFIG, toolHref } from "@/lib/utils";
-import { FileoraLogo } from "@/components/brand/FileoraLogo";
+import { DualBrandLockup, ZolvStackEcosystemLinks } from "@/components/brand/DualBrandLockup";
 
 const tools = Object.values(TOOL_CONFIG);
 
@@ -30,8 +30,7 @@ export function Navbar() {
             height: 60,
           }}
         >
-          {/* Logo */}
-          <FileoraLogo />
+          <DualBrandLockup variant="header" />
 
           {/* Desktop nav */}
           <nav
@@ -141,6 +140,7 @@ export function Navbar() {
                 gap: 4,
               }}
             >
+              <ZolvStackEcosystemLinks onNavigate={() => setOpen(false)} />
               <p
                 style={{
                   fontSize: 11,

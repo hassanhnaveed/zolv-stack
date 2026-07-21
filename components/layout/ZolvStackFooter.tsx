@@ -69,21 +69,9 @@ export function ZolvStackFooter() {
                 color: "var(--color-text-3)",
                 lineHeight: 1.7,
                 maxWidth: 260,
-                marginBottom: 16,
               }}
             >
               {ZOLVSTACK_COMPANY.description}
-            </p>
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--color-text-3)",
-                lineHeight: 1.6,
-                maxWidth: 260,
-              }}
-            >
-              Fileora is a ZolvStack product — free file conversion for images,
-              PDFs, and documents.
             </p>
           </div>
 
