@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { TOOL_CONFIG, TOOL_CATEGORIES, toolHref, type ToolSlug } from "@/lib/utils";
 
@@ -12,36 +10,6 @@ const categoryMeta: Record<string, { label: string; color: string }> = {
   document: { label: "📝 Document Tools", color: "#F59E0B" },
   ai: { label: "✨ AI Tools", color: "#8B5CF6" },
 };
-
-export function BackButton() {
-  const router = useRouter();
-  return (
-    <button
-      onClick={() => {
-        if (typeof window !== "undefined" && window.history.length > 1) {
-          router.back();
-        } else {
-          router.push("/fileora");
-        }
-      }}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        fontSize: 13,
-        color: "var(--color-text-3)",
-        background: "transparent",
-        border: "none",
-        padding: 0,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        marginBottom: 32,
-      }}
-    >
-      <ArrowLeft size={14} /> Back
-    </button>
-  );
-}
 
 export function OtherTools({ activeTool }: { activeTool: ToolSlug }) {
   const [openCategory, setOpenCategory] = useState<string>("image");

@@ -17,7 +17,7 @@ const routeModules: ReadonlyArray<{
 }> = [
   {
     id: ROUTE_IDS.HOME,
-    load: () => import("../../app/(zolvstack)/layout"),
+    load: () => import("../../app/(zolvstack)/page"),
   },
   {
     id: ROUTE_IDS.FILEORA_HUB,
