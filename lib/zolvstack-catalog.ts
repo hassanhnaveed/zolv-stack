@@ -9,6 +9,7 @@ export const ZOLVSTACK_COMPANY = Object.freeze({
     "We build practical web tools that respect your time and privacy. Every product in the ZolvStack portfolio is designed to be fast, accessible, and free to use.",
   vision:
     "A growing ecosystem of focused tools — each excellent at one job, all united under a brand you can trust.",
+  githubUrl: "https://github.com/hassanhnaveed/zolv-stack",
 } as const);
 
 export type ZolvStackProduct = {
@@ -53,7 +54,7 @@ export const ZOLVSTACK_FOOTER_SECTIONS: readonly FooterSection[] = Object.freeze
     links: [
       { label: "About Us", href: "/about" },
       { label: "Contact Us", href: "/contact" },
-      { label: "Careers", href: "/careers" },
+      { label: "Contribute", href: "/careers" },
     ],
   },
   {
