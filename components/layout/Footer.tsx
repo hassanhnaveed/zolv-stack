@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FileoraLogo } from "@/components/brand/FileoraLogo";
+import { DualBrandLockup } from "@/components/brand/DualBrandLockup";
 
 export function Footer() {
   return (
@@ -9,13 +9,7 @@ export function Footer() {
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 32px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 40, marginBottom: 40 }}>
           <div>
-            <FileoraLogo
-              markSize={18}
-              badgeSize={28}
-              badgeRadius={7}
-              wordSize={15}
-              style={{ marginBottom: 12 }}
-            />
+            <DualBrandLockup variant="footer" style={{ marginBottom: 12 }} />
             <p style={{ fontSize: 13, color: "var(--color-text-3)", lineHeight: 1.7, maxWidth: 220 }}>
               Free, fast, and private file conversion. No limits. No watermarks. No signup.
             </p>
