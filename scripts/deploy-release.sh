@@ -243,5 +243,19 @@ if ! wait_for_health 30 2; then
   exit 1
 fi
 
+# Cleanup old releases (keep latest 3)
+log "Cleaning up old releases (keeping latest 3)..."
+
+find "${APP_DIR}/releases" \
+  -mindepth 1 -maxdepth 1 -type d \
+  -printf '%T@ %p\n' |
+sort -nr |
+tail -n +4 |
+cut -d' ' -f2- |
+xargs -r rm -rf
+
+log "Remaining releases:"
+ls -1dt "${APP_DIR}/releases"/*
+
 rm -f "${ARCHIVE_PATH}"
 log "Deployment successful"

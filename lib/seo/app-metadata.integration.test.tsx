@@ -47,6 +47,7 @@ describe("App Router metadata migration", () => {
     load: () => Promise<{ metadata?: unknown }>;
   }> = [
     { id: ROUTE_IDS.ABOUT, load: () => import("../../app/about/page") },
+    { id: ROUTE_IDS.PRODUCTS, load: () => import("../../app/(zolvstack)/products/page") },
     { id: ROUTE_IDS.CONTACT, load: () => import("../../app/contact/page") },
     { id: ROUTE_IDS.SECURITY, load: () => import("../../app/security/page") },
     { id: ROUTE_IDS.PRIVACY, load: () => import("../../app/privacy/page") },
@@ -61,18 +62,15 @@ describe("App Router metadata migration", () => {
     },
   );
 
-  it("keeps the client home page under a server layout with home metadata and schema", async () => {
-    const { default: ZolvStackLayout, metadata } = await import(
-      "../../app/(zolvstack)/layout"
+  it("keeps the home page with home metadata and JSON-LD", async () => {
+    const { default: ZolvStackHomePage, metadata } = await import(
+      "../../app/(zolvstack)/page"
     );
-    const markup = renderToStaticMarkup(
-      ZolvStackLayout({ children: <main>Home content</main> }),
-    );
+    const markup = renderToStaticMarkup(<ZolvStackHomePage />);
 
     expect(metadata).toEqual(buildMetadataForRoute(ROUTE_IDS.HOME));
     expect(markup).toContain('type="application/ld+json"');
     expect(markup).toContain("ZolvStack");
     expect(markup).not.toContain("aggregateRating");
-    expect(markup).toContain("<main>Home content</main>");
   });
 });

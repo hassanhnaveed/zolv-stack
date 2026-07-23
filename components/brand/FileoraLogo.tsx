@@ -13,7 +13,7 @@ type FileoraLogoProps = {
 };
 
 export function FileoraLogo({
-  href = "/",
+  href = "/fileora",
   markSize,
   badgeSize = 32,
   badgeRadius = 9,
