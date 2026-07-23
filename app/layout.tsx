@@ -1,6 +1,7 @@
 import type { Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import { buildRootMetadata } from "@/lib/seo";
 
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         {children}
+        <GoogleAnalytics />
         <MicrosoftClarity />
         <Toaster
           position="bottom-right"

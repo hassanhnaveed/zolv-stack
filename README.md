@@ -50,6 +50,7 @@ Open [http://localhost:3000](http://localhost:3000).
 - `NEXT_PUBLIC_GOOGLE_API_KEY` — required for the Google Drive picker. Restrict it by HTTP referrer in Google Cloud.
 - `NEXT_PUBLIC_GOOGLE_APP_ID` — optional Google Cloud project number; derived from the client ID when omitted.
 - `NEXT_PUBLIC_CLARITY_PROJECT_ID` — optional; enables Microsoft Clarity analytics.
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID` — optional; enables Google Analytics 4. Must be present in the GitHub Environment `production` variables used by `.github/workflows/deploy-main.yml` so it is baked into the Lightsail build artifact.
 - `SEO_INDEXING_ENABLED` — server-only; explicit opt-in for search indexing. See [SEO architecture](#seo-architecture) below.
 - `SEO_GOOGLE_SITE_VERIFICATION` / `SEO_BING_SITE_VERIFICATION` — server-only Search Console / Bing Webmaster Tools verification tokens. Optional; leave blank until configured.
 - `SMTP_HOST` — server-only; SMTP host for contact form mail (e.g. `smtp.gmail.com`).
