@@ -10,6 +10,8 @@ type FormState = {
   email: string;
   subject: string;
   message: string;
+  /** Honeypot — leave empty; bots often fill it. */
+  website: string;
 };
 
 const initialState: FormState = {
@@ -17,6 +19,7 @@ const initialState: FormState = {
   email: "",
   subject: "",
   message: "",
+  website: "",
 };
 
 const labelStyle: React.CSSProperties = {
@@ -61,17 +64,30 @@ export function ContactForm() {
           email: form.email.trim(),
           subject: form.subject.trim(),
           message: form.message.trim(),
+          website: form.website,
+          source: "contact-page",
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Request failed");
+        let message = "Request failed";
+        try {
+          const data = (await response.json()) as { error?: string };
+          if (data.error) message = data.error;
+        } catch {
+          // keep generic message
+        }
+        throw new Error(message);
       }
 
       toast.success("Message sent! We'll get back to you soon.");
       setForm(initialState);
-    } catch {
-      toast.error("Something went wrong. Please try again in a moment.");
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message && err.message !== "Request failed"
+          ? err.message
+          : "Something went wrong. Please try again in a moment.";
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -85,6 +101,7 @@ export function ContactForm() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut", delay: 0.04 }}
       style={{
+        position: "relative",
         background: "var(--color-bg-2)",
         border: "1px solid var(--color-border)",
         borderRadius: 16,
@@ -166,6 +183,30 @@ export function ContactForm() {
             onChange={(e) => updateField("message", e.target.value)}
             disabled={submitting}
             required
+          />
+        </div>
+
+        {/* Honeypot — hidden from users; leave empty */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: "-10000px",
+            top: "auto",
+            width: 1,
+            height: 1,
+            overflow: "hidden",
+          }}
+        >
+          <label htmlFor="contact-website">Website</label>
+          <input
+            id="contact-website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={form.website}
+            onChange={(e) => updateField("website", e.target.value)}
           />
         </div>
       </div>
