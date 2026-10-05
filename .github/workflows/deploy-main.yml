@@ -70,6 +70,14 @@ jobs:
           name: zolv-stack-${{ github.sha }}
           path: zolv-stack-${{ github.sha }}.tgz
           if-no-files-found: error
+          # Only ever needed transiently (downloaded by the `deploy` job
+          # within the same workflow run — rollback here uses the
+          # previous release already on the VM, not this artifact). With
+          # no limit this defaulted to 90-day retention and, combined
+          # with similar artifacts in other repos under the same GitHub
+          # account, blew past the account-wide Actions artifact storage
+          # quota, blocking uploads account-wide.
+          retention-days: 1
 
   deploy:
     name: Deploy to Lightsail
